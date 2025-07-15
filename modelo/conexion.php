@@ -1,10 +1,10 @@
 <?php
 // Definición de los parámetros de conexión a la base de datos
-$host = "127.0.0.1";         
-$usuario = "root";           
-$contrasena = "";            
-$base_datos = "tienda";     
-$puerto = 3307;              
+$host = "biwezh06z1yafmlocoe7-mysql.services.clever-cloud.com";         
+$usuario = "usnfohjdasabv4el";           
+$contrasena = "vsCunVPa3JaJExZ7lIxH";            
+$base_datos = "biwezh06z1yafmlocoe7"; 
+$puerto = 3306;              
 
 // Creación de la conexión usando MySQLi
 $conn = new mysqli($host, $usuario, $contrasena, $base_datos, $puerto);
