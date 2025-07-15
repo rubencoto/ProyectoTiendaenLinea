@@ -80,32 +80,68 @@ $producto = $result->fetch_assoc();
     <meta charset="UTF-8">
     <title>Detalle del Producto</title>
     <style>
-        body { font-family: Arial; padding: 20px; background: #f9f9f9; }
+        /* Establece la fuente general, padding y color de fondo de la página */
+        body { 
+            font-family: Arial; /* Usa fuente Arial */
+            padding: 20px; /* Espaciado interno de 20px */
+            background: #f9f9f9; /* Fondo gris muy claro */
+        }
+        /* Estiliza el formulario: fondo blanco, padding, ancho máximo, centrado, bordes redondeados y borde gris */
         form {
-            background: white;
-            padding: 20px;
-            max-width: 700px;
-            margin: auto;
-            border-radius: 8px;
-            border: 1px solid #ccc;
+            background: white; /* Fondo blanco */
+            padding: 20px; /* Espaciado interno */
+            max-width: 700px; /* Ancho máximo de 700px */
+            margin: auto; /* Centra el formulario horizontalmente */
+            border-radius: 8px; /* Bordes redondeados */
+            border: 1px solid #ccc; /* Borde gris claro */
         }
-        label { display: block; margin-top: 10px; font-weight: bold; }
-        input, textarea { width: 100%; padding: 10px; margin-top: 5px; }
-        img { margin-top: 10px; max-width: 200px; border: 1px solid #ccc; }
+        /* Estiliza las etiquetas: bloque, margen superior y negrita */
+        label { 
+            display: block; /* Hace que cada etiqueta ocupe toda la línea */
+            margin-top: 10px; /* Espacio arriba de cada etiqueta */
+            font-weight: bold; /* Texto en negrita */
+        }
+        /* Estiliza los inputs y textareas: ancho completo, padding y margen superior */
+        input, textarea { 
+            width: 100%; /* Ocupa todo el ancho disponible */
+            padding: 10px; /* Espaciado interno */
+            margin-top: 5px; /* Espacio arriba del campo */
+        }
+        /* Estiliza las imágenes: margen superior, ancho máximo y borde gris */
+        img { 
+            margin-top: 10px; /* Espacio arriba de la imagen */
+            max-width: 200px; /* Ancho máximo de 200px */
+            border: 1px solid #ccc; /* Borde gris claro */
+        }
+        /* Contenedor de botones: margen superior, usa flexbox y separa los botones */
         .acciones {
-            margin-top: 20px;
-            display: flex;
-            justify-content: space-between;
+            margin-top: 20px; /* Espacio arriba del contenedor */
+            display: flex; /* Usa flexbox para organizar los botones */
+            justify-content: space-between; /* Separa los botones a los extremos */
         }
+        /* Estiliza los botones: padding, negrita, cursor de mano y bordes redondeados */
         button {
-            padding: 10px 20px;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 5px;
+            padding: 10px 20px; /* Espaciado interno */
+            font-weight: bold; /* Texto en negrita */
+            cursor: pointer; /* Cursor tipo mano */
+            border-radius: 5px; /* Bordes redondeados */
         }
-        .guardar { background: #f0c14b; border: 1px solid #a88734; }
-        .eliminar { background: #dc3545; color: white; border: none; }
-        a { display: inline-block; margin-top: 20px; }
+        /* Botón guardar: fondo amarillo, borde marrón claro */
+        .guardar { 
+            background: #f0c14b; /* Fondo amarillo */
+            border: 1px solid #a88734; /* Borde marrón claro */
+        }
+        /* Botón eliminar: fondo rojo, texto blanco, sin borde */
+        .eliminar { 
+            background: #dc3545; /* Fondo rojo */
+            color: white; /* Texto blanco */
+            border: none; /* Sin borde */
+        }
+        /* Estiliza los enlaces: bloque en línea y margen superior */
+        a { 
+            display: inline-block; /* Permite margen y padding */
+            margin-top: 20px; /* Espacio arriba del enlace */
+        }
     </style>
 </head>
 <body>
