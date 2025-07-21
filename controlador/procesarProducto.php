@@ -26,12 +26,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $imagenSecundaria1 = obtenerContenidoImagen("imagen_secundaria1");
     $imagenSecundaria2 = obtenerContenidoImagen("imagen_secundaria2");
 
+<<<<<<< HEAD
     $stmt = $conn->prepare("INSERT INTO productos 
         (nombre, descripcion, precio, categoria, imagen_principal, imagen_secundaria1, imagen_secundaria2, tallas, color, unidades, garantia, dimensiones, peso, tamano_empaque) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
     $stmt->bind_param(
         "ssdssssssissds",
+=======
+    // Obtener el ID del vendedor de la sesión
+    $id_vendedor = $_SESSION['id_vendedor'];
+
+    $stmt = $conn->prepare("INSERT INTO productos 
+        (nombre, descripcion, precio, categoria, imagen_principal, imagen_secundaria1, imagen_secundaria2, tallas, color, unidades, garantia, dimensiones, peso, tamano_empaque, id_vendedor) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+    $stmt->bind_param(
+        "ssdssssssissdsi",
+>>>>>>> e608ed9 (Updated project files with latest changes)
         $nombre,
         $descripcion,
         $precio,
@@ -45,7 +57,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $garantia,
         $dimensiones,
         $peso,
+<<<<<<< HEAD
         $tamano_empaque
+=======
+        $tamano_empaque,
+        $id_vendedor
+>>>>>>> e608ed9 (Updated project files with latest changes)
     );
 
     if ($stmt->execute()) {

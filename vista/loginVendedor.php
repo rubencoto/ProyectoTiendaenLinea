@@ -20,8 +20,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$verificado) {
             $error = "La cuenta aún no ha sido verificada.";
         } elseif (password_verify($contrasena, $hash)) {
+<<<<<<< HEAD
             $_SESSION['vendedor_id'] = $id;
             header("Location: panelVendedor.php");
+=======
+            $_SESSION['id'] = $id;
+            header("Location: inicioVendedor.php");
+>>>>>>> e608ed9 (Updated project files with latest changes)
             exit;
         } else {
             $error = "Contraseña incorrecta.";

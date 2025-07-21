@@ -1,4 +1,5 @@
 <?php
+<<<<<<< HEAD
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -9,6 +10,33 @@ require_once 'C:/Users/ruben/OneDrive/Desktop/correo/PHPMailer-master/src/SMTP.p
 
 function enviarCorreoVerificacion($correoDestino, $codigo) {
     $mail = new PHPMailer(true);
+=======
+// Verificar si PHPMailer está disponible usando Composer
+if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
+    require_once __DIR__ . '/../vendor/autoload.php';
+} else {
+    // Si no hay Composer, intentar incluir PHPMailer manualmente
+    if (file_exists('C:/Users/leomo/OneDrive/Desktop/PHPMailer-master/PHPMailer-master/src/PHPMailer.php')) {
+        require_once 'C:/Users/leomo/OneDrive/Desktop/PHPMailer-master/PHPMailer-master/src/Exception.php';
+        require_once 'C:/Users/leomo/OneDrive/Desktop/PHPMailer-master/PHPMailer-master/src/PHPMailer.php';
+        require_once 'C:/Users/leomo/OneDrive/Desktop/PHPMailer-master/PHPMailer-master/src/SMTP.php';
+    } else {
+        die('PHPMailer no encontrado. Por favor instala PHPMailer usando Composer o verifica la ruta manual.');
+    }
+}
+
+// Importar las clases de PHPMailer
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\SMTP;
+
+function enviarCorreoVerificacion($correoDestino, $codigo) {
+    if (class_exists('PHPMailer\\PHPMailer\\PHPMailer')) {
+        $mail = new PHPMailer(true);
+    } else {
+        $mail = new PHPMailer(true);
+    }
+>>>>>>> e608ed9 (Updated project files with latest changes)
 
     try {
         $mail->isSMTP();

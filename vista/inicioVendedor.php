@@ -2,7 +2,11 @@
 session_start(); // 🔐 Iniciar sesión
 
 // 🚫 Verificar si hay sesión activa del vendedor
+<<<<<<< HEAD
 if (!isset($_SESSION['vendedor_id'])) {
+=======
+if (!isset($_SESSION['id'])) {
+>>>>>>> e608ed9 (Updated project files with latest changes)
     header('Location: loginVendedor.php');
     exit;
 }
@@ -67,7 +71,11 @@ if (!isset($_SESSION['vendedor_id'])) {
 <body>
 
     <div class="header">
+<<<<<<< HEAD
         <h1>Bienvenido, Vendedor</h1>
+=======
+        <h1>Bienvenido, <?= htmlspecialchars($_SESSION['id']) ?></h1>
+>>>>>>> e608ed9 (Updated project files with latest changes)
     </div>
 
     <div class="container">

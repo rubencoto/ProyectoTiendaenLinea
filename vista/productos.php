@@ -2,7 +2,11 @@
 session_start();
 
 // Si no hay vendedor autenticado, redirige al login
+<<<<<<< HEAD
 if (empty($_SESSION['vendedor_id'])) {
+=======
+if (empty($_SESSION['id'])) {
+>>>>>>> e608ed9 (Updated project files with latest changes)
     header('Location: loginVendedor.php');
     exit;
 }
@@ -10,11 +14,19 @@ if (empty($_SESSION['vendedor_id'])) {
 require_once '../modelo/conexion.php';
 
 // Prepara y ejecuta la consulta filtrando por id_vendedor
+<<<<<<< HEAD
 $idV = $_SESSION['vendedor_id'];
 $stmt = $conn->prepare(
     "SELECT id, nombre, precio, imagen_principal 
      FROM productos 
      WHERE id_vendedor = ?"
+=======
+$idV = $_SESSION['id'];
+$stmt = $conn->prepare(
+    "SELECT id, nombre, precio, imagen_principal 
+     FROM productos 
+     WHERE id = ?"
+>>>>>>> e608ed9 (Updated project files with latest changes)
 );
 $stmt->bind_param("i", $idV);
 $stmt->execute();
