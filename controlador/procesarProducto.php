@@ -1,4 +1,8 @@
 <?php
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
 include '../modelo/conexion.php';
 
@@ -10,6 +14,12 @@ function obtenerContenidoImagen($campo) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Check if vendor session exists
+    if (!isset($_SESSION['id'])) {
+        echo "❌ Error: Sesión de vendedor no válida. Por favor inicia sesión nuevamente.";
+        exit;
+    }
+    
     $nombre = $_POST["nombre"];
     $descripcion = $_POST["descripcion"];
     $precio = $_POST["precio"];
@@ -26,16 +36,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $imagenSecundaria1 = obtenerContenidoImagen("imagen_secundaria1");
     $imagenSecundaria2 = obtenerContenidoImagen("imagen_secundaria2");
 
-<<<<<<< HEAD
-    $stmt = $conn->prepare("INSERT INTO productos 
-        (nombre, descripcion, precio, categoria, imagen_principal, imagen_secundaria1, imagen_secundaria2, tallas, color, unidades, garantia, dimensiones, peso, tamano_empaque) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-
-    $stmt->bind_param(
-        "ssdssssssissds",
-=======
     // Obtener el ID del vendedor de la sesión
-    $id_vendedor = $_SESSION['id_vendedor'];
+    $id_vendedor = $_SESSION['id'];
 
     $stmt = $conn->prepare("INSERT INTO productos 
         (nombre, descripcion, precio, categoria, imagen_principal, imagen_secundaria1, imagen_secundaria2, tallas, color, unidades, garantia, dimensiones, peso, tamano_empaque, id_vendedor) 
@@ -43,7 +45,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $stmt->bind_param(
         "ssdssssssissdsi",
->>>>>>> e608ed9 (Updated project files with latest changes)
         $nombre,
         $descripcion,
         $precio,
@@ -57,12 +58,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $garantia,
         $dimensiones,
         $peso,
-<<<<<<< HEAD
-        $tamano_empaque
-=======
         $tamano_empaque,
         $id_vendedor
->>>>>>> e608ed9 (Updated project files with latest changes)
     );
 
     if ($stmt->execute()) {
@@ -86,7 +83,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 cancelButtonText: "No, volver al panel"
             }).then((result) => {
                 if (result.isConfirmed) {
-                    window.location.href = "../vista/agregarProducto.php";
+                    window.location.href = "../vista/agregarproducto.php";
                 } else {
                     window.location.href = "../vista/inicioVendedor.php";
                 }

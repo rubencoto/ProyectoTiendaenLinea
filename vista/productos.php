@@ -2,11 +2,7 @@
 session_start();
 
 // Si no hay vendedor autenticado, redirige al login
-<<<<<<< HEAD
-if (empty($_SESSION['vendedor_id'])) {
-=======
 if (empty($_SESSION['id'])) {
->>>>>>> e608ed9 (Updated project files with latest changes)
     header('Location: loginVendedor.php');
     exit;
 }
@@ -14,19 +10,11 @@ if (empty($_SESSION['id'])) {
 require_once '../modelo/conexion.php';
 
 // Prepara y ejecuta la consulta filtrando por id_vendedor
-<<<<<<< HEAD
-$idV = $_SESSION['vendedor_id'];
-$stmt = $conn->prepare(
-    "SELECT id, nombre, precio, imagen_principal 
-     FROM productos 
-     WHERE id_vendedor = ?"
-=======
 $idV = $_SESSION['id'];
 $stmt = $conn->prepare(
     "SELECT id, nombre, precio, imagen_principal 
      FROM productos 
-     WHERE id = ?"
->>>>>>> e608ed9 (Updated project files with latest changes)
+     WHERE id_vendedor = ?"
 );
 $stmt->bind_param("i", $idV);
 $stmt->execute();
@@ -49,7 +37,29 @@ $stmt->close();
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
-            padding: 30px;
+            margin: 0;
+            padding: 20px;
+        }
+        .header {
+            background-color: #232f3e;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            margin: -20px -20px 20px -20px;
+        }
+        .volver-btn {
+            background-color: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        .volver-btn:hover {
+            background-color: #5a6268;
+            color: white;
+            text-decoration: none;
         }
         .busqueda-container {
             display: flex;
@@ -131,6 +141,12 @@ $stmt->close();
 </head>
 <body>
 
+<div class="header">
+    <h1>📦 Gestión de Mis Productos</h1>
+</div>
+
+<a href="inicioVendedor.php" class="volver-btn">← Volver al Panel</a>
+
 <div class="busqueda-container">
     <input type="text" id="busqueda" placeholder="Buscar por nombre...">
     <select id="ordenar">
@@ -182,7 +198,15 @@ document.getElementById("aplicarBtn").addEventListener("click", aplicarCambios);
 renderizarProductos(productos);
 
 function eliminarProducto(id, boton) {
-    if (!confirm("¿Estás seguro de eliminar este producto?")) return;
+    // Store the button and id for later use
+    window.eliminarData = { id: id, boton: boton };
+    document.getElementById('modalEliminarProductoLista').style.display = 'block';
+}
+
+function confirmarEliminacionLista() {
+    const { id, boton } = window.eliminarData;
+    document.getElementById('modalEliminarProductoLista').style.display = 'none';
+    
     boton.disabled = true;
     boton.textContent = "Eliminando...";
     fetch("eliminarProducto.php", {
@@ -221,7 +245,101 @@ function mostrarToast(msg) {
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
 }
+
+function cerrarModalLista(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+    }
+}
 </script>
+
+<!-- Modal para eliminar producto de la lista -->
+<div id="modalEliminarProductoLista" class="modal">
+    <div class="modal-content">
+        <h3>⚠️ Confirmar Eliminación</h3>
+        <p>¿Está seguro de que desea eliminar este producto permanentemente de su inventario?</p>
+        <div class="modal-buttons">
+            <button class="modal-btn danger" onclick="confirmarEliminacionLista()">Sí, Eliminar</button>
+            <button class="modal-btn secondary" onclick="cerrarModalLista('modalEliminarProductoLista')">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 30px;
+    border: none;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.modal h3 {
+    color: #dc3545;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.modal p {
+    margin-bottom: 30px;
+    font-size: 16px;
+    color: #333;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.modal-btn {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.modal-btn.danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.modal-btn.danger:hover {
+    background-color: #c82333;
+}
+
+.modal-btn.secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.modal-btn.secondary:hover {
+    background-color: #5a6268;
+}
+</style>
 
 <script src="../js/app.js"></script>
 </body>
