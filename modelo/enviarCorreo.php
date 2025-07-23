@@ -66,7 +66,7 @@ function enviarCorreo($correoDestino, $asunto, $mensaje) {
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = 587;
 
-        $mail->setFrom('serviciocontactoventaonline@gmail.com', 'Tienda en Línea');
+        $mail->setFrom('serviciocontactoventaonline@gmail.com', 'Tienda en Linea');
         $mail->addAddress($correoDestino);
 
         $mail->isHTML(true);

@@ -178,7 +178,7 @@ $conn->close();
 <body>
 
 <div class="header">
-    <h1>🛍️ Catálogo de Productos</h1>
+    <h1>Catálogo de Productos</h1>
 </div>
 
 <a href="inicioCliente.php" class="volver-btn">← Volver al Inicio</a>

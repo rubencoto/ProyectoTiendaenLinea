@@ -324,7 +324,7 @@ if (!empty($_SESSION['carrito'])) {
             </div>
             
             <div class="acciones-carrito">
-                <a href="checkout.php" class="btn btn-primary">💳 Proceder al Pago</a>
+                <a href="../controlador/confirmarOrden.php" class="btn btn-primary">✅ Confirmar Orden</a>
                 <a href="catalogo.php" class="btn btn-secondary">🛍️ Seguir Comprando</a>
                 <form method="POST" style="display: inline;">
                     <input type="hidden" name="accion" value="vaciar">

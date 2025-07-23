@@ -91,27 +91,27 @@ $conn->close();
     <div class="container">
         <div class="opciones">
             <div class="card">
-                <h3>🛍️ Ver Productos</h3>
+                <h3>Ver Productos</h3>
                 <p>Explora todos los productos disponibles</p>
                 <a href="catalogo.php">Ver Catálogo</a>
             </div>
             <div class="card">
-                <h3>🛒 Mi Carrito</h3>
+                <h3>Mi Carrito</h3>
                 <p>Revisa los productos en tu carrito</p>
                 <a href="carrito.php">Ver Carrito</a>
             </div>
             <div class="card">
-                <h3>📦 Mis Pedidos</h3>
+                <h3>Mis Pedidos</h3>
                 <p>Historial de compras realizadas</p>
                 <a href="misPedidos.php">Ver Pedidos</a>
             </div>
             <div class="card">
-                <h3>👤 Mi Perfil</h3>
+                <h3>Mi Perfil</h3>
                 <p>Gestiona tu información personal</p>
                 <a href="perfil.php">Editar Perfil</a>
             </div>
             <div class="card">
-                <h3>🚪 Cerrar Sesión</h3>
+                <h3>Cerrar Sesión</h3>
                 <p>Salir de tu cuenta</p>
                 <a href="logout.php">Salir</a>
             </div>
