@@ -9,14 +9,78 @@ if (empty($_SESSION['cliente_id'])) {
 
 require_once '../modelo/conexion.php';
 
-// Obtener todos los productos disponibles
+// 🔍 Búsqueda AJAX
+if (isset($_GET['busqueda_ajax'])) {
+    header('Content-Type: application/json');
+    
+    $termino = $_GET['q'] ?? '';
+    $categoria = $_GET['categoria'] ?? '';
+    $orden = $_GET['orden'] ?? 'reciente';
+    
+    $sql = "SELECT p.id, p.nombre, p.precio, p.imagen_principal, p.descripcion, v.nombre_empresa AS vendedor_nombre 
+            FROM productos p 
+            JOIN vendedores v ON p.id_vendedor = v.id 
+            WHERE 1=1";
+    $params = [];
+    $types = '';
+    
+    if ($termino) {
+        $sql .= " AND (p.nombre LIKE ? OR p.descripcion LIKE ? OR v.nombre_empresa LIKE ?)";
+        $termino_like = "%$termino%";
+        $params = array_merge($params, [$termino_like, $termino_like, $termino_like]);
+        $types .= 'sss';
+    }
+    
+    if ($categoria) {
+        $sql .= " AND p.categoria = ?";
+        $params[] = $categoria;
+        $types .= 's';
+    }
+    
+    // Ordenamiento
+    switch($orden) {
+        case 'precio_asc':
+            $sql .= " ORDER BY p.precio ASC";
+            break;
+        case 'precio_desc':
+            $sql .= " ORDER BY p.precio DESC";
+            break;
+        case 'nombre_asc':
+            $sql .= " ORDER BY p.nombre ASC";
+            break;
+        case 'nombre_desc':
+            $sql .= " ORDER BY p.nombre DESC";
+            break;
+        default:
+            $sql .= " ORDER BY p.id DESC";
+    }
+    
+    $stmt = $conn->prepare($sql);
+    if ($params) {
+        $stmt->bind_param($types, ...$params);
+    }
+    $stmt->execute();
+    $resultado = $stmt->get_result();
+    
+    $productos = [];
+    while ($row = $resultado->fetch_assoc()) {
+        $row['imagen_principal'] = base64_encode($row['imagen_principal']);
+        $productos[] = $row;
+    }
+    
+    echo json_encode($productos);
+    $stmt->close();
+    $conn->close();
+    exit;
+}
+
+// Obtener todos los productos disponibles (comportamiento normal)
 $stmt = $conn->prepare(
     "SELECT p.id, p.nombre, p.precio, p.imagen_principal, p.descripcion, v.nombre_empresa AS vendedor_nombre 
     FROM productos p 
     JOIN vendedores v ON p.id_vendedor = v.id 
     ORDER BY p.id DESC"
 );
-
 
 $stmt->execute();
 $resultado = $stmt->get_result();
@@ -173,6 +237,26 @@ $conn->close();
             font-size: 1.1em;
             margin-top: 50px;
         }
+        
+        /* 🔄 Animación de carga */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .busqueda-container {
+            display: flex;
+            gap: 10px;
+            max-width: 1000px;
+            margin: 0 auto 20px auto;
+            flex-wrap: wrap;
+        }
+        
+        .busqueda-container input,
+        .busqueda-container select {
+            flex: 1;
+            min-width: 150px;
+        }
     </style>
 </head>
 <body>
@@ -199,10 +283,17 @@ $conn->close();
 
 <div class="busqueda-container">
     <input type="text" id="busqueda" placeholder="Buscar productos...">
+    <select id="categoria">
+        <option value="">Todas las categorías</option>
+        <option value="Electrónicos">Electrónicos</option>
+        <option value="Ropa">Ropa</option>
+        <option value="Hogar">Hogar</option>
+        <option value="Deportes">Deportes</option>
+    </select>
     <select id="ordenar">
         <option value="reciente">Más recientes</option>
-        <option value="asc">Nombre A-Z</option>
-        <option value="desc">Nombre Z-A</option>
+        <option value="nombre_asc">Nombre A-Z</option>
+        <option value="nombre_desc">Nombre Z-A</option>
         <option value="precio_asc">Precio menor a mayor</option>
         <option value="precio_desc">Precio mayor a menor</option>
     </select>
@@ -213,6 +304,48 @@ $conn->close();
 
 <script>
 const productos = <?= json_encode($productos, JSON_HEX_TAG) ?>;
+let busquedaTimeout;
+
+// 🚀 Búsqueda en tiempo real con debounce
+document.getElementById('busqueda').addEventListener('input', function() {
+    clearTimeout(busquedaTimeout);
+    busquedaTimeout = setTimeout(() => {
+        buscarProductosAjax();
+    }, 500); // Esperar 500ms después de que el usuario deje de escribir
+});
+
+document.getElementById('categoria').addEventListener('change', buscarProductosAjax);
+document.getElementById('ordenar').addEventListener('change', buscarProductosAjax);
+
+// 🔍 Función de búsqueda AJAX
+async function buscarProductosAjax() {
+    const busqueda = document.getElementById('busqueda').value;
+    const categoria = document.getElementById('categoria').value;
+    const orden = document.getElementById('ordenar').value;
+    
+    // Mostrar indicador de carga
+    document.getElementById('productosContenedor').innerHTML = 
+        '<div style="text-align: center; padding: 50px;"><div style="display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid #007185; border-radius: 50%; animation: spin 1s linear infinite;"></div> Buscando...</div>';
+    
+    try {
+        const params = new URLSearchParams({
+            busqueda_ajax: '1',
+            q: busqueda,
+            categoria: categoria,
+            orden: orden
+        });
+        
+        const response = await fetch(`catalogo.php?${params}`);
+        const productosEncontrados = await response.json();
+        
+        renderizarProductos(productosEncontrados);
+        
+    } catch (error) {
+        console.error('Error en búsqueda:', error);
+        document.getElementById('productosContenedor').innerHTML = 
+            '<div style="text-align: center; color: red;">Error al buscar productos</div>';
+    }
+}
 
 function renderizarProductos(lista) {
     const contenedor = document.getElementById("productosContenedor");

@@ -103,7 +103,7 @@ $conn->close();
             <div class="card">
                 <h3>Mis Pedidos</h3>
                 <p>Historial de compras realizadas</p>
-                <a href="misPedidos.php">Ver Pedidos</a>
+                <a href="historialPedidos.php">Ver Pedidos</a>
             </div>
             <div class="card">
                 <h3>Mi Perfil</h3>

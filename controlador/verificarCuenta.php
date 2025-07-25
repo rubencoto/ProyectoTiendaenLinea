@@ -1,6 +1,10 @@
 <?php
 require_once '../modelo/conexion.php';
 
+// 🔍 Detectar petición AJAX
+$esAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+          strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $correo = $_POST['correo'];
     $codigo = $_POST['codigo'];
@@ -9,6 +13,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->bind_param("ss", $correo, $codigo);
     $stmt->execute();
     $stmt->store_result();
+
+    if ($stmt->num_rows === 1) {
+        // ✅ Código correcto, activar cuenta
+        $updateStmt = $conn->prepare("UPDATE vendedores SET verificado = 1 WHERE correo = ?");
+        $updateStmt->bind_param("s", $correo);
+        $updateStmt->execute();
+        $updateStmt->close();
+        
+        if ($esAjax) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => true,
+                'message' => '¡Cuenta verificada exitosamente! Ya puedes iniciar sesión.',
+                'redirect' => '../vista/loginVendedor.php'
+            ]);
+            $stmt->close();
+            $conn->close();
+            exit;
+        }
+        
+        // Respuesta HTML tradicional (código existente continúa...)
+    } else {
+        // ❌ Código incorrecto
+        if ($esAjax) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => false,
+                'error' => 'Código de verificación incorrecto o cuenta ya verificada.'
+            ]);
+            $stmt->close();
+            $conn->close();
+            exit;
+        }
+    }
 
     $htmlHeader = '
     <!DOCTYPE html>

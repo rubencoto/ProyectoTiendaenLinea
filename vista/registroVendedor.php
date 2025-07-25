@@ -89,22 +89,118 @@ require_once '../modelo/conexion.php';
             </label>
         </div>
 
-        <button type="submit" class="btn btn-primary">Registrarse</button>
+        <button type="submit" class="btn btn-primary" id="btnSubmit">Registrarse</button>
     </form>
+    
+    <!-- 🔔 Área para mensajes -->
+    <div id="mensajeResultado" class="mt-3"></div>
 </div>
 
 <script>
-    // Validación JS: Contraseñas coincidan
-    document.getElementById('registroForm').addEventListener('submit', function(event) {
+    // 🚀 AJAX para registro sin recarga de página
+    document.getElementById('registroForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        
+        // Validar contraseñas
         const pass = document.getElementById('contrasena').value;
         const confirm = document.getElementById('confirmar_contrasena').value;
         const errorMsg = document.getElementById('errorContrasena');
 
         if (pass !== confirm) {
             errorMsg.textContent = "Las contraseñas no coinciden.";
-            event.preventDefault();
+            return;
         } else {
             errorMsg.textContent = "";
+        }
+        
+        // 🔄 Mostrar estado de carga
+        const btnSubmit = document.getElementById('btnSubmit');
+        const originalText = btnSubmit.textContent;
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = 'Registrando...';
+        
+        try {
+            const formData = new FormData(this);
+            
+            const response = await fetch('../controlador/procesarRegistroVendedor.php', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest' // 🎯 Indica que es AJAX
+                }
+            });
+            
+            const result = await response.json();
+            
+            const mensajeDiv = document.getElementById('mensajeResultado');
+            
+            if (result.success) {
+                // ✅ Éxito
+                mensajeDiv.innerHTML = `
+                    <div class="alert alert-success">
+                        <h5>🎉 ${result.message}</h5>
+                        <p>Se ha enviado el código de verificación a: <strong>${result.correo}</strong></p>
+                        <a href="verificarCuenta.php?correo=${encodeURIComponent(result.correo)}" 
+                           class="btn btn-primary">Verificar Cuenta Ahora</a>
+                    </div>
+                `;
+                
+                // Limpiar formulario
+                this.reset();
+                
+                // Scroll al mensaje
+                mensajeDiv.scrollIntoView({ behavior: 'smooth' });
+                
+            } else {
+                // ❌ Error
+                mensajeDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <strong>Error:</strong> ${result.error}
+                    </div>
+                `;
+            }
+            
+        } catch (error) {
+            // 🚨 Error de conexión
+            document.getElementById('mensajeResultado').innerHTML = `
+                <div class="alert alert-danger">
+                    <strong>Error:</strong> No se pudo conectar con el servidor. Inténtalo de nuevo.
+                </div>
+            `;
+            console.error('Error:', error);
+        } finally {
+            // 🔄 Restaurar botón
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = originalText;
+        }
+    });
+    
+    // 📧 Validación de email en tiempo real
+    document.querySelector('input[name="correo"]').addEventListener('blur', async function() {
+        const email = this.value;
+        
+        if (email && this.checkValidity()) {
+            try {
+                const response = await fetch('../controlador/procesarRegistroVendedor.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: `verificar_email=1&correo=${encodeURIComponent(email)}`
+                });
+                
+                const result = await response.json();
+                
+                if (!result.success && result.error.includes('ya está registrado')) {
+                    this.setCustomValidity('Este correo ya está registrado');
+                    this.reportValidity();
+                } else {
+                    this.setCustomValidity('');
+                }
+            } catch (error) {
+                console.warn('Error al verificar email:', error);
+            }
         }
     });
 </script>

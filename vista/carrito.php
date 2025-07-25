@@ -19,14 +19,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $accion = $_POST['accion'] ?? '';
     $producto_id = intval($_POST['producto_id'] ?? 0);
     
+    // 🔍 Detectar petición AJAX
+    $esAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+              strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
+    
     switch ($accion) {
         case 'agregar':
             if (!isset($_SESSION['carrito'][$producto_id])) {
                 $_SESSION['carrito'][$producto_id] = 0;
             }
             $_SESSION['carrito'][$producto_id]++;
-            echo json_encode(['status' => 'success', 'mensaje' => 'Producto agregado al carrito']);
-            exit;
+            
+            if ($esAjax) {
+                echo json_encode(['status' => 'success', 'mensaje' => 'Producto agregado al carrito']);
+                exit;
+            }
+            break;
             
         case 'actualizar':
             $cantidad = intval($_POST['cantidad'] ?? 1);
@@ -35,19 +43,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 unset($_SESSION['carrito'][$producto_id]);
             }
+            
+            if ($esAjax) {
+                // Calcular nuevo total
+                $total = 0;
+                if (!empty($_SESSION['carrito'])) {
+                    $ids = array_keys($_SESSION['carrito']);
+                    $placeholders = implode(',', array_fill(0, count($ids), '?'));
+                    $stmt = $conn->prepare("SELECT id, precio FROM productos WHERE id IN ($placeholders)");
+                    $types = str_repeat('i', count($ids));
+                    $stmt->bind_param($types, ...$ids);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    
+                    while ($row = $result->fetch_assoc()) {
+                        $total += $row['precio'] * $_SESSION['carrito'][$row['id']];
+                    }
+                    $stmt->close();
+                }
+                
+                echo json_encode([
+                    'status' => 'success',
+                    'nuevo_total' => $total,
+                    'total_items' => array_sum($_SESSION['carrito']),
+                    'subtotal_producto' => $cantidad > 0 ? $cantidad * ($_POST['precio'] ?? 0) : 0
+                ]);
+                exit;
+            }
             break;
             
         case 'eliminar':
             unset($_SESSION['carrito'][$producto_id]);
+            
+            if ($esAjax) {
+                echo json_encode(['status' => 'success', 'mensaje' => 'Producto eliminado del carrito']);
+                exit;
+            }
             break;
             
         case 'vaciar':
             $_SESSION['carrito'] = [];
+            
+            if ($esAjax) {
+                echo json_encode(['status' => 'success', 'mensaje' => 'Carrito vaciado']);
+                exit;
+            }
             break;
     }
     
-    // Redirigir después de procesar para evitar reenvío
-    header('Location: carrito.php');
+    // Solo redirigir si NO es AJAX
+    if (!$esAjax) {
+        header('Location: carrito.php');
+        exit;
+    }
     exit;
 }
 
@@ -355,10 +403,56 @@ function actualizarCantidad(productoId) {
     
     fetch('carrito.php', {
         method: 'POST',
-        body: form
-    }).then(() => {
-        location.reload();
+        body: form,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // 🔄 Actualizar totales sin recargar página
+            document.querySelector('.total-line:last-child span:last-child').textContent = 
+                `₡${(data.nuevo_total + 2500).toLocaleString()}`;
+            
+            document.querySelector('.total-line:first-child span:first-child').textContent = 
+                `Subtotal (${data.total_items} productos):`;
+            
+            document.querySelector('.total-line:first-child span:last-child').textContent = 
+                `₡${data.nuevo_total.toLocaleString()}`;
+            
+            // Actualizar subtotal del producto específico
+            const subtotalElement = document.querySelector(`[data-producto-id="${productoId}"] .producto-subtotal`);
+            if (subtotalElement) {
+                subtotalElement.textContent = `₡${data.subtotal_producto.toLocaleString()}`;
+            }
+            
+            mostrarToast('✅ Carrito actualizado');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarToast('❌ Error al actualizar carrito');
     });
+}
+
+// 🎯 Función para mostrar notificaciones
+function mostrarToast(mensaje) {
+    const toast = document.createElement('div');
+    toast.textContent = mensaje;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #28a745;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 6px;
+        z-index: 1000;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
 }
 
 // Modal functions

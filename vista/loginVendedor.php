@@ -4,6 +4,10 @@ require_once '../modelo/conexion.php';
 
 $error = '';
 
+// 🔍 Detectar petición AJAX
+$esAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+          strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $correo = $_POST['correo'] ?? '';
     $contrasena = $_POST['contrasena'] ?? '';
@@ -21,6 +25,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = "La cuenta aún no ha sido verificada.";
         } elseif (password_verify($contrasena, $hash)) {
             $_SESSION['id'] = $id;
+            
+            if ($esAjax) {
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Login exitoso',
+                    'redirect' => 'inicioVendedor.php'
+                ]);
+                exit;
+            }
+            
             header("Location: inicioVendedor.php");
             exit;
         } else {
@@ -32,6 +47,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $stmt->close();
     $conn->close();
+    
+    // 🚀 Respuesta AJAX para errores
+    if ($esAjax && $error) {
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => false,
+            'error' => $error
+        ]);
+        exit;
+    }
 }
 ?>
 
@@ -51,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php if ($error): ?>
             <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
-        <form method="POST">
+        <form id="loginForm" method="POST">
             <div class="mb-3">
                 <label>Correo electrónico</label>
                 <input type="email" name="correo" class="form-control" required>
@@ -60,8 +85,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label>Contraseña</label>
                 <input type="password" name="contrasena" class="form-control" required>
             </div>
-            <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+            <button type="submit" class="btn btn-primary w-100" id="btnLogin">Ingresar</button>
         </form>
+
+        <!-- 🔔 Área para mensajes dinámicos -->
+        <div id="mensajeLogin" class="mt-3"></div>
 
         <?php if (!empty($error)): ?>
             <div class="alert alert-danger mt-3" role="alert">
@@ -74,5 +102,71 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <p class="small"><a href="loginCliente.php">¿Eres cliente? Ingresa aquí</a></p>
         </div>
     </div>
+
+    <script>
+    // 🚀 LOGIN CON AJAX
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const btnLogin = document.getElementById('btnLogin');
+        const mensajeDiv = document.getElementById('mensajeLogin');
+        const originalText = btnLogin.textContent;
+        
+        // 🔄 Estado de carga
+        btnLogin.disabled = true;
+        btnLogin.textContent = 'Ingresando...';
+        mensajeDiv.innerHTML = '';
+        
+        try {
+            const formData = new FormData(this);
+            
+            const response = await fetch('', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                // ✅ Login exitoso
+                mensajeDiv.innerHTML = `
+                    <div class="alert alert-success">
+                        <strong>✅ ${result.message}</strong><br>
+                        Redirigiendo al panel...
+                    </div>
+                `;
+                
+                // Redireccionar después de 1 segundo
+                setTimeout(() => {
+                    window.location.href = result.redirect;
+                }, 1000);
+                
+            } else {
+                // ❌ Error
+                mensajeDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <strong>❌ Error:</strong> ${result.error}
+                    </div>
+                `;
+            }
+            
+        } catch (error) {
+            // 🚨 Error de conexión
+            mensajeDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    <strong>🚨 Error:</strong> No se pudo conectar con el servidor.
+                </div>
+            `;
+            console.error('Error:', error);
+        } finally {
+            // 🔄 Restaurar botón
+            btnLogin.disabled = false;
+            btnLogin.textContent = originalText;
+        }
+    });
+    </script>
 </body>
 </html>

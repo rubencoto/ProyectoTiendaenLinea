@@ -65,8 +65,54 @@ try {
     }
     $stmt->close();
 
-    // Insertar orden en la base de datos (opcional - puedes crear una tabla 'ordenes' si quieres)
+    // Crear tablas si no existen
+    $crear_tabla_ordenes = "
+    CREATE TABLE IF NOT EXISTS ordenes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        numero_orden VARCHAR(50) UNIQUE NOT NULL,
+        cliente_id INT NOT NULL,
+        subtotal DECIMAL(10,2) NOT NULL,
+        envio DECIMAL(10,2) NOT NULL,
+        total DECIMAL(10,2) NOT NULL,
+        estado ENUM('pendiente', 'procesando', 'enviado', 'entregado', 'cancelado') DEFAULT 'pendiente',
+        fecha_orden DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+    )";
+
+    $crear_tabla_detalles = "
+    CREATE TABLE IF NOT EXISTS orden_detalles (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        orden_id INT NOT NULL,
+        producto_id INT NOT NULL,
+        cantidad INT NOT NULL,
+        precio_unitario DECIMAL(10,2) NOT NULL,
+        subtotal DECIMAL(10,2) NOT NULL,
+        FOREIGN KEY (orden_id) REFERENCES ordenes(id),
+        FOREIGN KEY (producto_id) REFERENCES productos(id)
+    )";
+
+    $conn->query($crear_tabla_ordenes);
+    $conn->query($crear_tabla_detalles);
+
+    // Insertar orden en la base de datos
     $numero_orden = 'ORD-' . date('Ymd') . '-' . sprintf('%04d', rand(1, 9999));
+    $envio = 2500;
+    $total_final = $total + $envio;
+    
+    // Insertar la orden principal
+    $stmt = $conn->prepare("INSERT INTO ordenes (numero_orden, cliente_id, subtotal, envio, total) VALUES (?, ?, ?, ?, ?)");
+    $stmt->bind_param("siddd", $numero_orden, $_SESSION['cliente_id'], $total, $envio, $total_final);
+    $stmt->execute();
+    $orden_id = $conn->insert_id;
+    $stmt->close();
+    
+    // Insertar los detalles de la orden
+    $stmt = $conn->prepare("INSERT INTO orden_detalles (orden_id, producto_id, cantidad, precio_unitario, subtotal) VALUES (?, ?, ?, ?, ?)");
+    foreach ($productos_comprados as $producto) {
+        $stmt->bind_param("iiidd", $orden_id, $producto['id'], $producto['cantidad'], $producto['precio'], $producto['subtotal']);
+        $stmt->execute();
+    }
+    $stmt->close();
     
     // Enviar correo de confirmación al cliente
     $productos_lista = '';
@@ -79,9 +125,6 @@ try {
             <td style='padding: 10px; border-bottom: 1px solid #ddd; text-align: right;'>CRC " . number_format($producto['subtotal'], 0, ',', '.') . "</td>
         </tr>";
     }
-
-    $envio = 2500;
-    $total_final = $total + $envio;
 
     $mensaje_cliente = "
     <h2 style='color: #007185;'>Gracias por tu compra</h2>
@@ -265,6 +308,7 @@ try {
             
             <div style="margin-top: 30px;">
                 <a href="../vista/catalogo.php" class="btn">🛍️ Seguir Comprando</a>
+                <a href="../vista/historialPedidos.php" class="btn">📋 Ver Mis Pedidos</a>
                 <a href="../vista/inicioCliente.php" class="btn">🏠 Ir al Inicio</a>
             </div>
         </div>
