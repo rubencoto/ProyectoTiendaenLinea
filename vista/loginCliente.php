@@ -35,6 +35,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> f56b1ab (Added the function to recover password)
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -58,6 +62,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label>Contraseña</label>
                 <input type="password" class="form-control" name="contrasena" required>
             </div>
+<<<<<<< HEAD
+=======
+
+            <!-- Enlace de recuperación -->
+            <div class="mb-3 text-end">
+                <a href="recuperarContrasena.php" class="small">¿Olvidaste tu contraseña?</a>
+            </div>
+
+>>>>>>> f56b1ab (Added the function to recover password)
             <button type="submit" class="btn btn-primary w-100">Ingresar</button>
         </form>
 
