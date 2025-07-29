@@ -35,19 +35,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 unset($_SESSION['carrito'][$producto_id]);
             }
-            break;
+            echo json_encode(['status' => 'success', 'mensaje' => 'Cantidad actualizada']);
+            exit;
             
         case 'eliminar':
             unset($_SESSION['carrito'][$producto_id]);
-            break;
+            echo json_encode(['status' => 'success', 'mensaje' => 'Producto eliminado del carrito']);
+            exit;
             
         case 'vaciar':
             $_SESSION['carrito'] = [];
-            break;
+            echo json_encode(['status' => 'success', 'mensaje' => 'Carrito vaciado']);
+            exit;
     }
-    
-    // Redirigir después de procesar para evitar reenvío
-    header('Location: carrito.php');
     exit;
 }
 
@@ -356,8 +356,67 @@ function actualizarCantidad(productoId) {
     fetch('carrito.php', {
         method: 'POST',
         body: form
-    }).then(() => {
-        location.reload();
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            updateCartDisplay();
+            mostrarToast(data.mensaje);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarToast('Error al actualizar cantidad');
+    });
+}
+
+function updateCartDisplay() {
+    // Reload only the cart contents
+    location.reload();
+}
+
+function eliminarProducto(productoId) {
+    const form = new FormData();
+    form.append('accion', 'eliminar');
+    form.append('producto_id', productoId);
+    
+    fetch('carrito.php', {
+        method: 'POST',
+        body: form
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            updateCartDisplay();
+            mostrarToast(data.mensaje);
+            cerrarModal('modalEliminar');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarToast('Error al eliminar producto');
+    });
+}
+
+function vaciarCarrito() {
+    const form = new FormData();
+    form.append('accion', 'vaciar');
+    
+    fetch('carrito.php', {
+        method: 'POST',
+        body: form
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            updateCartDisplay();
+            mostrarToast(data.mensaje);
+            cerrarModal('modalVaciar');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarToast('Error al vaciar carrito');
     });
 }
 
@@ -376,11 +435,12 @@ function cerrarModal(modalId) {
 }
 
 function confirmarEliminar() {
-    document.getElementById('formEliminar').submit();
+    const productoId = document.getElementById('eliminarProductoId').value;
+    eliminarProducto(productoId);
 }
 
 function confirmarVaciar() {
-    document.getElementById('formVaciar').submit();
+    vaciarCarrito();
 }
 
 // Close modal when clicking outside
@@ -388,6 +448,24 @@ window.onclick = function(event) {
     if (event.target.classList.contains('modal')) {
         event.target.style.display = 'none';
     }
+}
+
+function mostrarToast(msg) {
+    const toast = document.createElement("div");
+    toast.textContent = msg;
+    Object.assign(toast.style, {
+        position: "fixed",
+        bottom: "20px",
+        right: "20px",
+        background: "#28a745",
+        color: "white",
+        padding: "12px 20px",
+        borderRadius: "6px",
+        boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+        zIndex: "1000"
+    });
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
 }
 </script>
 

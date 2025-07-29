@@ -208,6 +208,19 @@ if (!$producto) {
 
 <a href="catalogo.php" class="volver-btn">← Volver al Catálogo</a>
 
+<div style="text-align: right; margin-bottom: 10px;">
+    <a href="carrito.php" style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+        Ver Carrito
+        <?php 
+        $cantidad_total = 0;
+        if (isset($_SESSION['carrito'])) {
+            $cantidad_total = array_sum($_SESSION['carrito']);
+        }
+        ?>
+        <span id="cart-count" style="background-color: #dc3545; border-radius: 50%; padding: 2px 6px; font-size: 0.8em; margin-left: 5px; <?= $cantidad_total > 0 ? '' : 'display: none;' ?>"><?= $cantidad_total ?></span>
+    </a>
+</div>
+
 <div class="producto-container">
     <div class="producto-detalle">
         <!-- Galería de imágenes -->
@@ -307,7 +320,7 @@ if (!$producto) {
     <!-- Descripción completa -->
     <?php if ($producto['descripcion']): ?>
     <div class="descripcion-completa">
-        <h3>📝 Descripción del Producto</h3>
+        <h3>Descripción del Producto</h3>
         <p><?= nl2br(htmlspecialchars($producto['descripcion'])) ?></p>
     </div>
     <?php endif; ?>
@@ -331,6 +344,8 @@ function agregarAlCarrito(productoId) {
     .then(data => {
         if (data.status === 'success') {
             mostrarToast(data.mensaje);
+            // Update cart count immediately
+            updateCartCount();
         } else {
             mostrarToast("Error al agregar al carrito");
         }
@@ -338,6 +353,23 @@ function agregarAlCarrito(productoId) {
     .catch(error => {
         console.error('Error:', error);
         mostrarToast("Error al agregar al carrito");
+    });
+}
+
+function updateCartCount() {
+    fetch('getCartCount.php')
+    .then(response => response.json())
+    .then(data => {
+        const cartCountElement = document.getElementById('cart-count');
+        if (data.count > 0) {
+            cartCountElement.textContent = data.count;
+            cartCountElement.style.display = 'inline';
+        } else {
+            cartCountElement.style.display = 'none';
+        }
+    })
+    .catch(error => {
+        console.error('Error updating cart count:', error);
     });
 }
 

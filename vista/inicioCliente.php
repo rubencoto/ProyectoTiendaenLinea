@@ -96,7 +96,16 @@ $conn->close();
                 <a href="catalogo.php">Ver Catálogo</a>
             </div>
             <div class="card">
-                <h3>Mi Carrito</h3>
+                <h3>Mi Carrito
+                    <?php 
+                    $cantidad_total = 0;
+                    if (isset($_SESSION['carrito'])) {
+                        $cantidad_total = array_sum($_SESSION['carrito']);
+                    }
+                    if ($cantidad_total > 0): ?>
+                        <span id="cart-count-home" style="background-color: #dc3545; border-radius: 50%; padding: 2px 6px; font-size: 0.8em; margin-left: 5px; color: white;"><?= $cantidad_total ?></span>
+                    <?php endif; ?>
+                </h3>
                 <p>Revisa los productos en tu carrito</p>
                 <a href="carrito.php">Ver Carrito</a>
             </div>

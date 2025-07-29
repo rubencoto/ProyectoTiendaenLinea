@@ -177,6 +177,8 @@ $conn->close();
 </head>
 <body>
 
+<script src="js/cart-utils.js"></script>
+
 <div class="header">
     <h1>Catálogo de Productos</h1>
 </div>
@@ -191,9 +193,8 @@ $conn->close();
         if (isset($_SESSION['carrito'])) {
             $cantidad_total = array_sum($_SESSION['carrito']);
         }
-        if ($cantidad_total > 0): ?>
-            <span style="background-color: #dc3545; border-radius: 50%; padding: 2px 6px; font-size: 0.8em; margin-left: 5px;"><?= $cantidad_total ?></span>
-        <?php endif; ?>
+        ?>
+        <span id="cart-count" style="background-color: #dc3545; border-radius: 50%; padding: 2px 6px; font-size: 0.8em; margin-left: 5px; <?= $cantidad_total > 0 ? '' : 'display: none;' ?>"><?= $cantidad_total ?></span>
     </a>
 </div>
 
@@ -292,34 +293,22 @@ function agregarAlCarrito(productoId) {
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            mostrarToast("" + data.mensaje);
+            mostrarToast(data.mensaje);
+            // Update cart count immediately
+            updateCartCount();
         } else {
-            mostrarToast("Error al agregar al carrito");
+            mostrarToast("Error al agregar al carrito", 'error');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        mostrarToast("Error al agregar al carrito");
+        mostrarToast("Error al agregar al carrito", 'error');
     });
 }
 
-function mostrarToast(msg) {
-    const toast = document.createElement("div");
-    toast.textContent = msg;
-    Object.assign(toast.style, {
-        position: "fixed",
-        bottom: "20px",
-        right: "20px",
-        background: "#28a745",
-        color: "white",
-        padding: "12px 20px",
-        borderRadius: "6px",
-        boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-        zIndex: "1000"
-    });
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
-}
+// Remove the duplicate updateCartCount and mostrarToast functions since they're in cart-utils.js
+
+// Remove the duplicate updateCartCount and mostrarToast functions since they're in cart-utils.js
 </script>
 
 </body>
