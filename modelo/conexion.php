@@ -1,4 +1,8 @@
 <?php
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 // Definición de los parámetros de conexión a la base de datos
 $host = "biwezh06z1yafmlocoe7-mysql.services.clever-cloud.com";         
 $usuario = "usnfohjdasabv4el";           

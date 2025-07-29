@@ -1,5 +1,10 @@
 <?php
 session_start();
+
+// Add error reporting for debugging on Heroku
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 require_once '../modelo/conexion.php';
 
 $error = '';
