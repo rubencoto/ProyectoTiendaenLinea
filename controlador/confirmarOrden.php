@@ -361,5 +361,5 @@ try {
     </html>';
 }
 
-$conn->close();
+// Connection managed by singleton, no need to close explicitly
 ?>

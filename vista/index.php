@@ -54,7 +54,7 @@ while ($row = $resultado->fetch_assoc()) {
     $productos[] = $row;
 }
 $stmt->close();
-$conn->close();
+// Connection managed by singleton, no need to close explicitly
 ?>
 
 <!DOCTYPE html>

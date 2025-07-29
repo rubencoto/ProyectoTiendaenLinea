@@ -3,22 +3,83 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Definición de los parámetros de conexión a la base de datos
-$host = "biwezh06z1yafmlocoe7-mysql.services.clever-cloud.com";         
-$usuario = "usnfohjdasabv4el";           
-$contrasena = "vsCunVPa3JaJExZ7lIxH";            
-$base_datos = "biwezh06z1yafmlocoe7"; 
-$puerto = 3306;              
-
-// Creación de la conexión usando MySQLi
-$conn = new mysqli($host, $usuario, $contrasena, $base_datos, $puerto);
-
-// Verifica si hubo un error al conectar
-if ($conn->connect_error) {
-    // Si hay error, muestra mensaje y detiene la ejecución
-    die(" Error de conexión: " . $conn->connect_error);
+// Database connection singleton class
+class DatabaseConnection {
+    private static $instance = null;
+    private $connection;
+    
+    // Database parameters
+    private $host = "biwezh06z1yafmlocoe7-mysql.services.clever-cloud.com";
+    private $usuario = "usnfohjdasabv4el";
+    private $contrasena = "vsCunVPa3JaJExZ7lIxH";
+    private $base_datos = "biwezh06z1yafmlocoe7";
+    private $puerto = 3306;
+    
+    private function __construct() {
+        try {
+            // Set connection timeout and other optimizations
+            ini_set('mysql.connect_timeout', 10);
+            ini_set('default_socket_timeout', 10);
+            
+            $this->connection = new mysqli(
+                $this->host, 
+                $this->usuario, 
+                $this->contrasena, 
+                $this->base_datos, 
+                $this->puerto
+            );
+            
+            if ($this->connection->connect_error) {
+                throw new Exception("Connection failed: " . $this->connection->connect_error);
+            }
+            
+            // Set charset to avoid encoding issues
+            $this->connection->set_charset("utf8");
+            
+            // Optimize connection settings for Clever Cloud limits
+            $this->connection->query("SET SESSION wait_timeout = 300");
+            $this->connection->query("SET SESSION interactive_timeout = 300");
+            
+        } catch (Exception $e) {
+            die("Database connection error: " . $e->getMessage());
+        }
+    }
+    
+    public static function getInstance() {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+    
+    public function getConnection() {
+        // Check if connection is still alive, reconnect if needed
+        if (!$this->connection || !$this->connection->ping()) {
+            $this->__construct();
+        }
+        return $this->connection;
+    }
+    
+    // Prevent cloning
+    private function __clone() {}
+    
+    // Prevent unserialization
+    public function __wakeup() {
+        throw new Exception("Cannot unserialize singleton");
+    }
+    
+    // Close connection when script ends
+    public function __destruct() {
+        if ($this->connection) {
+            $this->connection->close();
+        }
+    }
 }
 
-// Si la conexión es exitosa, no se muestra ningún mensaje
-// echo " Conexión exitosa a la base de datos.";
+// Get the singleton connection instance
+$db = DatabaseConnection::getInstance();
+$conn = $db->getConnection();
+
+// Legacy compatibility - maintain the old $conn variable for existing code
+// But now it uses the singleton pattern to prevent multiple connections
 ?>
