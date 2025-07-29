@@ -7,39 +7,7 @@ ini_set('display_errors', 1);
 
 require_once '../modelo/conexion.php';
 
-$error = '';
 $isLoggedIn = !empty($_SESSION['cliente_id']);
-
-// Handle login form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
-    $correo = $_POST['correo'] ?? '';
-    $contrasena = $_POST['contrasena'] ?? '';
-
-    $stmt = $conn->prepare("SELECT id, contrasena, verificado FROM clientes WHERE correo = ?");
-    $stmt->bind_param("s", $correo);
-    $stmt->execute();
-    $stmt->store_result();
-
-    if ($stmt->num_rows === 1) {
-        $stmt->bind_result($id, $hash, $verificado);
-        $stmt->fetch();
-
-        if (!$verificado) {
-            $error = "La cuenta aún no ha sido verificada.";
-        } elseif (password_verify($contrasena, $hash)) {
-            $_SESSION['cliente_id'] = $id;
-            $isLoggedIn = true;
-            // Refresh page to show logged in state
-            header("Location: index.php");
-            exit;
-        } else {
-            $error = "Contraseña incorrecta.";
-        }
-    } else {
-        $error = "Correo no registrado.";
-    }
-    $stmt->close();
-}
 
 // Handle logout
 if (isset($_GET['logout'])) {
@@ -229,12 +197,6 @@ $conn->close();
             font-size: 1.1em;
             margin-top: 50px;
         }
-        .login-form {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 0 10px;
-        }
         .user-info {
             color: white;
         }
@@ -269,15 +231,8 @@ $conn->close();
                         <a href="?logout=1" class="btn btn-outline-light btn-sm ms-2">Cerrar Sesión</a>
                     </div>
                 <?php else: ?>
-                    <div class="login-form d-inline-block">
-                        <form method="POST" class="d-flex align-items-center gap-2">
-                            <input type="email" class="form-control form-control-sm" name="correo" placeholder="Correo electrónico" required style="width: 200px;">
-                            <input type="password" class="form-control form-control-sm" name="contrasena" placeholder="Contraseña" required style="width: 150px;">
-                            <button type="submit" name="login" class="btn btn-primary btn-sm">Ingresar</button>
-                        </form>
-                        <?php if (!empty($error)): ?>
-                            <div class="text-danger small mt-1"><?= htmlspecialchars($error) ?></div>
-                        <?php endif; ?>
+                    <div class="welcome-message">
+                        <span class="text-light">¡Bienvenido a nuestra tienda!</span>
                     </div>
                 <?php endif; ?>
             </div>
