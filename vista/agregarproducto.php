@@ -259,7 +259,7 @@
 <!-- Custom Modal -->
 <div id="successModal" class="modal">
     <div class="modal-content">
-        <h3>🎉 ¡Producto Agregado Exitosamente!</h3>
+        <h3>¡Producto Agregado Exitosamente!</h3>
         <p>Su producto ha sido registrado correctamente en el sistema.</p>
         <div class="modal-buttons">
             <button class="modal-btn primary" onclick="addAnotherProduct()">Agregar Otro Producto</button>
@@ -285,7 +285,7 @@ document.getElementById("formularioProducto").addEventListener("submit", functio
     e.preventDefault();
     
     // IMMEDIATELY show a processing message
-    showMessage("🔄 Procesando producto... Por favor espera.", "success");
+    showMessage("Procesando producto... Por favor espera.", "success");
     
     try {
         // Disable submit button to prevent double submission
@@ -307,7 +307,7 @@ document.getElementById("formularioProducto").addEventListener("submit", functio
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
             document.getElementById("progressContainer").style.display = "none";
-            showMessage("❌ Tiempo de espera agotado. El servidor tardó demasiado en responder.", "error");
+            showMessage("Tiempo de espera agotado. El servidor tardó demasiado en responder.", "error");
         };
 
         xhr.upload.addEventListener("progress", function(e) {
@@ -344,7 +344,7 @@ document.getElementById("formularioProducto").addEventListener("submit", functio
                     xhr.responseText.includes("Swal.fire")) {
                     
                     // DON'T replace the body - show our own success dialog instead
-                    showMessage("✅ ¡Producto agregado exitosamente! 🎉", "success");
+                    showMessage("¡Producto agregado exitosamente!", "success");
                     
                     // Show custom modal after 2 seconds
                     setTimeout(() => {
@@ -353,18 +353,18 @@ document.getElementById("formularioProducto").addEventListener("submit", functio
                     
                 } else if (xhr.responseText.includes("Error al guardar producto")) {
                     // Show error message from server
-                    showMessage("❌ " + xhr.responseText, "error");
+                    showMessage(xhr.responseText, "error");
                     
                 } else if (xhr.responseText.trim() === "") {
                     // Empty response - likely a PHP error
-                    showMessage("❌ El servidor devolvió una respuesta vacía. Puede que el producto se haya guardado. Revisa el panel de productos.", "error");
+                    showMessage("El servidor devolvió una respuesta vacía. Puede que el producto se haya guardado. Revisa el panel de productos.", "error");
                     
                 } else {
                     // Unknown response - but let's assume it might have worked
-                    showMessage("⚠️ Respuesta del servidor no reconocida. El producto puede haberse guardado. Respuesta: " + xhr.responseText.replace(/</g, "&lt;").substring(0, 200) + "...", "error");
+                    showMessage("Respuesta del servidor no reconocida. El producto puede haberse guardado. Respuesta: " + xhr.responseText.replace(/</g, "&lt;").substring(0, 200) + "...", "error");
                 }
             } else {
-                showMessage("❌ Error HTTP " + xhr.status + ": " + xhr.statusText, "error");
+                showMessage("Error HTTP " + xhr.status + ": " + xhr.statusText, "error");
             }
         };
 
@@ -374,14 +374,14 @@ document.getElementById("formularioProducto").addEventListener("submit", functio
             submitBtn.textContent = originalText;
             
             document.getElementById("progressContainer").style.display = "none";
-            showMessage("❌ Error de conexión. Verifica tu internet e inténtalo de nuevo.", "error");
+            showMessage("Error de conexión. Verifica tu internet e inténtalo de nuevo.", "error");
         };
 
         xhr.send(data);
         
     } catch (error) {
         console.error("JavaScript Error:", error);
-        showMessage("❌ Error de JavaScript: " + error.message, "error");
+        showMessage("Error de JavaScript: " + error.message, "error");
     }
 });
 
@@ -439,7 +439,7 @@ window.onclick = function(event) {
 }
 </script>
 
-<!-- ✅ Script de funcionalidades JS adicionales -->
+<!-- Script de funcionalidades JS adicionales -->
 <script src="../js/app.js"></script>
 
 </body>

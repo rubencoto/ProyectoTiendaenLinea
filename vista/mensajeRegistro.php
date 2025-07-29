@@ -7,7 +7,7 @@
 </head>
 <body>
 <div class="container mt-5 text-center">
-    <h3>🎉 Registro exitoso</h3>
+    <h3>Registro exitoso</h3>
     <p>Se ha enviado un código de verificación a tu correo electrónico.</p>
     <a href="verificarCuenta.php" class="btn btn-primary">Verificar cuenta</a>
 </div>

@@ -58,6 +58,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label>Contraseña</label>
                 <input type="password" class="form-control" name="contrasena" required>
             </div>
+
+            <!-- Enlace de recuperación -->
+            <div class="mb-3 text-end">
+                <a href="recuperarContrasena.php" class="small">¿Olvidaste tu contraseña?</a>
+            </div>
+
             <button type="submit" class="btn btn-primary w-100">Ingresar</button>
         </form>
 

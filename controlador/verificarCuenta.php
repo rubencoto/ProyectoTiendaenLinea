@@ -82,9 +82,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $update->bind_param("s", $correo);
         $update->execute();
 
-        echo $htmlHeader . "<h3>✅ Cuenta verificada correctamente.</h3><a href='../vista/loginVendedor.php'>Iniciar sesión</a>" . $htmlFooter;
+        echo $htmlHeader . "<h3>Cuenta verificada correctamente.</h3><a href='../vista/loginVendedor.php'>Iniciar sesión</a>" . $htmlFooter;
     } else {
-        echo $htmlHeader . "<h3>❌ Código incorrecto o ya verificado.</h3><a href='../vista/verificarCuenta.php'>Reintentar</a>" . $htmlFooter;
+        echo $htmlHeader . "<h3>Código incorrecto o ya verificado.</h3><a href='../vista/verificarCuenta.php'>Reintentar</a>" . $htmlFooter;
     }
     $conn->close();
 } else {

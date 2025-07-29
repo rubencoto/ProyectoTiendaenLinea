@@ -30,17 +30,17 @@ $newsletter = isset($_POST['newsletter']) ? 1 : 0;
 
 // Validar campos requeridos
 if (!$nombre || !$apellidos || !$correo || !$contrasena || !$telefono || !$cedula || !$direccion || !$provincia) {
-    die('❌ Error: Faltan datos requeridos. Por favor, completa todos los campos obligatorios.');
+    die('Error: Faltan datos requeridos. Por favor, completa todos los campos obligatorios.');
 }
 
 // Validar formato de correo
 if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
-    die('❌ Error: El formato del correo electrónico no es válido.');
+    die('Error: El formato del correo electrónico no es válido.');
 }
 
 // Validar cédula (9 dígitos para Costa Rica)
 if (!preg_match('/^\d{9}$/', $cedula)) {
-    die('❌ Error: La cédula debe tener exactamente 9 dígitos.');
+    die('Error: La cédula debe tener exactamente 9 dígitos.');
 }
 
 // Verificar si el correo ya existe
@@ -49,7 +49,7 @@ $stmt->bind_param("s", $correo);
 $stmt->execute();
 if ($stmt->get_result()->num_rows > 0) {
     $stmt->close();
-    die('❌ Error: Ya existe una cuenta con este correo electrónico.');
+    die('Error: Ya existe una cuenta con este correo electrónico.');
 }
 $stmt->close();
 
@@ -59,7 +59,7 @@ $stmt->bind_param("s", $cedula);
 $stmt->execute();
 if ($stmt->get_result()->num_rows > 0) {
     $stmt->close();
-    die('❌ Error: Ya existe una cuenta con esta cédula.');
+    die('Error: Ya existe una cuenta con esta cédula.');
 }
 $stmt->close();
 
@@ -88,7 +88,7 @@ try {
         $cliente_id = $conn->insert_id;
         
         // Enviar correo de verificación
-        $asunto = "🛍️ Verificación de cuenta - Tienda en Línea";
+        $asunto = "Verificación de cuenta - Tienda en Línea";
         $mensaje = "
         <h2>¡Bienvenido/a $nombre $apellidos!</h2>
         <p>Gracias por registrarte en nuestra tienda en línea.</p>
@@ -119,7 +119,7 @@ try {
 
 }  catch (Exception $e) {
     error_log("Error en registro de cliente: " . $e->getMessage());
-    die('❌ Error: Hubo un problema al procesar tu registro. Por favor, inténtalo de nuevo más tarde.<br><br>Detalle del error: ' . $e->getMessage());
+    die('Error: Hubo un problema al procesar tu registro. Por favor, inténtalo de nuevo más tarde.<br><br>Detalle del error: ' . $e->getMessage());
 
 
 } finally {

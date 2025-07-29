@@ -1,5 +1,5 @@
 <?php
-session_start(); // 🔐 Iniciar sesión
+session_start(); // Iniciar sesión
 
 // 🚫 Verificar si hay sesión activa del vendedor
 if (!isset($_SESSION['id'])) {
@@ -87,7 +87,7 @@ if (!isset($_SESSION['id'])) {
         </div>
     </div>
 
-    <!-- ✅ Script general JS -->
+    <!-- Script general JS -->
     <script src="../app.js"></script>
     
 </body>

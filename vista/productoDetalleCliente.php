@@ -203,7 +203,7 @@ if (!$producto) {
 <body>
 
 <div class="header">
-    <h1>🛍️ Detalle del Producto</h1>
+    <h1>Detalle del Producto</h1>
 </div>
 
 <a href="catalogo.php" class="volver-btn">← Volver al Catálogo</a>
@@ -240,9 +240,9 @@ if (!$producto) {
             <div class="precio-producto">₡<?= number_format($producto['precio'], 0, ',', '.') ?></div>
             
             <?php if ($producto['unidades'] > 0): ?>
-                <div class="disponibilidad">✅ Disponible (<?= $producto['unidades'] ?> unidades)</div>
+                <div class="disponibilidad">Disponible (<?= $producto['unidades'] ?> unidades)</div>
             <?php else: ?>
-                <div style="color: #dc3545; font-weight: bold;">❌ Agotado</div>
+                <div style="color: #dc3545; font-weight: bold;">Agotado</div>
             <?php endif; ?>
             
             <div class="info-item">
@@ -287,19 +287,19 @@ if (!$producto) {
             
             <div class="acciones">
                 <?php if ($producto['unidades'] > 0): ?>
-                    <button onclick="agregarAlCarrito(<?= $producto['id'] ?>)" class="btn btn-primary">🛒 Agregar al Carrito</button>
+                    <button onclick="agregarAlCarrito(<?= $producto['id'] ?>)" class="btn btn-primary">Agregar al Carrito</button>
                 <?php endif; ?>
-                <a href="carrito.php" class="btn btn-secondary">🛒 Ver Carrito</a>
+                <a href="carrito.php" class="btn btn-secondary">Ver Carrito</a>
             </div>
             
             <!-- Información del vendedor -->
             <div class="vendedor-info">
-                <h4>🏪 Vendido por:</h4>
+                <h4>Vendido por:</h4>
                 <p><strong><?= htmlspecialchars($producto['vendedor_nombre']) ?></strong></p>
                 <?php if ($producto['vendedor_telefono']): ?>
-                    <p>📱 <?= htmlspecialchars($producto['vendedor_telefono']) ?></p>
+                    <p><?= htmlspecialchars($producto['vendedor_telefono']) ?></p>
                 <?php endif; ?>
-                <p>📧 <?= htmlspecialchars($producto['vendedor_correo']) ?></p>
+                <p><?= htmlspecialchars($producto['vendedor_correo']) ?></p>
             </div>
         </div>
     </div>
@@ -330,14 +330,14 @@ function agregarAlCarrito(productoId) {
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            mostrarToast("🛒 " + data.mensaje);
+            mostrarToast(data.mensaje);
         } else {
-            mostrarToast("❌ Error al agregar al carrito");
+            mostrarToast("Error al agregar al carrito");
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        mostrarToast("❌ Error al agregar al carrito");
+        mostrarToast("Error al agregar al carrito");
     });
 }
 

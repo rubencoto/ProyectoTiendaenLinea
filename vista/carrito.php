@@ -264,7 +264,7 @@ if (!empty($_SESSION['carrito'])) {
 <body>
 
 <div class="header">
-    <h1>🛒 Mi Carrito de Compras</h1>
+    <h1>Mi Carrito de Compras</h1>
 </div>
 
 <a href="catalogo.php" class="volver-btn">← Seguir Comprando</a>
@@ -272,7 +272,7 @@ if (!empty($_SESSION['carrito'])) {
 <div class="carrito-container">
     <?php if (empty($productos_carrito)): ?>
         <div class="carrito-vacio">
-            <div style="font-size: 4em;">🛒</div>
+            <div style="font-size: 4em;"></div>
             <h3>Tu carrito está vacío</h3>
             <p>¡Agrega algunos productos para empezar!</p>
             <a href="catalogo.php" class="btn btn-primary">Ver Catálogo</a>
@@ -303,7 +303,7 @@ if (!empty($_SESSION['carrito'])) {
                     <form method="POST" style="display: inline; margin-top: 10px;">
                         <input type="hidden" name="accion" value="eliminar">
                         <input type="hidden" name="producto_id" value="<?= $producto['id'] ?>">
-                        <button type="button" class="eliminar-btn" onclick="mostrarModalEliminar(<?= $producto['id'] ?>)">🗑️ Eliminar</button>
+                        <button type="button" class="eliminar-btn" onclick="mostrarModalEliminar(<?= $producto['id'] ?>)">Eliminar</button>
                     </form>
                 </div>
             </div>
@@ -324,11 +324,11 @@ if (!empty($_SESSION['carrito'])) {
             </div>
             
             <div class="acciones-carrito">
-                <a href="../controlador/confirmarOrden.php" class="btn btn-primary">✅ Confirmar Orden</a>
-                <a href="catalogo.php" class="btn btn-secondary">🛍️ Seguir Comprando</a>
+                <a href="../controlador/confirmarOrden.php" class="btn btn-primary">Confirmar Orden</a>
+                <a href="catalogo.php" class="btn btn-secondary">Seguir Comprando</a>
                 <form method="POST" style="display: inline;">
                     <input type="hidden" name="accion" value="vaciar">
-                    <button type="button" class="btn btn-danger" onclick="mostrarModalVaciar()">🗑️ Vaciar Carrito</button>
+                    <button type="button" class="btn btn-danger" onclick="mostrarModalVaciar()">Vaciar Carrito</button>
                 </form>
             </div>
         </div>
@@ -394,7 +394,7 @@ window.onclick = function(event) {
 <!-- Modal para eliminar producto -->
 <div id="modalEliminar" class="modal">
     <div class="modal-content">
-        <h3>⚠️ Confirmar Eliminación</h3>
+        <h3>Confirmar Eliminación</h3>
         <p>¿Está seguro de que desea eliminar este producto del carrito?</p>
         <div class="modal-buttons">
             <button class="modal-btn danger" onclick="confirmarEliminar()">Sí, Eliminar</button>
@@ -406,7 +406,7 @@ window.onclick = function(event) {
 <!-- Modal para vaciar carrito -->
 <div id="modalVaciar" class="modal">
     <div class="modal-content">
-        <h3>⚠️ Vaciar Carrito</h3>
+        <h3>Vaciar Carrito</h3>
         <p>¿Está seguro de que desea eliminar todos los productos del carrito?</p>
         <div class="modal-buttons">
             <button class="modal-btn danger" onclick="confirmarVaciar()">Sí, Vaciar Todo</button>

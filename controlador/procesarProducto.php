@@ -16,7 +16,7 @@ function obtenerContenidoImagen($campo) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Check if vendor session exists
     if (!isset($_SESSION['id'])) {
-        echo "❌ Error: Sesión de vendedor no válida. Por favor inicia sesión nuevamente.";
+        echo "Error: Sesión de vendedor no válida. Por favor inicia sesión nuevamente.";
         exit;
     }
     
@@ -75,7 +75,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <body>
         <script>
             Swal.fire({
-                title: "✅ Producto agregado con éxito",
+                title: "Producto agregado con éxito",
                 text: "¿Deseas agregar otro artículo?",
                 icon: "success",
                 showCancelButton: true,
@@ -92,7 +92,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </body>
         </html>';
     } else {
-        echo "❌ Error al guardar producto: " . $stmt->error;
+        echo "Error al guardar producto: " . $stmt->error;
     }
 
     $stmt->close();

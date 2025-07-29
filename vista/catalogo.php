@@ -185,7 +185,7 @@ $conn->close();
 
 <div style="text-align: right; margin-bottom: 10px;">
     <a href="carrito.php" style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; font-weight: bold;">
-        🛒 Ver Carrito
+        Ver Carrito
         <?php 
         $cantidad_total = 0;
         if (isset($_SESSION['carrito'])) {
@@ -234,7 +234,7 @@ function renderizarProductos(lista) {
             <div class="descripcion">${p.descripcion || 'Sin descripción disponible'}</div>
             <div class="botones">
                 <a href="productoDetalleCliente.php?id=${p.id}" class="btn-detalle">Ver Detalle</a>
-                <button onclick="agregarAlCarrito(${p.id})" class="btn-carrito">🛒 Agregar</button>
+                <button onclick="agregarAlCarrito(${p.id})" class="btn-carrito">Agregar</button>
             </div>
         `;
         contenedor.appendChild(card);
@@ -292,14 +292,14 @@ function agregarAlCarrito(productoId) {
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            mostrarToast("🛒 " + data.mensaje);
+            mostrarToast("" + data.mensaje);
         } else {
-            mostrarToast("❌ Error al agregar al carrito");
+            mostrarToast("Error al agregar al carrito");
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        mostrarToast("❌ Error al agregar al carrito");
+        mostrarToast("Error al agregar al carrito");
     });
 }
 

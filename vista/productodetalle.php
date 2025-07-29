@@ -175,7 +175,7 @@ window.onclick = function(event) {
 <!-- Modal para eliminar producto -->
 <div id="modalEliminarProducto" class="modal">
     <div class="modal-content">
-        <h3>⚠️ Confirmar Eliminación</h3>
+        <h3>Confirmar Eliminación</h3>
         <p>¿Está seguro de que desea eliminar este producto permanentemente?</p>
         <div class="modal-buttons">
             <button class="modal-btn danger" onclick="confirmarEliminacionProducto()">Sí, Eliminar</button>

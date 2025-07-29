@@ -1,5 +1,5 @@
 <?php
-session_start(); // 🔐 Iniciar sesión
+session_start(); // Iniciar sesión
 
 // 🚫 Verificar si hay sesión activa del cliente
 if (!isset($_SESSION['cliente_id'])) {
@@ -7,7 +7,7 @@ if (!isset($_SESSION['cliente_id'])) {
     exit;
 }
 
-// 📋 Obtener información del cliente
+// Obtener información del cliente
 require_once '../modelo/conexion.php';
 $cliente_id = $_SESSION['cliente_id'];
 $stmt = $conn->prepare("SELECT nombre, apellidos FROM clientes WHERE id = ?");
@@ -118,7 +118,7 @@ $conn->close();
         </div>
     </div>
 
-    <!-- ✅ Script general JS -->
+    <!-- Script general JS -->
     <script src="../app.js"></script>
     
 </body>

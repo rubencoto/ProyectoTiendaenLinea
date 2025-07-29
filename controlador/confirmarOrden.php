@@ -303,7 +303,7 @@ try {
     </head>
     <body>
         <div class="container">
-            <div class="success-icon">✅</div>
+            <div class="success-icon">✓</div>
             <h1>¡Orden Confirmada!</h1>
             <p>Tu compra ha sido procesada exitosamente.</p>
             
@@ -318,13 +318,17 @@ try {
             
             <hr style="margin: 30px 0;">
             
-            <h3>📧 Estado de Notificaciones:</h3>
-            <p>📬 Cliente: ' . ($envio_cliente ? '<span style="color: green;">✅ Enviado</span>' : '<span style="color: red;">❌ Error</span>') . '</p>
-            <p>📬 Vendedores: ' . (array_sum($envios_vendedores) === count($envios_vendedores) ? '<span style="color: green;">✅ Todos notificados</span>' : '<span style="color: orange;">⚠️ Algunos errores</span>') . '</p>
+            <h3>Estado de Notificaciones:</h3>
+            <p>Cliente: ' . ($envio_cliente ? '<span style="color: green;">Enviado</span>' : '<span style="color: red;">Error</span>') . '</p>
+            <p>Vendedores: ' . (array_sum($envios_vendedores) === count($envios_vendedores) ? '<span style="color: green;">Todos notificados</span>' : '<span style="color: orange;">Algunos errores</span>') . '</p>
             
             <div style="margin-top: 30px;">
+<<<<<<< HEAD
                 <a href="../vista/catalogo.php" class="btn">🛍️ Seguir Comprando</a>
                 <a href="../vista/misPedidos.php" class="btn">📋 Ver Mis Pedidos</a>
+=======
+                <a href="../vista/catalogo.php" class="btn">Seguir Comprando</a>
+>>>>>>> 52e8443 (Removed emojis from the whole project and fixed the recover password functionality)
                 <a href="../vista/inicioCliente.php" class="btn">🏠 Ir al Inicio</a>
             </div>
         </div>
@@ -348,10 +352,10 @@ try {
     </head>
     <body>
         <div class="container">
-            <div class="error-icon">❌</div>
+            <div class="error-icon">✗</div>
             <h1>Error al Procesar la Orden</h1>
             <p>Ha ocurrido un error inesperado. Por favor, inténtalo de nuevo.</p>
-            <a href="../vista/carrito.php" class="btn">🛒 Volver al Carrito</a>
+            <a href="../vista/carrito.php" class="btn">Volver al Carrito</a>
         </div>
     </body>
     </html>';

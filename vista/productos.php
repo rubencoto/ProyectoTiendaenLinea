@@ -142,7 +142,7 @@ $stmt->close();
 <body>
 
 <div class="header">
-    <h1>📦 Gestión de Mis Productos</h1>
+    <h1>Gestión de Mis Productos</h1>
 </div>
 
 <a href="inicioVendedor.php" class="volver-btn">← Volver al Panel</a>
@@ -220,9 +220,9 @@ function confirmarEliminacionLista() {
             const card = boton.closest(".card");
             card.classList.add("desaparecer");
             setTimeout(() => card.remove(), 500);
-            mostrarToast("✅ Producto eliminado.");
+            mostrarToast("Producto eliminado.");
         } else {
-            mostrarToast("❌ Error al eliminar.");
+            mostrarToast("Error al eliminar.");
             boton.disabled = false;
             boton.textContent = "Eliminar";
         }
@@ -261,7 +261,7 @@ window.onclick = function(event) {
 <!-- Modal para eliminar producto de la lista -->
 <div id="modalEliminarProductoLista" class="modal">
     <div class="modal-content">
-        <h3>⚠️ Confirmar Eliminación</h3>
+        <h3>Confirmar Eliminación</h3>
         <p>¿Está seguro de que desea eliminar este producto permanentemente de su inventario?</p>
         <div class="modal-buttons">
             <button class="modal-btn danger" onclick="confirmarEliminacionLista()">Sí, Eliminar</button>
