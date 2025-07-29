@@ -124,7 +124,7 @@ try {
 
 } finally {
     $stmt->close();
-    $conn->close();
+    // Connection managed by singleton, no need to close explicitly
 }
 ?>
 

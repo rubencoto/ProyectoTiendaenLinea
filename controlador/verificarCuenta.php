@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         echo $htmlHeader . "<h3>Código incorrecto o ya verificado.</h3><a href='../vista/verificarCuenta.php'>Reintentar</a>" . $htmlFooter;
     }
-    $conn->close();
+    // Connection managed by singleton, no need to close explicitly
 } else {
     header("Location: ../vista/verificarCuenta.php");
     exit();

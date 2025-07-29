@@ -40,6 +40,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $stmt->close();
-    $conn->close();
+    // Connection managed by singleton, no need to close explicitly
 }
 ?>

@@ -61,6 +61,20 @@ class DatabaseConnection {
         return $this->connection;
     }
     
+    // Safe close method that can be called multiple times
+    public function closeConnection() {
+        if ($this->connection && $this->connection instanceof mysqli) {
+            try {
+                if ($this->connection->thread_id) {
+                    $this->connection->close();
+                }
+            } catch (Error $e) {
+                // Connection already closed, ignore
+            }
+            $this->connection = null;
+        }
+    }
+    
     // Prevent cloning
     private function __clone() {}
     
@@ -71,9 +85,7 @@ class DatabaseConnection {
     
     // Close connection when script ends
     public function __destruct() {
-        if ($this->connection) {
-            $this->connection->close();
-        }
+        $this->closeConnection();
     }
 }
 
