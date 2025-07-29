@@ -72,7 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="text-center mt-3">
             <p class="small">¿Olvidaste tu contraseña? <a href="recuperarContrasena.php">Recuperar contraseña</a></p>
             <p class="small">¿No tienes cuenta? <a href="registroCliente.php">Regístrate como cliente</a></p>
-            <p class="small">¿No has verificado tu cuenta? <a href="verificarCuenta.php">Verificar cuenta</a></p>
             <p class="small"><a href="index.php">Volver al catálogo</a></p>
         </div>
     </div>

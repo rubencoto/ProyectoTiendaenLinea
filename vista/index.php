@@ -239,7 +239,6 @@ $conn->close();
             <div class="col-md-4 text-end">
                 <?php if (!$isLoggedIn): ?>
                     <a href="loginCliente.php" class="btn btn-primary btn-sm">Clientes</a>
-                    <a href="registroCliente.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                     <a href="loginVendedor.php" class="btn btn-outline-light btn-sm">Vendedores</a>
                 <?php endif; ?>
             </div>
