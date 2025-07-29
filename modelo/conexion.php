@@ -53,8 +53,9 @@ class DatabaseConnection {
     }
     
     public function getConnection() {
-        // Check if connection is still alive, reconnect if needed
-        if (!$this->connection || !$this->connection->ping()) {
+        // Simply return the connection - no need to ping in modern PHP
+        // The singleton pattern ensures we maintain one connection per script
+        if (!$this->connection) {
             $this->__construct();
         }
         return $this->connection;
