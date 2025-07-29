@@ -206,7 +206,7 @@ if (!$producto) {
     <h1>Detalle del Producto</h1>
 </div>
 
-<a href="catalogo.php" class="volver-btn">← Volver al Catálogo</a>
+<a href="index.php" class="volver-btn">← Volver al Catálogo</a>
 
 <div style="text-align: right; margin-bottom: 10px;">
     <a href="carrito.php" style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; font-weight: bold;">

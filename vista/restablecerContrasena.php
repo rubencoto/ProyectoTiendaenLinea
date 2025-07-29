@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <?php if ($exito): ?>
         <div class="alert alert-success"><?= htmlspecialchars($exito) ?></div>
-        <p class="text-center"><a href="loginCliente.php">Volver al login</a></p>
+        <p class="text-center"><a href="index.php">Volver al login</a></p>
     <?php else: ?>
         <form method="POST">
             <div class="mb-3">

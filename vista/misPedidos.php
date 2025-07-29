@@ -311,7 +311,7 @@ $conn->close();
     <div class="container">
         <div class="navegacion">
             <a href="inicioCliente.php">← Volver al Panel</a>
-            <a href="catalogo.php">Continuar Comprando</a>
+            <a href="index.php">Continuar Comprando</a>
             <a href="carrito.php">Ver Carrito</a>
         </div>
 
@@ -319,7 +319,7 @@ $conn->close();
             <div class="mensaje-vacio">
                 <h2>No tienes pedidos aún</h2>
                 <p>¡Empieza a explorar nuestros productos y realiza tu primera compra!</p>
-                <a href="catalogo.php" style="color: #007185; text-decoration: none; font-weight: bold;">
+                <a href="index.php" style="color: #007185; text-decoration: none; font-weight: bold;">
                     Ver Catálogo de Productos
                 </a>
             </div>

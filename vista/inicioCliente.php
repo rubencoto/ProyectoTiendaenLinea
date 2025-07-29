@@ -93,7 +93,7 @@ $conn->close();
             <div class="card">
                 <h3>Ver Productos</h3>
                 <p>Explora todos los productos disponibles</p>
-                <a href="catalogo.php">Ver Catálogo</a>
+                <a href="index.php">Ver Catálogo</a>
             </div>
             <div class="card">
                 <h3>Mi Carrito

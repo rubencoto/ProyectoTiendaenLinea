@@ -3,7 +3,7 @@ session_start();
 
 // Si no hay cliente autenticado, redirige al login
 if (empty($_SESSION['cliente_id'])) {
-    header('Location: loginCliente.php');
+    header('Location: index.php');
     exit;
 }
 
@@ -267,7 +267,7 @@ if (!empty($_SESSION['carrito'])) {
     <h1>Mi Carrito de Compras</h1>
 </div>
 
-<a href="catalogo.php" class="volver-btn">← Seguir Comprando</a>
+<a href="index.php" class="volver-btn">← Seguir Comprando</a>
 
 <div class="carrito-container">
     <?php if (empty($productos_carrito)): ?>
@@ -275,7 +275,7 @@ if (!empty($_SESSION['carrito'])) {
             <div style="font-size: 4em;"></div>
             <h3>Tu carrito está vacío</h3>
             <p>¡Agrega algunos productos para empezar!</p>
-            <a href="catalogo.php" class="btn btn-primary">Ver Catálogo</a>
+            <a href="index.php" class="btn btn-primary">Ver Catálogo</a>
         </div>
     <?php else: ?>
         <?php foreach ($productos_carrito as $producto): ?>
@@ -325,7 +325,7 @@ if (!empty($_SESSION['carrito'])) {
             
             <div class="acciones-carrito">
                 <a href="../controlador/confirmarOrden.php" class="btn btn-primary">Confirmar Orden</a>
-                <a href="catalogo.php" class="btn btn-secondary">Seguir Comprando</a>
+                <a href="index.php" class="btn btn-secondary">Seguir Comprando</a>
                 <form method="POST" style="display: inline;">
                     <input type="hidden" name="accion" value="vaciar">
                     <button type="button" class="btn btn-danger" onclick="mostrarModalVaciar()">Vaciar Carrito</button>

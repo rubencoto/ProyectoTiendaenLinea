@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $update->bind_param("si", $hash, $id);
 
         if ($update->execute()) {
-            echo "<p style='text-align:center; color:green;'> Contraseña actualizada correctamente. <a href='loginCliente.php'>Iniciar sesión</a></p>";
+            echo "<p style='text-align:center; color:green;'> Contraseña actualizada correctamente. <a href='index.php'>Iniciar sesión</a></p>";
         } else {
             echo "<p style='text-align:center; color:red;'> Error al actualizar la contraseña.</p>";
         }

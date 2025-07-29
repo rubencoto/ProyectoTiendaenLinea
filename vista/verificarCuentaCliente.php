@@ -98,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 <?php if ($tipo_mensaje === 'success'): ?>
                     <div class="text-center">
-                        <a href="loginCliente.php" class="btn btn-primary">Iniciar Sesión</a>
+                        <a href="index.php" class="btn btn-primary">Iniciar Sesión</a>
                     </div>
                 <?php endif; ?>
                 
@@ -122,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </form>
                 
                 <div class="text-center mt-3">
-                    <p><a href="loginCliente.php">Volver al login</a></p>
+                    <p><a href="index.php">Volver al login</a></p>
                 </div>
             <?php endif; ?>
             

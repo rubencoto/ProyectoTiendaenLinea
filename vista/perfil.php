@@ -392,7 +392,7 @@ $conn->close();
         <div class="navegacion">
             <a href="inicioCliente.php">← Volver al Panel</a>
             <a href="misPedidos.php">Mis Pedidos</a>
-            <a href="catalogo.php">Catálogo</a>
+            <a href="index.php">Catálogo</a>
             <a href="carrito.php">Carrito</a>
         </div>
 

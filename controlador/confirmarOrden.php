@@ -5,7 +5,7 @@ require_once '../modelo/enviarCorreo.php';
 
 // Verificar que el usuario esté autenticado
 if (empty($_SESSION['cliente_id'])) {
-    header('Location: ../vista/loginCliente.php');
+    header('Location: ../vista/index.php');
     exit;
 }
 
@@ -327,7 +327,7 @@ try {
                 <a href="../vista/catalogo.php" class="btn">🛍️ Seguir Comprando</a>
                 <a href="../vista/misPedidos.php" class="btn">📋 Ver Mis Pedidos</a>
 =======
-                <a href="../vista/catalogo.php" class="btn">Seguir Comprando</a>
+                <a href="../vista/index.php" class="btn">Seguir Comprando</a>
 >>>>>>> 52e8443 (Removed emojis from the whole project and fixed the recover password functionality)
                 <a href="../vista/inicioCliente.php" class="btn">🏠 Ir al Inicio</a>
             </div>

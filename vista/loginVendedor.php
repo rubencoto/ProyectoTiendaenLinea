@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div class="text-center mt-3">
             <p class="small">¿No tienes cuenta? <a href="registroVendedor.php">Regístrate como vendedor</a></p>
-            <p class="small"><a href="loginCliente.php">¿Eres cliente? Ingresa aquí</a></p>
+            <p class="small"><a href="index.php">¿Eres cliente? Ingresa aquí</a></p>
         </div>
     </div>
 </body>
