@@ -65,8 +65,67 @@ try {
     }
     $stmt->close();
 
-    // Insertar orden en la base de datos (opcional - puedes crear una tabla 'ordenes' si quieres)
+    // Generar número de orden único
     $numero_orden = 'ORD-' . date('Ymd') . '-' . sprintf('%04d', rand(1, 9999));
+    
+    // Verificar que el número de orden sea único
+    do {
+        $stmt_check = $conn->prepare("SELECT id FROM ordenes WHERE numero_orden = ?");
+        $stmt_check->bind_param("s", $numero_orden);
+        $stmt_check->execute();
+        $result_check = $stmt_check->get_result();
+        if ($result_check->num_rows > 0) {
+            $numero_orden = 'ORD-' . date('Ymd') . '-' . sprintf('%04d', rand(1, 9999));
+        }
+        $stmt_check->close();
+    } while ($result_check->num_rows > 0);
+    
+    // Calcular costos
+    $envio = 2500;
+    $total_final = $total + $envio;
+    
+    // Iniciar transacción para garantizar consistencia
+    $conn->begin_transaction();
+    
+    try {
+        // Insertar orden en la tabla ordenes
+        $stmt_orden = $conn->prepare("
+            INSERT INTO ordenes (numero_orden, cliente_id, subtotal, envio, total, estado, fecha_orden) 
+            VALUES (?, ?, ?, ?, ?, 'pendiente', NOW())
+        ");
+        $stmt_orden->bind_param("siddd", $numero_orden, $_SESSION['cliente_id'], $total, $envio, $total_final);
+        $stmt_orden->execute();
+        $orden_id = $conn->insert_id;
+        $stmt_orden->close();
+        
+        // Insertar detalles de la orden en detalle_pedidos
+        $stmt_detalle = $conn->prepare("
+            INSERT INTO detalle_pedidos (orden_id, producto_id, cantidad, precio_unitario, subtotal) 
+            VALUES (?, ?, ?, ?, ?)
+        ");
+        
+        foreach ($productos_comprados as $producto) {
+            $stmt_detalle->bind_param("iiidd", $orden_id, $producto['id'], $producto['cantidad'], $producto['precio'], $producto['subtotal']);
+            $stmt_detalle->execute();
+        }
+        $stmt_detalle->close();
+        
+        // Actualizar stock de productos
+        $stmt_stock = $conn->prepare("UPDATE productos SET unidades = unidades - ? WHERE id = ?");
+        foreach ($productos_comprados as $producto) {
+            $stmt_stock->bind_param("ii", $producto['cantidad'], $producto['id']);
+            $stmt_stock->execute();
+        }
+        $stmt_stock->close();
+        
+        // Confirmar transacción
+        $conn->commit();
+        
+    } catch (Exception $e) {
+        // Revertir transacción en caso de error
+        $conn->rollback();
+        throw new Exception("Error al guardar la orden en la base de datos: " . $e->getMessage());
+    }
     
     // Enviar correo de confirmación al cliente
     $productos_lista = '';
@@ -80,9 +139,7 @@ try {
         </tr>";
     }
 
-    $envio = 2500;
-    $total_final = $total + $envio;
-
+    // El envío y total final ya se calcularon antes de la inserción
     $mensaje_cliente = "
     <h2 style='color: #007185;'>Gracias por tu compra</h2>
     <p>Hola <strong>{$cliente['nombre']} {$cliente['apellidos']}</strong>,</p>
@@ -251,9 +308,11 @@ try {
             <p>Tu compra ha sido procesada exitosamente.</p>
             
             <div class="order-number">
-                <strong>Numero de Orden:</strong> ' . $numero_orden . '
+                <strong>Numero de Orden:</strong> ' . $numero_orden . '<br>
+                <strong>ID de Orden:</strong> #' . $orden_id . '
             </div>
             
+            <p>✅ <strong>Orden guardada exitosamente en la base de datos</strong></p>
             <p>Hemos enviado un correo de confirmacion a: <strong>' . htmlspecialchars($cliente['correo']) . '</strong></p>
             <p>Los vendedores han sido notificados de tu compra.</p>
             
@@ -265,6 +324,7 @@ try {
             
             <div style="margin-top: 30px;">
                 <a href="../vista/catalogo.php" class="btn">🛍️ Seguir Comprando</a>
+                <a href="../vista/misPedidos.php" class="btn">📋 Ver Mis Pedidos</a>
                 <a href="../vista/inicioCliente.php" class="btn">🏠 Ir al Inicio</a>
             </div>
         </div>
