@@ -18,13 +18,22 @@ try {
     $productos_sql = "
         CREATE TABLE IF NOT EXISTS productos (
             id INT AUTO_INCREMENT PRIMARY KEY,
-            vendedor_id INT NOT NULL,
+            id_vendedor INT NOT NULL,
             nombre VARCHAR(200) NOT NULL,
             descripcion TEXT,
             precio DECIMAL(10,2) NOT NULL,
             categoria VARCHAR(100),
             stock INT DEFAULT 0,
             imagen_principal LONGTEXT,
+            imagen_secundaria1 LONGTEXT,
+            imagen_secundaria2 LONGTEXT,
+            tallas VARCHAR(100),
+            color VARCHAR(50),
+            unidades INT DEFAULT 0,
+            garantia TEXT,
+            dimensiones VARCHAR(100),
+            peso VARCHAR(50),
+            tamano_empaque VARCHAR(100),
             fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             activo BOOLEAN DEFAULT TRUE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
@@ -60,7 +69,7 @@ try {
                 contrasena VARCHAR(255) NOT NULL,
                 telefono VARCHAR(20),
                 direccion TEXT,
-                nombre_tienda VARCHAR(200),
+                nombre_empresa VARCHAR(200),
                 descripcion_tienda TEXT,
                 fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 verificado BOOLEAN DEFAULT FALSE,
