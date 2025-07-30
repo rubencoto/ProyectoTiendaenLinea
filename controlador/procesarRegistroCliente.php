@@ -9,9 +9,6 @@ $apellidos = $_POST['apellidos'] ?? ''; // Use apellidos since table has this co
 $correo = $_POST['correo'] ?? '';
 $contrasena = password_hash($_POST['contrasena'], PASSWORD_BCRYPT);
 $telefono = $_POST['telefono'] ?? '';
-$cedula = $_POST['cedula'] ?? '';
-$direccion = $_POST['direccion'] ?? '';
-$provincia = $_POST['provincia'] ?? '';
 $fecha_nacimiento = $_POST['fecha_nacimiento'] ?? null;
 $genero = $_POST['genero'] ?? null;
 switch ($genero) {
@@ -30,18 +27,13 @@ switch ($genero) {
 $newsletter = isset($_POST['newsletter']) ? 1 : 0;
 
 // Validar campos requeridos
-if (!$nombre || !$apellidos || !$correo || !$contrasena || !$telefono || !$cedula || !$direccion || !$provincia) {
+if (!$nombre || !$apellidos || !$correo || !$contrasena || !$telefono) {
     die('Error: Faltan datos requeridos. Por favor, completa todos los campos obligatorios.');
 }
 
 // Validar formato de correo
 if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
     die('Error: El formato del correo electrónico no es válido.');
-}
-
-// Validar cédula (9 dígitos para Costa Rica)
-if (!preg_match('/^\d{9}$/', $cedula)) {
-    die('Error: La cédula debe tener exactamente 9 dígitos.');
 }
 
 // Verificar si el correo ya existe
@@ -54,34 +46,23 @@ if ($stmt->get_result()->num_rows > 0) {
 }
 $stmt->close();
 
-// Verificar si la cédula ya existe
-$stmt = $conn->prepare("SELECT id FROM clientes WHERE cedula = ?");
-$stmt->bind_param("s", $cedula);
-$stmt->execute();
-if ($stmt->get_result()->num_rows > 0) {
-    $stmt->close();
-    die('Error: Ya existe una cuenta con esta cédula.');
-}
-$stmt->close();
-
 // Generar código de verificación (6 dígitos)
 $codigo_verificacion = substr(bin2hex(random_bytes(4)), 0, 6);
 
 try {
-    // Preparar e insertar nuevo cliente - usando todas las columnas disponibles
+    // Preparar e insertar nuevo cliente - solo campos esenciales para registro
     $stmt = $conn->prepare("
         INSERT INTO clientes (
-            nombre, apellidos, correo, contrasena, telefono, cedula, 
-            direccion, provincia, fecha_nacimiento, genero, 
-            newsletter, codigo_verificacion, verificado, fecha_registro
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, NOW())
+            nombre, apellidos, correo, contrasena, telefono,
+            fecha_nacimiento, genero, newsletter, 
+            codigo_verificacion, verificado, fecha_registro
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, NOW())
     ");
     
     $stmt->bind_param(
-        "ssssssssssis", 
-        $nombre, $apellidos, $correo, $contrasena, $telefono, $cedula,
-        $direccion, $provincia, $fecha_nacimiento, $genero,
-        $newsletter, $codigo_verificacion
+        "ssssssis", 
+        $nombre, $apellidos, $correo, $contrasena, $telefono,
+        $fecha_nacimiento, $genero, $newsletter, $codigo_verificacion
     );
 
 

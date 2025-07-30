@@ -1,7 +1,7 @@
 <?php
 session_start(); // 🔐 Iniciar sesión
 
-// 🚫 Verificar si hay sesión activa del cliente
+// 🚫 Verificar si el cliente está autenticado
 if (!isset($_SESSION['cliente_id'])) {
     header('Location: loginCliente.php');
     exit;
@@ -19,7 +19,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nombre = trim($_POST['nombre'] ?? '');
     $apellidos = trim($_POST['apellidos'] ?? '');
     $telefono = trim($_POST['telefono'] ?? '');
-    $cedula = trim($_POST['cedula'] ?? '');
     $direccion = trim($_POST['direccion'] ?? '');
     $provincia = trim($_POST['provincia'] ?? '');
     $fecha_nacimiento = trim($_POST['fecha_nacimiento'] ?? '');
@@ -32,14 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($nombre)) $errores[] = "El nombre es obligatorio";
     if (empty($apellidos)) $errores[] = "Los apellidos son obligatorios";
     if (empty($telefono)) $errores[] = "El teléfono es obligatorio";
-    if (empty($cedula)) $errores[] = "La cédula es obligatoria";
     if (empty($direccion)) $errores[] = "La dirección es obligatoria";
     if (empty($provincia)) $errores[] = "La provincia es obligatoria";
-    
-    // Validar formato de cédula (básico)
-    if (!preg_match('/^[0-9]{9}$/', $cedula)) {
-        $errores[] = "La cédula debe tener 9 dígitos";
-    }
     
     // Validar formato de teléfono (básico)
     if (!preg_match('/^[0-9]{8}$/', $telefono)) {
@@ -48,41 +41,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if (empty($errores)) {
         try {
-            // Verificar que la cédula no esté en uso por otro cliente
-            $stmt_check = $conn->prepare("SELECT id FROM clientes WHERE cedula = ? AND id != ?");
-            $stmt_check->bind_param("si", $cedula, $cliente_id);
-            $stmt_check->execute();
-            $result_check = $stmt_check->get_result();
+            // Actualizar información del cliente
+            $stmt_update = $conn->prepare("
+                UPDATE clientes SET 
+                    nombre = ?, apellidos = ?, telefono = ?, 
+                    direccion = ?, provincia = ?, fecha_nacimiento = ?, 
+                    genero = ?, newsletter = ?
+                WHERE id = ?
+            ");
             
-            if ($result_check->num_rows > 0) {
-                $errores[] = "La cédula ya está registrada por otro usuario";
+            $stmt_update->bind_param(
+                "sssssssii",
+                $nombre, $apellidos, $telefono,
+                $direccion, $provincia, $fecha_nacimiento,
+                $genero, $newsletter, $cliente_id
+            );
+                
+            if ($stmt_update->execute()) {
+                $mensaje = "Perfil actualizado exitosamente";
+                $tipo_mensaje = "success";
             } else {
-                // Actualizar información del cliente
-                $stmt_update = $conn->prepare("
-                    UPDATE clientes SET 
-                        nombre = ?, apellidos = ?, telefono = ?, cedula = ?, 
-                        direccion = ?, provincia = ?, fecha_nacimiento = ?, 
-                        genero = ?, newsletter = ?
-                    WHERE id = ?
-                ");
-                
-                $stmt_update->bind_param(
-                    "ssssssssii",
-                    $nombre, $apellidos, $telefono, $cedula,
-                    $direccion, $provincia, $fecha_nacimiento,
-                    $genero, $newsletter, $cliente_id
-                );
-                
-                if ($stmt_update->execute()) {
-                    $mensaje = "Perfil actualizado exitosamente";
-                    $tipo_mensaje = "success";
-                } else {
-                    $mensaje = "Error al actualizar el perfil";
-                    $tipo_mensaje = "error";
-                }
-                $stmt_update->close();
+                $mensaje = "Error al actualizar el perfil";
+                $tipo_mensaje = "error";
             }
-            $stmt_check->close();
+            $stmt_update->close();
             
         } catch (Exception $e) {
             $mensaje = "Error: " . $e->getMessage();
@@ -96,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Obtener información actual del cliente
 $stmt = $conn->prepare("
-    SELECT nombre, apellidos, correo, telefono, cedula, direccion, 
+    SELECT nombre, apellidos, correo, telefono, direccion, 
            provincia, fecha_nacimiento, genero, newsletter, 
            verificado, fecha_registro
     FROM clientes 
@@ -449,12 +431,6 @@ $conn->close();
                                    value="<?php echo htmlspecialchars($cliente['telefono']); ?>" 
                                    pattern="[0-9]{8}" title="Debe tener 8 dígitos" required>
                         </div>
-                        <div class="form-group">
-                            <label for="cedula">Cédula *</label>
-                            <input type="text" id="cedula" name="cedula" 
-                                   value="<?php echo htmlspecialchars($cliente['cedula']); ?>" 
-                                   pattern="[0-9]{9}" title="Debe tener 9 dígitos" required>
-                        </div>
                     </div>
 
                     <div class="form-group">
@@ -538,13 +514,6 @@ $conn->close();
             e.target.value = e.target.value.replace(/[^0-9]/g, '');
             if (e.target.value.length > 8) {
                 e.target.value = e.target.value.substring(0, 8);
-            }
-        });
-
-        document.getElementById('cedula').addEventListener('input', function(e) {
-            e.target.value = e.target.value.replace(/[^0-9]/g, '');
-            if (e.target.value.length > 9) {
-                e.target.value = e.target.value.substring(0, 9);
             }
         });
 
