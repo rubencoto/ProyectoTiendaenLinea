@@ -60,13 +60,14 @@ class DatabaseConnection {
                 }
             }
             
-            // Set charset to avoid encoding issues
-            $this->connection->set_charset("utf8");
+            // Set charset to avoid encoding issues - use utf8mb4 for better compatibility
+            $this->connection->set_charset("utf8mb4");
             
             // Optimize connection settings for AWS RDS
             $this->connection->query("SET SESSION wait_timeout = 28800");
             $this->connection->query("SET SESSION interactive_timeout = 28800");
             $this->connection->query("SET SESSION sql_mode = 'STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO'");
+            $this->connection->query("SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci");
             
         } catch (Exception $e) {
             die("Database connection error: " . $e->getMessage());
