@@ -1,3 +1,6 @@
+<?php
+require_once '../modelo/config.php';
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -80,7 +83,7 @@
     <div class="container-verificacion">
         <div class="card">
             <h2>Ingresa tu código</h2>
-            <form action="../controlador/verificarCuenta.php" method="POST">
+            <form action="<?= AppConfig::controladorUrl('verificarCuenta.php') ?>" method="POST">
                 <div class="mb-3 text-start">
                     <label for="correo" class="form-label">Correo electrónico</label>
                     <input type="email" class="form-control" name="correo" required>

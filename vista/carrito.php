@@ -8,6 +8,7 @@ if (empty($_SESSION['cliente_id'])) {
 }
 
 require_once '../modelo/conexion.php';
+require_once '../modelo/config.php';
 
 // Inicializar carrito si no existe
 if (!isset($_SESSION['carrito'])) {
@@ -324,7 +325,7 @@ if (!empty($_SESSION['carrito'])) {
             </div>
             
             <div class="acciones-carrito">
-                <a href="../controlador/confirmarOrden.php" class="btn btn-primary">Confirmar Orden</a>
+                <a href="<?= AppConfig::controladorUrl('confirmarOrden.php') ?>" class="btn btn-primary">Confirmar Orden</a>
                 <a href="index.php" class="btn btn-secondary">Seguir Comprando</a>
                 <form method="POST" style="display: inline;">
                     <input type="hidden" name="accion" value="vaciar">

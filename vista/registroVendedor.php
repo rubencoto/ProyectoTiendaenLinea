@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../modelo/conexion.php';
+require_once '../modelo/config.php';
 ?>
 
 <!DOCTYPE html>
@@ -19,7 +20,7 @@ require_once '../modelo/conexion.php';
 <body>
 <div class="container mt-5">
     <h2 class="mb-4">Registro de Emprendedor</h2>
-    <form id="registroForm" action="../controlador/procesarRegistroVendedor.php" method="POST" enctype="multipart/form-data">
+    <form id="registroForm" action="<?= AppConfig::controladorUrl('procesarRegistroVendedor.php') ?>" method="POST" enctype="multipart/form-data">
 
         <div class="mb-3">
             <label>Nombre de la Empresa *</label>

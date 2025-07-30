@@ -59,9 +59,9 @@ class AppConfig {
     
     public static function controladorUrl($file) {
         if (self::isHeroku()) {
-            // On Heroku, controlador/ is at the same level as vista/ 
-            // But vista/ is document root, so we need relative path
-            return '../controlador/' . $file;
+            // On Heroku, use the controller router
+            $controller = str_replace('.php', '', $file);
+            return self::getBaseUrl() . '/controller.php?c=' . $controller;
         } else {
             // Local development - full path needed
             return self::url('/controlador/' . $file);

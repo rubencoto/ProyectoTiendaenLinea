@@ -1,5 +1,6 @@
 <?php
 require_once '../controlador/ProductoControlador.php';
+require_once '../modelo/config.php';
 
 if (!isset($_GET['id'])) {
     echo "<p>Error: ID no especificado</p>";
@@ -36,7 +37,7 @@ if (!$producto) {
 <body>
 <div class="container mt-5">
     <h2>Editar Producto</h2>
-    <form action="../controlador/actualizarProducto.php" method="POST" enctype="multipart/form-data">
+    <form action="<?= AppConfig::controladorUrl('actualizarProducto.php') ?>" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="id" value="<?= htmlspecialchars($producto['id']) ?>">
 
         <div class="mb-3">

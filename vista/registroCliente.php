@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../modelo/conexion.php';
+require_once '../modelo/config.php';
 ?>
 
 <!DOCTYPE html>
@@ -20,7 +21,7 @@ require_once '../modelo/conexion.php';
 
 <div class="container mt-5">
     <h2 class="mb-4">Registro de Cliente</h2>
-    <form id="registroForm" action="../controlador/procesarRegistroCliente.php" method="POST">
+    <form id="registroForm" action="<?= AppConfig::controladorUrl('procesarRegistroCliente.php') ?>" method="POST">
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
