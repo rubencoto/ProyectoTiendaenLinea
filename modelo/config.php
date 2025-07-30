@@ -6,7 +6,7 @@
 
 class AppConfig {
     // Your Heroku app URL - UPDATE THIS WITH YOUR ACTUAL HEROKU APP URL
-    const HEROKU_APP_URL = 'https://your-app-name.herokuapp.com';
+    const HEROKU_APP_URL = 'https://reventazon-27b010286492.herokuapp.com';
     
     // Detect if we're running on Heroku
     public static function isHeroku() {
@@ -43,11 +43,24 @@ class AppConfig {
     
     // Helper methods for common URLs
     public static function vistaUrl($file) {
-        return self::url('/vista/' . $file);
+        if (self::isHeroku()) {
+            // On Heroku, vista/ is document root, so files are at root level
+            return self::getBaseUrl() . '/' . $file;
+        } else {
+            // Local development - full path needed
+            return self::url('/vista/' . $file);
+        }
     }
     
     public static function controladorUrl($file) {
-        return self::url('/controlador/' . $file);
+        if (self::isHeroku()) {
+            // On Heroku, controlador/ is at the same level as vista/ 
+            // But vista/ is document root, so we need relative path
+            return '../controlador/' . $file;
+        } else {
+            // Local development - full path needed
+            return self::url('/controlador/' . $file);
+        }
     }
     
     // For JavaScript redirects and navigation
@@ -58,11 +71,11 @@ class AppConfig {
     // Handle relative links - in Heroku use full URLs, locally use relative paths
     public static function link($path) {
         if (self::isHeroku()) {
-            // On Heroku, use full URLs for reliability
+            // On Heroku, vista/ is the document root, so don't add /vista/ prefix
             if (strpos($path, '/') === 0) {
                 return self::getBaseUrl() . $path;
             } else {
-                return self::getBaseUrl() . '/vista/' . $path;
+                return self::getBaseUrl() . '/' . $path;
             }
         } else {
             // Local development - keep relative paths simple

@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = "La cuenta aún no ha sido verificada.";
         } elseif (password_verify($contrasena, $hash)) {
             $_SESSION['cliente_id'] = $id;
-            header("Location: index.php");
+            header("Location: " . AppConfig::link('index.php'));
             exit;
         } else {
             $error = "Contraseña incorrecta.";
