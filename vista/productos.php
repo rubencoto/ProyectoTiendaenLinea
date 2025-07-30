@@ -1,9 +1,10 @@
 <?php
 session_start();
+require_once '../modelo/config.php';
 
 // Si no hay vendedor autenticado, redirige al login
 if (empty($_SESSION['id'])) {
-    header('Location: loginVendedor.php');
+    header('Location: ' . AppConfig::vistaUrl('loginVendedor.php'));
     exit;
 }
 

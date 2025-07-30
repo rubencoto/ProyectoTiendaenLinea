@@ -1,9 +1,10 @@
 <?php
 session_start(); // Iniciar sesión
+require_once '../modelo/config.php';
 
 // 🚫 Verificar si hay sesión activa del vendedor
 if (!isset($_SESSION['id'])) {
-    header('Location: loginVendedor.php');
+    header('Location: ' . AppConfig::vistaUrl('loginVendedor.php'));
     exit;
 }
 ?>

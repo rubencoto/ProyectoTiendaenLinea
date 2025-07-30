@@ -9,8 +9,8 @@
 <body>
     <div class="container">
         <h4 class="mb-4 text-center">Recuperar Contraseña</h4>
-
-        <form action="enviarEnlace.php" method="POST">
+        <?php require_once '../modelo/config.php'; ?>
+        <form action="<?= AppConfig::vistaUrl('enviarEnlace.php') ?>" method="POST">
             <div class="mb-3">
                 <label>Correo registrado</label>
                 <input type="email" name="correo" class="form-control" required>

@@ -1,9 +1,10 @@
 <?php
 session_start(); // 🔐 Iniciar sesión
+require_once '../modelo/config.php';
 
 // 🚫 Verificar si hay sesión activa del cliente
 if (!isset($_SESSION['cliente_id'])) {
-    header('Location: loginCliente.php');
+    header('Location: ' . AppConfig::vistaUrl('loginCliente.php'));
     exit;
 }
 
