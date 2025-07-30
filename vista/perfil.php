@@ -17,7 +17,7 @@ $tipo_mensaje = '';
 // Procesar formulario de actualización
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nombre = trim($_POST['nombre'] ?? '');
-    $apellidos = trim($_POST['apellidos'] ?? '');
+    $apellidos = trim($_POST['apellidos'] ?? ''); // Form uses apellidos, map to apellido column
     $telefono = trim($_POST['telefono'] ?? '');
     $direccion = trim($_POST['direccion'] ?? '');
     $provincia = trim($_POST['provincia'] ?? '');
@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Actualizar información del cliente
             $stmt_update = $conn->prepare("
                 UPDATE clientes SET 
-                    nombre = ?, apellidos = ?, telefono = ?, 
+                    nombre = ?, apellido = ?, telefono = ?, 
                     direccion = ?, provincia = ?, fecha_nacimiento = ?, 
                     genero = ?, newsletter = ?
                 WHERE id = ?
@@ -78,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Obtener información actual del cliente
 $stmt = $conn->prepare("
-    SELECT nombre, apellidos, correo, telefono, direccion, 
+    SELECT nombre, apellido, correo, telefono, direccion, 
            provincia, fecha_nacimiento, genero, newsletter, 
            verificado, fecha_registro
     FROM clientes 
@@ -103,7 +103,7 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Perfil - <?php echo htmlspecialchars($cliente['nombre'] . ' ' . $cliente['apellidos']); ?></title>
+    <title>Mi Perfil - <?php echo htmlspecialchars($cliente['nombre'] . ' ' . $cliente['apellido']); ?></title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -384,7 +384,7 @@ $conn->close();
                     👤
                 </div>
                 <div class="perfil-nombre">
-                    <?php echo htmlspecialchars($cliente['nombre'] . ' ' . $cliente['apellidos']); ?>
+                    <?php echo htmlspecialchars($cliente['nombre'] . ' ' . $cliente['apellido']); ?>
                 </div>
                 <div class="perfil-email">
                     <?php echo htmlspecialchars($cliente['correo']); ?>
@@ -411,7 +411,7 @@ $conn->close();
                         <div class="form-group">
                             <label for="apellidos">Apellidos *</label>
                             <input type="text" id="apellidos" name="apellidos" 
-                                   value="<?php echo htmlspecialchars($cliente['apellidos']); ?>" required>
+                                   value="<?php echo htmlspecialchars($cliente['apellido']); ?>" required>
                         </div>
                     </div>
 

@@ -5,7 +5,7 @@ require_once '../modelo/config.php';
 
 // Recolectar datos del formulario
 $nombre = $_POST['nombre'] ?? '';
-$apellidos = $_POST['apellidos'] ?? ''; // Use apellidos since table has this column
+$apellidos = $_POST['apellidos'] ?? ''; // Form uses apellidos, but we'll map to apellido column
 $correo = $_POST['correo'] ?? '';
 $contrasena = password_hash($_POST['contrasena'], PASSWORD_BCRYPT);
 $telefono = $_POST['telefono'] ?? '';
@@ -53,7 +53,7 @@ try {
     // Preparar e insertar nuevo cliente - solo campos esenciales para registro
     $stmt = $conn->prepare("
         INSERT INTO clientes (
-            nombre, apellidos, correo, contrasena, telefono,
+            nombre, apellido, correo, contrasena, telefono,
             fecha_nacimiento, genero, newsletter, 
             codigo_verificacion, verificado, fecha_registro
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, NOW())
