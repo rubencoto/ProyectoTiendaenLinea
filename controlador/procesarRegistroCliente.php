@@ -48,12 +48,15 @@ if ($result->num_rows > 0) {
     
     if ($existing_user['verificado'] == 1) {
         // Usuario ya verificado
+        $loginUrl = AppConfig::vistaUrl('loginCliente.php');
+        $recuperarUrl = AppConfig::vistaUrl('recuperarContrasena.php');
         die('Error: Ya existe una cuenta verificada con este correo electrónico. <br><br>
-             Si es tu cuenta, puedes <a href="../vista/loginCliente.php">iniciar sesión aquí</a>.<br>
-             Si olvidaste tu contraseña, puedes <a href="../vista/recuperarContrasena.php">recuperarla aquí</a>.');
+             Si es tu cuenta, puedes <a href="' . $loginUrl . '">iniciar sesión aquí</a>.<br>
+             Si olvidaste tu contraseña, puedes <a href="' . $recuperarUrl . '">recuperarla aquí</a>.');
     } else {
         // Usuario existe pero no verificado - redirigir a verificación
-        header("Location: ../vista/verificarCuentaCliente.php?correo=" . urlencode($correo) . "&pendiente=1");
+        $verificarUrl = AppConfig::vistaUrl('verificarCuentaCliente.php?correo=' . urlencode($correo) . '&pendiente=1');
+        header("Location: " . $verificarUrl);
         exit;
     }
 }
@@ -107,11 +110,13 @@ try {
 
         if (enviarCorreo($correo, $asunto, $mensaje)) {
             // Redirigir directamente a la página de verificación
-            header("Location: ../vista/verificarCuentaCliente.php?registro=1&correo=" . urlencode($correo));
+            $verificarUrl = AppConfig::vistaUrl('verificarCuentaCliente.php?registro=1&correo=' . urlencode($correo));
+            header("Location: " . $verificarUrl);
             exit;
         } else {
             // Error al enviar correo, pero usuario registrado - mostrar mensaje y permitir verificación manual
-            header("Location: ../vista/verificarCuentaCliente.php?registro=1&correo=" . urlencode($correo) . "&correo_error=1");
+            $verificarUrl = AppConfig::vistaUrl('verificarCuentaCliente.php?registro=1&correo=' . urlencode($correo) . '&correo_error=1');
+            header("Location: " . $verificarUrl);
             exit;
         }
     } else {

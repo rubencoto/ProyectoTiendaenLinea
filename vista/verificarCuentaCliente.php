@@ -6,6 +6,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 require_once '../modelo/conexion.php';
+require_once '../modelo/config.php';
 
 $mensaje = '';
 $tipo_mensaje = '';
@@ -212,7 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 <?php if ($tipo_mensaje === 'success'): ?>
                     <div class="text-center">
-                        <a href="loginCliente.php" class="btn btn-primary">Iniciar Sesión</a>
+                        <a href="<?= AppConfig::vistaUrl('loginCliente.php') ?>" class="btn btn-primary">Iniciar Sesión</a>
                     </div>
                 <?php endif; ?>
                 
@@ -252,11 +253,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 <div class="text-center">
                     <hr class="my-3">
-                    <a href="loginCliente.php" class="text-decoration-none">
+                    <a href="<?= AppConfig::vistaUrl('loginCliente.php') ?>" class="text-decoration-none">
                         <i class="fas fa-arrow-left me-1"></i>Volver al login
                     </a>
                     <span class="mx-2">|</span>
-                    <a href="registroCliente.php" class="text-decoration-none">
+                    <a href="<?= AppConfig::vistaUrl('registroCliente.php') ?>" class="text-decoration-none">
                         <i class="fas fa-user-plus me-1"></i>Registrarse
                     </a>
                 </div>
