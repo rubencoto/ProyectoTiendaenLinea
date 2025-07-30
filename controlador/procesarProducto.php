@@ -15,7 +15,28 @@ if (isset($conn)) {
 
 function obtenerContenidoImagen($campo) {
     if (isset($_FILES[$campo]) && $_FILES[$campo]['error'] === UPLOAD_ERR_OK) {
-        return file_get_contents($_FILES[$campo]['tmp_name']);
+        // Validate file type
+        $allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        $file_type = $_FILES[$campo]['type'];
+        
+        if (!in_array($file_type, $allowed_types)) {
+            error_log("Invalid file type: " . $file_type);
+            return null;
+        }
+        
+        // Check file size (limit to 5MB)
+        if ($_FILES[$campo]['size'] > 5 * 1024 * 1024) {
+            error_log("File too large: " . $_FILES[$campo]['size']);
+            return null;
+        }
+        
+        // Read file content as binary data
+        $binary_data = file_get_contents($_FILES[$campo]['tmp_name']);
+        
+        // Log file info for debugging
+        error_log("Processing image: " . $_FILES[$campo]['name'] . ", Size: " . $_FILES[$campo]['size'] . ", Type: " . $file_type);
+        
+        return $binary_data;
     }
     return null;
 }
@@ -43,6 +64,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $imagenSecundaria1 = obtenerContenidoImagen("imagen_secundaria1");
     $imagenSecundaria2 = obtenerContenidoImagen("imagen_secundaria2");
 
+    // Debug image data
+    error_log("Image principal size: " . ($imagenPrincipal ? strlen($imagenPrincipal) : 'NULL'));
+    error_log("Image secundaria1 size: " . ($imagenSecundaria1 ? strlen($imagenSecundaria1) : 'NULL'));
+    error_log("Image secundaria2 size: " . ($imagenSecundaria2 ? strlen($imagenSecundaria2) : 'NULL'));
+
+    // Ensure we have at least the principal image
+    if (!$imagenPrincipal) {
+        die("Error: Imagen principal es requerida.");
+    }
+
     // Obtener el ID del vendedor de la sesión
     $id_vendedor = $_SESSION['id'];
 
@@ -56,15 +87,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         (nombre, descripcion, precio, categoria, imagen_principal, imagen_secundaria1, imagen_secundaria2, tallas, color, unidades, garantia, dimensiones, peso, tamano_empaque, id_vendedor) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
+    if (!$stmt) {
+        die("Prepare failed: " . $conn->error);
+    }
+
+    // Bind all parameters first with NULL placeholders for images
+    $null_image_principal = null;
+    $null_image_secundaria1 = null;
+    $null_image_secundaria2 = null;
+    
     $stmt->bind_param(
-        "ssdssssssissdsi",
+        "ssdsbbbsissdsi",
         $nombre,
         $descripcion,
         $precio,
         $categoria,
-        $imagenPrincipal,
-        $imagenSecundaria1,
-        $imagenSecundaria2,
+        $null_image_principal,
+        $null_image_secundaria1,
+        $null_image_secundaria2,
         $tallas,
         $color,
         $unidades,
@@ -74,6 +114,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $tamano_empaque,
         $id_vendedor
     );
+    
+    // Send binary data using send_long_data for better handling of large binary objects
+    if ($imagenPrincipal) {
+        $stmt->send_long_data(4, $imagenPrincipal); // 4 is the index of imagen_principal parameter (0-based)
+    }
+    if ($imagenSecundaria1) {
+        $stmt->send_long_data(5, $imagenSecundaria1); // 5 is the index of imagen_secundaria1 parameter
+    }
+    if ($imagenSecundaria2) {
+        $stmt->send_long_data(6, $imagenSecundaria2); // 6 is the index of imagen_secundaria2 parameter
+    }
 
     if ($stmt->execute()) {
         // Generate URLs for JavaScript
