@@ -57,7 +57,7 @@ try {
         $id_vendedor = 1;
         
         $stmt->bind_param(
-            "ssdsbbbsissdsi",
+            "ssdsbbssissdsi",
             $nombre,
             $descripcion,
             $precio,

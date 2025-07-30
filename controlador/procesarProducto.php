@@ -97,7 +97,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $null_image_secundaria2 = null;
     
     $stmt->bind_param(
-        "ssdsbbbsissdsi",
+        "ssdsbbssissdsi",
         $nombre,
         $descripcion,
         $precio,
