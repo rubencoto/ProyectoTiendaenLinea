@@ -33,16 +33,17 @@ if (isset($_FILES['logo']) && $_FILES['logo']['error'] === UPLOAD_ERR_OK) {
 // Generar código de verificación (6 dígitos)
 $codigo_verificacion = substr(bin2hex(random_bytes(4)), 0, 6);
 
-// Insertar vendedor con la estructura correcta de la tabla
+// Insertar nuevo vendedor - incluir campos nombre y apellido requeridos
 $sql = "INSERT INTO vendedores (
-    nombre_empresa, correo, contrasena, telefono,
-    direccion1, direccion2, categoria, cedula_juridica, 
+    nombre, apellido, nombre_empresa, correo, contrasena, telefono, direccion1, direccion2, categoria, cedula_juridica,
     codigo_verificacion, verificado
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0)";
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)";
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param(
-    'sssssssss', // 9 's' correspond to 9 placeholders
+    'sssssssssss', // 11 's' correspond to 11 placeholders
+    $nombre_empresa, // Use company name as nombre
+    $nombre_empresa, // Use company name as apellido
     $nombre_empresa,
     $correo,
     $contrasena,
