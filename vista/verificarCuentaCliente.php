@@ -119,8 +119,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resend_code'])) {
                 ";
 
                 if (enviarCorreo($correo, $asunto, $mensaje_email)) {
-                    $mensaje = "Se ha enviado un nuevo código de verificación a tu correo electrónico.";
-                    $tipo_mensaje = "success";
+                    $mensaje = "Se ha enviado un nuevo código de verificación a tu correo electrónico. Ingresa el nuevo código abajo.";
+                    $tipo_mensaje = "resend_success";
                 } else {
                     $mensaje = "Se generó un nuevo código pero hubo un problema al enviar el correo. Puedes intentar verificar manualmente con el código: $nuevo_codigo";
                     $tipo_mensaje = "warning";
@@ -209,6 +209,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['resend_code'])) {
                     case 'success':
                         $alert_class = 'alert-success';
                         break;
+                    case 'resend_success':
+                        $alert_class = 'alert-success';
+                        break;
                     case 'error':
                         $alert_class = 'alert-danger';
                         break;
@@ -245,7 +248,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['resend_code'])) {
                         <label class="form-label">Código de Verificación</label>
                         <input type="text" class="form-control" name="codigo" 
                                placeholder="Ingresa el código de 6 dígitos" maxlength="6" required>
-                        <div class="form-text">Revisa tu correo electrónico para obtener el código</div>
+                        <div class="form-text">
+                            <?php if ($tipo_mensaje === 'resend_success'): ?>
+                                Revisa tu correo - se ha enviado un nuevo código
+                            <?php else: ?>
+                                Revisa tu correo electrónico para obtener el código
+                            <?php endif; ?>
+                        </div>
                     </div>
                     
                     <button type="submit" class="btn btn-primary w-100 mb-3">
