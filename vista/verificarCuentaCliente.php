@@ -4,6 +4,32 @@ require_once '../modelo/conexion.php';
 
 $mensaje = '';
 $tipo_mensaje = '';
+$correo_prefill = '';
+
+// Handle registration success message
+if (isset($_GET['registro']) && $_GET['registro'] == 1) {
+    if (isset($_GET['correo_error']) && $_GET['correo_error'] == 1) {
+        $mensaje = "¡Registro exitoso! Hubo un problema al enviar el correo de verificación, pero puedes verificar tu cuenta manualmente ingresando el código que se generó.";
+        $tipo_mensaje = "warning";
+    } else {
+        $mensaje = "¡Registro exitoso! Se ha enviado un código de verificación a tu correo electrónico. Por favor, ingresa el código para activar tu cuenta.";
+        $tipo_mensaje = "success";
+    }
+    
+    if (isset($_GET['correo'])) {
+        $correo_prefill = htmlspecialchars($_GET['correo']);
+    }
+}
+
+// Handle pending verification case
+if (isset($_GET['pendiente']) && $_GET['pendiente'] == 1) {
+    $mensaje = "Ya tienes una cuenta registrada con este correo, pero aún no está verificada. Por favor, ingresa el código de verificación que se envió a tu correo.";
+    $tipo_mensaje = "info";
+    
+    if (isset($_GET['correo'])) {
+        $correo_prefill = htmlspecialchars($_GET['correo']);
+    }
+}
 
 // Verificación automática por URL
 if (isset($_GET['codigo']) && isset($_GET['correo'])) {
@@ -109,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="mb-3">
                         <label>Correo Electrónico</label>
                         <input type="email" class="form-control" name="correo" 
-                               value="<?= htmlspecialchars($_GET['correo'] ?? '') ?>" required>
+                               value="<?= $correo_prefill ?: htmlspecialchars($_GET['correo'] ?? '') ?>" required>
                     </div>
                     
                     <div class="mb-3">

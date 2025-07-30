@@ -37,12 +37,25 @@ if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
 }
 
 // Verificar si el correo ya existe
-$stmt = $conn->prepare("SELECT id FROM clientes WHERE correo = ?");
+$stmt = $conn->prepare("SELECT id, verificado FROM clientes WHERE correo = ?");
 $stmt->bind_param("s", $correo);
 $stmt->execute();
-if ($stmt->get_result()->num_rows > 0) {
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    $existing_user = $result->fetch_assoc();
     $stmt->close();
-    die('Error: Ya existe una cuenta con este correo electrónico.');
+    
+    if ($existing_user['verificado'] == 1) {
+        // Usuario ya verificado
+        die('Error: Ya existe una cuenta verificada con este correo electrónico. <br><br>
+             Si es tu cuenta, puedes <a href="../vista/loginCliente.php">iniciar sesión aquí</a>.<br>
+             Si olvidaste tu contraseña, puedes <a href="../vista/recuperarContrasena.php">recuperarla aquí</a>.');
+    } else {
+        // Usuario existe pero no verificado - redirigir a verificación
+        header("Location: ../vista/verificarCuentaCliente.php?correo=" . urlencode($correo) . "&pendiente=1");
+        exit;
+    }
 }
 $stmt->close();
 
@@ -93,12 +106,12 @@ try {
         ";
 
         if (enviarCorreo($correo, $asunto, $mensaje)) {
-            // Redirigir a página de éxito
-            header("Location: ../vista/mensajeRegistroCliente.php?exito=1");
+            // Redirigir directamente a la página de verificación
+            header("Location: ../vista/verificarCuentaCliente.php?registro=1&correo=" . urlencode($correo));
             exit;
         } else {
-            // Error al enviar correo, pero usuario registrado
-            header("Location: ../vista/mensajeRegistroCliente.php?exito=1&correo_error=1");
+            // Error al enviar correo, pero usuario registrado - mostrar mensaje y permitir verificación manual
+            header("Location: ../vista/verificarCuentaCliente.php?registro=1&correo=" . urlencode($correo) . "&correo_error=1");
             exit;
         }
     } else {
