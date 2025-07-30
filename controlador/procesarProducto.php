@@ -91,28 +91,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die("Prepare failed: " . $conn->error);
     }
 
-    // Bind all parameters first with NULL placeholders for images
+    // Bind all parameters - CORRECTED parameter types
     $null_image_principal = null;
     $null_image_secundaria1 = null;
     $null_image_secundaria2 = null;
     
+    // Fixed: 15 parameters with correct types: ssdsbbssissdsi
     $stmt->bind_param(
         "ssdsbbssissdsi",
-        $nombre,
-        $descripcion,
-        $precio,
-        $categoria,
-        $null_image_principal,
-        $null_image_secundaria1,
-        $null_image_secundaria2,
-        $tallas,
-        $color,
-        $unidades,
-        $garantia,
-        $dimensiones,
-        $peso,
-        $tamano_empaque,
-        $id_vendedor
+        $nombre,           // s - string
+        $descripcion,      // s - string  
+        $precio,           // d - double
+        $categoria,        // s - string
+        $null_image_principal,    // b - binary
+        $null_image_secundaria1,  // b - binary
+        $null_image_secundaria2,  // b - binary
+        $tallas,           // s - string
+        $color,            // s - string
+        $unidades,         // i - integer
+        $garantia,         // s - string
+        $dimensiones,      // s - string
+        $peso,             // d - double
+        $tamano_empaque,   // s - string
+        $id_vendedor       // i - integer
     );
     
     // Send binary data using send_long_data for better handling of large binary objects
