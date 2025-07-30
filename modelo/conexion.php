@@ -8,37 +8,65 @@ class DatabaseConnection {
     private static $instance = null;
     private $connection;
     
-    // Database parameters
-    private $host = "biwezh06z1yafmlocoe7-mysql.services.clever-cloud.com";
-    private $usuario = "usnfohjdasabv4el";
-    private $contrasena = "vsCunVPa3JaJExZ7lIxH";
-    private $base_datos = "biwezh06z1yafmlocoe7";
+    // Database parameters - AWS RDS MySQL
+    private $host = "kavfu5f7pido12mr.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+    private $usuario = "kd8mm5vnhfoajcsh";
+    private $contrasena = "u8im10ovr94ccsfq";
+    private $base_datos = "lsj1q7iol6uhg5wu";
     private $puerto = 3306;
     
     private function __construct() {
         try {
             // Set connection timeout and other optimizations
-            ini_set('mysql.connect_timeout', 10);
-            ini_set('default_socket_timeout', 10);
+            ini_set('mysql.connect_timeout', 5);
+            ini_set('default_socket_timeout', 5);
             
-            $this->connection = new mysqli(
-                $this->host, 
-                $this->usuario, 
-                $this->contrasena, 
-                $this->base_datos, 
-                $this->puerto
-            );
+            // Add retry logic for connection limits
+            $maxRetries = 3;
+            $retryDelay = 1; // seconds
             
-            if ($this->connection->connect_error) {
-                throw new Exception("Connection failed: " . $this->connection->connect_error);
+            for ($i = 0; $i < $maxRetries; $i++) {
+                try {
+                    $this->connection = new mysqli(
+                        $this->host, 
+                        $this->usuario, 
+                        $this->contrasena, 
+                        $this->base_datos, 
+                        $this->puerto
+                    );
+                    
+                    if ($this->connection->connect_error) {
+                        throw new Exception("Connection failed: " . $this->connection->connect_error);
+                    }
+                    
+                    // Connection successful, break the retry loop
+                    break;
+                    
+                } catch (Exception $e) {
+                    if ($i === $maxRetries - 1) {
+                        // Last attempt failed
+                        throw $e;
+                    }
+                    
+                    // Check if it's a connection limit error
+                    if (strpos($e->getMessage(), 'max_user_connections') !== false) {
+                        // Wait before retrying
+                        sleep($retryDelay);
+                        $retryDelay *= 2; // Exponential backoff
+                    } else {
+                        // Non-connection-limit error, don't retry
+                        throw $e;
+                    }
+                }
             }
             
             // Set charset to avoid encoding issues
             $this->connection->set_charset("utf8");
             
-            // Optimize connection settings for Clever Cloud limits
-            $this->connection->query("SET SESSION wait_timeout = 300");
-            $this->connection->query("SET SESSION interactive_timeout = 300");
+            // Optimize connection settings for AWS RDS
+            $this->connection->query("SET SESSION wait_timeout = 28800");
+            $this->connection->query("SET SESSION interactive_timeout = 28800");
+            $this->connection->query("SET SESSION sql_mode = 'STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO'");
             
         } catch (Exception $e) {
             die("Database connection error: " . $e->getMessage());
