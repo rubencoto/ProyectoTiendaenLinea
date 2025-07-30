@@ -20,7 +20,7 @@
         
         <a href="verificarCuentaCliente.php" class="btn btn-primary">Verificar cuenta</a>
         <br><br>
-        <a href="index.php" class="btn btn-secondary">Ir al Login</a>
+        <a href="loginCliente.php" class="btn btn-secondary">Ir al Login</a>
         
     <?php else: ?>
         <h3>Error en el registro</h3>

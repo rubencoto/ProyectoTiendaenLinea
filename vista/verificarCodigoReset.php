@@ -178,7 +178,7 @@ if (isset($_SESSION['codigo_verificado']) && isset($_SESSION['correo_reset'])) {
                 <h4>¡Listo!</h4>
                 <p><?= htmlspecialchars($mensaje) ?></p>
             </div>
-            <a href="index.php" class="btn btn-primary btn-lg">Ir al Login</a>
+            <a href="loginCliente.php" class="btn btn-primary btn-lg">Ir al Login</a>
         </div>
     <?php elseif (!$codigo_verificado): ?>
         <!-- PASO 1: Verificar Código -->
@@ -212,7 +212,7 @@ if (isset($_SESSION['codigo_verificado']) && isset($_SESSION['correo_reset'])) {
 
         <div class="text-center mt-3">
             <p class="small">
-                <a href="index.php">← Volver al login</a> | 
+                <a href="loginCliente.php">← Volver al login</a> | 
                 <a href="recuperarContrasena.php">Solicitar nuevo código</a>
             </p>
         </div>
@@ -253,7 +253,7 @@ if (isset($_SESSION['codigo_verificado']) && isset($_SESSION['correo_reset'])) {
 
         <div class="text-center mt-3">
             <p class="small">
-                <a href="index.php">← Volver al login</a>
+                <a href="loginCliente.php">← Volver al login</a>
             </p>
         </div>
     <?php endif; ?>

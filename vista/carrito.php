@@ -3,7 +3,7 @@ session_start();
 
 // Si no hay cliente autenticado, redirige al login
 if (empty($_SESSION['cliente_id'])) {
-    header('Location: index.php');
+    header('Location: loginCliente.php');
     exit;
 }
 

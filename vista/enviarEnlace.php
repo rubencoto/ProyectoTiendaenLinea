@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo "<p>Hemos enviado un código de verificación a tu correo.</p>";
             echo "<p><strong>Haz clic en el botón de abajo para ingresar el código:</strong></p>";
             echo "<a href='$enlace' style='background-color: #007185; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; margin: 20px 0;'>Ingresar Código de Verificación</a>";
-            echo "<p style='margin-top: 20px;'><a href='index.php'>Volver al login</a></p>";
+            echo "<p style='margin-top: 20px;'><a href='loginCliente.php'>Volver al login</a></p>";
             echo "</div>";
         } else {
             echo "<p style='color:red; text-align:center;'>Error al enviar el correo. Intentalo de nuevo.</p>";
