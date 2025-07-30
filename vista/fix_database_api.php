@@ -1,10 +1,17 @@
 <?php
-require_once 'modelo/conexion.php';
+// Start output buffering to catch any unexpected output
+ob_start();
 
-$output = [];
-$output[] = "=== Database Structure Fix ===";
+// Set error handling
+error_reporting(E_ALL);
+ini_set('display_errors', 0); // Don't display errors, we'll capture them
 
 try {
+    require_once '../modelo/conexion.php';
+    
+    $output = [];
+    $output[] = "=== Database Structure Fix ===";
+
     // First, check current structure
     $result = $conn->query('DESCRIBE clientes');
     $existing_columns = [];
@@ -15,6 +22,8 @@ try {
             $existing_columns[] = $row['Field'];
             $output[] = "- " . $row['Field'] . " (" . $row['Type'] . ")";
         }
+    } else {
+        throw new Exception("Could not describe clientes table: " . $conn->error);
     }
     
     // Define required columns that might be missing
@@ -64,15 +73,23 @@ try {
     }
     
     $output[] = "\n✅ Database structure fix completed!";
+    $status = 'completed';
     
 } catch (Exception $e) {
     $output[] = "❌ Error: " . $e->getMessage();
+    $status = 'error';
+} catch (Error $e) {
+    $output[] = "❌ Fatal Error: " . $e->getMessage();
+    $status = 'error';
 }
+
+// Clear any unwanted output
+ob_clean();
 
 // Output as JSON for easy parsing
 header('Content-Type: application/json');
 echo json_encode([
-    'status' => 'completed',
+    'status' => $status,
     'output' => $output
-]);
+], JSON_UNESCAPED_UNICODE);
 ?>

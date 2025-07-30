@@ -16,12 +16,13 @@
                         <p class="mb-0">This will add missing columns to the clientes table</p>
                     </div>
                     <div class="card-body">
+                        <button id="debugBtn" class="btn btn-info me-2">Debug Connection</button>
                         <button id="fixBtn" class="btn btn-primary">Fix Database Structure</button>
                         <div id="loading" class="d-none">
                             <div class="spinner-border" role="status">
                                 <span class="visually-hidden">Loading...</span>
                             </div>
-                            <span class="ms-2">Fixing database structure...</span>
+                            <span class="ms-2" id="loadingText">Processing...</span>
                         </div>
                         <div id="output" class="mt-3"></div>
                     </div>
@@ -31,47 +32,82 @@
     </div>
 
     <script>
-        document.getElementById('fixBtn').addEventListener('click', function() {
-            const btn = this;
-            const loading = document.getElementById('loading');
-            const output = document.getElementById('output');
+        function showLoading(text) {
+            document.getElementById('debugBtn').style.display = 'none';
+            document.getElementById('fixBtn').style.display = 'none';
+            document.getElementById('loadingText').textContent = text;
+            document.getElementById('loading').classList.remove('d-none');
+            document.getElementById('output').innerHTML = '';
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading').classList.add('d-none');
+            document.getElementById('debugBtn').style.display = 'inline-block';
+            document.getElementById('fixBtn').style.display = 'inline-block';
+        }
+        
+        function showError(message) {
+            document.getElementById('output').innerHTML = '<div class="alert alert-danger">Error: ' + message + '</div>';
+        }
+        
+        document.getElementById('debugBtn').addEventListener('click', function() {
+            showLoading('Debugging connection...');
             
-            btn.disabled = true;
-            btn.style.display = 'none';
-            loading.classList.remove('d-none');
-            output.innerHTML = '';
-            
-            fetch('fix_database_api.php')
-                .then(response => response.json())
-                .then(data => {
-                    loading.classList.add('d-none');
-                    
-                    let html = '<div class="alert alert-info"><h5>Database Fix Results:</h5>';
-                    data.output.forEach(line => {
-                        if (line.includes('✅')) {
-                            html += '<p class="text-success mb-1">' + line + '</p>';
-                        } else if (line.includes('❌')) {
-                            html += '<p class="text-danger mb-1">' + line + '</p>';
-                        } else if (line.includes('===')) {
-                            html += '<h6 class="mt-2">' + line + '</h6>';
-                        } else {
-                            html += '<p class="mb-1">' + line + '</p>';
-                        }
-                    });
-                    html += '</div>';
-                    
-                    output.innerHTML = html;
-                    
-                    // Add success message if completed
-                    if (data.status === 'completed') {
-                        output.innerHTML += '<div class="alert alert-success"><strong>Success!</strong> You can now test the registration form.</div>';
+            fetch('debug_connection.php')
+                .then(response => response.text())
+                .then(text => {
+                    hideLoading();
+                    try {
+                        const data = JSON.parse(text);
+                        let html = '<div class="alert alert-info"><h5>Debug Results:</h5>';
+                        html += '<pre>' + data.debug + '</pre>';
+                        html += '</div>';
+                        document.getElementById('output').innerHTML = html;
+                    } catch (e) {
+                        document.getElementById('output').innerHTML = '<div class="alert alert-danger"><h5>Raw Response:</h5><pre>' + text + '</pre></div>';
                     }
                 })
                 .catch(error => {
-                    loading.classList.add('d-none');
-                    output.innerHTML = '<div class="alert alert-danger">Error: ' + error.message + '</div>';
-                    btn.disabled = false;
-                    btn.style.display = 'block';
+                    hideLoading();
+                    showError(error.message);
+                });
+        });
+
+        document.getElementById('fixBtn').addEventListener('click', function() {
+            showLoading('Fixing database structure...');
+            
+            fetch('fix_database_api.php')
+                .then(response => response.text())
+                .then(text => {
+                    hideLoading();
+                    try {
+                        const data = JSON.parse(text);
+                        let html = '<div class="alert alert-info"><h5>Database Fix Results:</h5>';
+                        data.output.forEach(line => {
+                            if (line.includes('✅')) {
+                                html += '<p class="text-success mb-1">' + line + '</p>';
+                            } else if (line.includes('❌')) {
+                                html += '<p class="text-danger mb-1">' + line + '</p>';
+                            } else if (line.includes('===')) {
+                                html += '<h6 class="mt-2">' + line + '</h6>';
+                            } else {
+                                html += '<p class="mb-1">' + line + '</p>';
+                            }
+                        });
+                        html += '</div>';
+                        
+                        document.getElementById('output').innerHTML = html;
+                        
+                        if (data.status === 'completed') {
+                            document.getElementById('output').innerHTML += '<div class="alert alert-success"><strong>Success!</strong> You can now test the registration form.</div>';
+                        }
+                    } catch (e) {
+                        document.getElementById('output').innerHTML = '<div class="alert alert-danger"><h5>Raw Response:</h5><pre>' + text + '</pre></div>';
+                    }
+                })
+                .catch(error => {
+                    hideLoading();
+                    showError(error.message);
                 });
         });
     </script>
