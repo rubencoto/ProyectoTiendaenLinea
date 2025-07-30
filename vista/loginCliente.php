@@ -73,6 +73,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="text-center mt-3">
             <p class="small">¿Olvidaste tu contraseña? <a href="<?= AppConfig::link('recuperarContrasena.php') ?>">Recuperar contraseña</a></p>
             <p class="small">¿No tienes cuenta? <a href="<?= AppConfig::link('registroCliente.php') ?>">Regístrate como cliente</a></p>
+            <hr class="my-3">
+            <p class="small text-muted">¿Eres vendedor? <a href="<?= AppConfig::link('loginVendedor.php') ?>" class="text-decoration-none">Iniciar sesión como vendedor</a></p>
             <p class="small"><a href="<?= AppConfig::link('index.php') ?>">Volver al catálogo</a></p>
         </div>
     </div>
