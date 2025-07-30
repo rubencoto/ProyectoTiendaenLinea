@@ -75,11 +75,11 @@ if (!isset($_SESSION['id'])) {
         <div class="opciones">
             <div class="card">
                 <h3>Agregar Producto</h3>
-                <a href="agregarProducto.php">Ir al formulario</a>
+                <a href="<?= AppConfig::vistaUrl('agregarproducto.php') ?>">Ir al formulario</a>
             </div>
             <div class="card">
                 <h3>Ver Mis Productos</h3>
-                <a href="productos.php">Administrar</a>
+                <a href="<?= AppConfig::vistaUrl('productos.php') ?>">Administrar</a>
             </div>
             <div class="card">
                 <h3>Cerrar Sesión</h3>

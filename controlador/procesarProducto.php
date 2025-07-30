@@ -5,6 +5,7 @@ ini_set('display_errors', 1);
 
 session_start();
 include '../modelo/conexion.php';
+require_once '../modelo/config.php';
 
 function obtenerContenidoImagen($campo) {
     if (isset($_FILES[$campo]) && $_FILES[$campo]['error'] === UPLOAD_ERR_OK) {
@@ -63,6 +64,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     );
 
     if ($stmt->execute()) {
+        // Generate URLs for JavaScript
+        $agregarProductoUrl = AppConfig::vistaUrl('agregarproducto.php');
+        $inicioVendedorUrl = AppConfig::vistaUrl('inicioVendedor.php');
+        
         // Usamos SweetAlert2 aquí
         echo '
         <!DOCTYPE html>
@@ -83,9 +88,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 cancelButtonText: "No, volver al panel"
             }).then((result) => {
                 if (result.isConfirmed) {
-                    window.location.href = "../vista/agregarproducto.php";
+                    window.location.href = "' . $agregarProductoUrl . '";
                 } else {
-                    window.location.href = "../vista/inicioVendedor.php";
+                    window.location.href = "' . $inicioVendedorUrl . '";
                 }
             });
         </script>

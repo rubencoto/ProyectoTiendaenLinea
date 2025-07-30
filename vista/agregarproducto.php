@@ -1,3 +1,13 @@
+<?php
+session_start();
+require_once '../modelo/config.php';
+
+// Verificar si hay sesión activa del vendedor
+if (!isset($_SESSION['id'])) {
+    header('Location: ' . AppConfig::vistaUrl('loginVendedor.php'));
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -198,7 +208,7 @@
 
 <div class="form-container">
     <h2>Agregar producto</h2>
-    <a href="inicioVendedor.php" class="back-btn">← Volver al Panel</a>
+    <a href="<?= AppConfig::vistaUrl('inicioVendedor.php') ?>" class="back-btn">← Volver al Panel</a>
     
     <div id="messageContainer"></div>
     
@@ -298,7 +308,7 @@ document.getElementById("formularioProducto").addEventListener("submit", functio
         const data = new FormData(form);
         const xhr = new XMLHttpRequest();
 
-        xhr.open("POST", "../controlador/procesarProducto.php");
+        xhr.open("POST", "<?= AppConfig::controladorUrl('procesarProducto.php') ?>");
         
         // Set timeout to 30 seconds
         xhr.timeout = 30000;
@@ -427,7 +437,7 @@ function addAnotherProduct() {
 }
 
 function goToDashboard() {
-    window.location.href = "inicioVendedor.php";
+    window.location.href = "<?= AppConfig::vistaUrl('inicioVendedor.php') ?>";
 }
 
 // Close modal when clicking outside of it
