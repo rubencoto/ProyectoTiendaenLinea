@@ -22,7 +22,8 @@
                         
                         <button id="analyzeBtn" class="btn btn-warning me-2">Analyze Issues</button>
                         <button id="checkBtn" class="btn btn-info me-2">Check Current Structure</button>
-                        <button id="setupBtn" class="btn btn-primary">Setup Database</button>
+                        <button id="completeBtn" class="btn btn-success me-2">Complete JAWSDB Setup</button>
+                        <button id="setupBtn" class="btn btn-primary">Full Database Setup</button>
                         
                         <div id="loading" class="d-none mt-3">
                             <div class="spinner-border" role="status">
@@ -41,6 +42,7 @@
         function showLoading(text) {
             document.getElementById('analyzeBtn').style.display = 'none';
             document.getElementById('checkBtn').style.display = 'none';
+            document.getElementById('completeBtn').style.display = 'none';
             document.getElementById('setupBtn').style.display = 'none';
             document.getElementById('loadingText').textContent = text;
             document.getElementById('loading').classList.remove('d-none');
@@ -51,6 +53,7 @@
             document.getElementById('loading').classList.add('d-none');
             document.getElementById('analyzeBtn').style.display = 'inline-block';
             document.getElementById('checkBtn').style.display = 'inline-block';
+            document.getElementById('completeBtn').style.display = 'inline-block';
             document.getElementById('setupBtn').style.display = 'inline-block';
         }
 
@@ -77,6 +80,54 @@
                         });
                         html += '</div>';
                         document.getElementById('output').innerHTML = html;
+                    } catch (e) {
+                        document.getElementById('output').innerHTML = '<div class="alert alert-danger"><h5>Raw Response:</h5><pre>' + text + '</pre></div>';
+                    }
+                })
+                .catch(error => {
+                    hideLoading();
+                    document.getElementById('output').innerHTML = '<div class="alert alert-danger">Error: ' + error.message + '</div>';
+                });
+        });
+
+        document.getElementById('completeBtn').addEventListener('click', function() {
+            if (!confirm('This will add missing tables and columns to your JAWSDB database. Continue?')) {
+                return;
+            }
+            
+            showLoading('Completing JAWSDB setup...');
+            
+            fetch('complete_jawsdb_setup.php')
+                .then(response => response.text())
+                .then(text => {
+                    hideLoading();
+                    try {
+                        const data = JSON.parse(text);
+                        let html = '<div class="alert alert-success"><h5>JAWSDB Completion Results:</h5>';
+                        data.output.forEach(line => {
+                            if (line.includes('✅')) {
+                                html += '<p class="text-success mb-1">' + line + '</p>';
+                            } else if (line.includes('❌')) {
+                                html += '<p class="text-danger mb-1">' + line + '</p>';
+                            } else if (line.includes('ℹ️')) {
+                                html += '<p class="text-info mb-1">' + line + '</p>';
+                            } else if (line.includes('===')) {
+                                html += '<h6 class="mt-2 text-primary">' + line + '</h6>';
+                            } else if (line.includes('---')) {
+                                html += '<h6 class="mt-2 text-secondary">' + line + '</h6>';
+                            } else if (line.startsWith('• ')) {
+                                html += '<p class="mb-1 ms-3"><code>' + line + '</code></p>';
+                            } else {
+                                html += '<p class="mb-1">' + line + '</p>';
+                            }
+                        });
+                        html += '</div>';
+                        
+                        document.getElementById('output').innerHTML = html;
+                        
+                        if (data.status === 'completed') {
+                            document.getElementById('output').innerHTML += '<div class="alert alert-success"><strong>Success!</strong> Your JAWSDB database is now complete. Test your application!</div>';
+                        }
                     } catch (e) {
                         document.getElementById('output').innerHTML = '<div class="alert alert-danger"><h5>Raw Response:</h5><pre>' + text + '</pre></div>';
                     }

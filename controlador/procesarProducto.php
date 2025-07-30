@@ -26,7 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $categoria = $_POST["categoria"];
     $tallas = $_POST["tallas"];
     $color = $_POST["color"];
-    $unidades = $_POST["unidades"];
+    $unidades = $_POST["unidades"]; // This maps to 'unidades' column in your database
     $garantia = $_POST["garantia"];
     $dimensiones = $_POST["dimensiones"];
     $peso = $_POST["peso"];

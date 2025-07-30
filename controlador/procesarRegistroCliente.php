@@ -5,7 +5,7 @@ require_once '../modelo/config.php';
 
 // Recolectar datos del formulario
 $nombre = $_POST['nombre'] ?? '';
-$apellido = $_POST['apellidos'] ?? ''; // Map apellidos to apellido for database
+$apellidos = $_POST['apellidos'] ?? ''; // Use apellidos since table has this column
 $correo = $_POST['correo'] ?? '';
 $contrasena = password_hash($_POST['contrasena'], PASSWORD_BCRYPT);
 $telefono = $_POST['telefono'] ?? '';
@@ -30,13 +30,18 @@ switch ($genero) {
 $newsletter = isset($_POST['newsletter']) ? 1 : 0;
 
 // Validar campos requeridos
-if (!$nombre || !$apellido || !$correo || !$contrasena || !$telefono || !$direccion) {
+if (!$nombre || !$apellidos || !$correo || !$contrasena || !$telefono || !$cedula || !$direccion || !$provincia) {
     die('Error: Faltan datos requeridos. Por favor, completa todos los campos obligatorios.');
 }
 
 // Validar formato de correo
 if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
     die('Error: El formato del correo electrónico no es válido.');
+}
+
+// Validar cédula (9 dígitos para Costa Rica)
+if (!preg_match('/^\d{9}$/', $cedula)) {
+    die('Error: La cédula debe tener exactamente 9 dígitos.');
 }
 
 // Verificar si el correo ya existe
@@ -49,22 +54,34 @@ if ($stmt->get_result()->num_rows > 0) {
 }
 $stmt->close();
 
+// Verificar si la cédula ya existe
+$stmt = $conn->prepare("SELECT id FROM clientes WHERE cedula = ?");
+$stmt->bind_param("s", $cedula);
+$stmt->execute();
+if ($stmt->get_result()->num_rows > 0) {
+    $stmt->close();
+    die('Error: Ya existe una cuenta con esta cédula.');
+}
+$stmt->close();
+
 // Generar código de verificación (6 dígitos)
 $codigo_verificacion = substr(bin2hex(random_bytes(4)), 0, 6);
 
 try {
-    // Preparar e insertar nuevo cliente - only using columns that exist in the database
+    // Preparar e insertar nuevo cliente - usando todas las columnas disponibles
     $stmt = $conn->prepare("
         INSERT INTO clientes (
-            nombre, apellido, correo, contrasena, telefono, 
-            direccion, codigo_verificacion, verificado, fecha_registro
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, 0, NOW())
+            nombre, apellidos, correo, contrasena, telefono, cedula, 
+            direccion, provincia, fecha_nacimiento, genero, 
+            newsletter, codigo_verificacion, verificado, fecha_registro
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, NOW())
     ");
     
     $stmt->bind_param(
-        "sssssss", 
-        $nombre, $apellido, $correo, $contrasena, $telefono,
-        $direccion, $codigo_verificacion
+        "ssssssssssis", 
+        $nombre, $apellidos, $correo, $contrasena, $telefono, $cedula,
+        $direccion, $provincia, $fecha_nacimiento, $genero,
+        $newsletter, $codigo_verificacion
     );
 
 
@@ -80,7 +97,7 @@ try {
         // Enviar correo de verificación
         $asunto = "Verificación de cuenta - Tienda en Línea";
         $mensaje = "
-        <h2>¡Bienvenido/a $nombre $apellido!</h2>
+        <h2>¡Bienvenido/a $nombre $apellidos!</h2>
         <p>Gracias por registrarte en nuestra tienda en línea.</p>
         <p>Para activar tu cuenta, usa el siguiente código de verificación:</p>
         <h3 style='background-color: #f0f0f0; padding: 10px; text-align: center; border-radius: 5px;'>$codigo_verificacion</h3>
