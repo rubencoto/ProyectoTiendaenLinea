@@ -10,14 +10,14 @@ if (!isset($_SESSION['cliente_id'])) {
 // Obtener información del cliente
 require_once '../modelo/conexion.php';
 $cliente_id = $_SESSION['cliente_id'];
-$stmt = $conn->prepare("SELECT nombre, apellidos FROM clientes WHERE id = ?");
+$stmt = $conn->prepare("SELECT nombre, apellido FROM clientes WHERE id = ?");
 $stmt->bind_param("i", $cliente_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows > 0) {
     $cliente = $result->fetch_assoc();
-    $nombre_completo = $cliente['nombre'] . ' ' . $cliente['apellidos'];
+    $nombre_completo = $cliente['nombre'] . ' ' . $cliente['apellido'];
 } else {
     $nombre_completo = 'Cliente';
 }

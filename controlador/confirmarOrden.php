@@ -17,7 +17,7 @@ if (empty($_SESSION['carrito'])) {
 
 try {
     // Obtener información del cliente
-    $stmt = $conn->prepare("SELECT nombre, apellidos, correo FROM clientes WHERE id = ?");
+    $stmt = $conn->prepare("SELECT nombre, apellido, correo FROM clientes WHERE id = ?");
     $stmt->bind_param("i", $_SESSION['cliente_id']);
     $stmt->execute();
     $cliente = $stmt->get_result()->fetch_assoc();
@@ -142,7 +142,7 @@ try {
     // El envío y total final ya se calcularon antes de la inserción
     $mensaje_cliente = "
     <h2 style='color: #007185;'>Gracias por tu compra</h2>
-    <p>Hola <strong>{$cliente['nombre']} {$cliente['apellidos']}</strong>,</p>
+    <p>Hola <strong>{$cliente['nombre']} {$cliente['apellido']}</strong>,</p>
     <p>Tu orden ha sido confirmada exitosamente. A continuacion, los detalles de tu compra:</p>
     
     <h3>Detalles de la Orden</h3>
@@ -212,7 +212,7 @@ try {
         
         <h3>Detalles de la Venta</h3>
         <p><strong>Numero de Orden:</strong> {$numero_orden}</p>
-        <p><strong>Cliente:</strong> {$cliente['nombre']} {$cliente['apellidos']}</p>
+        <p><strong>Cliente:</strong> {$cliente['nombre']} {$cliente['apellido']}</p>
         <p><strong>Fecha:</strong> " . date('d/m/Y H:i:s') . "</p>
         
         <h3>Productos Vendidos</h3>

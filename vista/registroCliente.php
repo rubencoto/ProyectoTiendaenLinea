@@ -52,13 +52,9 @@ require_once '../modelo/config.php';
                 </div>
 
                 <div class="row">
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-12 mb-3">
                         <label>Número de Teléfono *</label>
                         <input type="tel" name="telefono" class="form-control" required pattern="[0-9]{8,15}">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label>Cédula *</label>
-                        <input type="text" name="cedula" class="form-control" required>
                     </div>
                 </div>
 
@@ -66,18 +62,6 @@ require_once '../modelo/config.php';
                     <label>Dirección *</label>
                     <input type="text" name="direccion" class="form-control" required>
                 </div>
-
-                <div class="mb-3">
-                    <label>Provincia *</label>
-                    <select name="provincia" class="form-control" required>
-                        <option value="">Seleccione una provincia</option>
-                        <option value="San José">San José</option>
-                        <option value="Alajuela">Alajuela</option>
-                        <option value="Cartago">Cartago</option>
-                        <option value="Heredia">Heredia</option>
-                        <option value="Guanacaste">Guanacaste</option>
-                        <option value="Puntarenas">Puntarenas</option>
-                        <option value="Limón">Limón</option>
                     </select>
                 </div>
 

@@ -32,12 +32,12 @@ $codigo_verificacion = substr(bin2hex(random_bytes(4)), 0, 6);
 $sql = "INSERT INTO vendedores (
     nombre_empresa, correo, contrasena, telefono,
     direccion1, direccion2, categoria, cedula_juridica,
-    logo, biografia, redes, codigo_verificacion, verificado
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)";
+    codigo_verificacion, verificado
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0)";
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param(
-    'ssssssssssss', // 12 's' correspond to 12 placeholders
+    'sssssssss', // 9 's' correspond to 9 placeholders
     $nombre,
     $correo,
     $contrasena,
@@ -46,9 +46,6 @@ $stmt->bind_param(
     $direccion2,
     $categoria,
     $cedula_juridica,
-    $logo_binario,
-    $biografia,
-    $redes,
     $codigo_verificacion
 );
 
