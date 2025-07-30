@@ -70,8 +70,80 @@ if (isset($_GET['codigo']) && isset($_GET['correo'])) {
     $stmt->close();
 }
 
+// Handle resend verification code
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resend_code'])) {
+    $correo = $_POST['correo'] ?? '';
+    
+    if (!empty($correo)) {
+        // Check if user exists and is not verified
+        $stmt = $conn->prepare("SELECT id, nombre, apellido FROM clientes WHERE correo = ? AND verificado = 0");
+        $stmt->bind_param("s", $correo);
+        $stmt->execute();
+        $resultado = $stmt->get_result();
+        
+        if ($resultado->num_rows === 1) {
+            $row = $resultado->fetch_assoc();
+            $cliente_id = $row['id'];
+            $nombre = $row['nombre'];
+            $apellido = $row['apellido'];
+            
+            // Generate new verification code
+            $nuevo_codigo = substr(bin2hex(random_bytes(4)), 0, 6);
+            
+            // Update verification code in database
+            $stmt_update = $conn->prepare("UPDATE clientes SET codigo_verificacion = ? WHERE id = ?");
+            $stmt_update->bind_param("si", $nuevo_codigo, $cliente_id);
+            
+            if ($stmt_update->execute()) {
+                // Send new verification email
+                require_once '../modelo/enviarCorreo.php';
+                
+                $verification_url = AppConfig::emailUrl('verificarCuentaCliente.php', [
+                    'codigo' => $nuevo_codigo,
+                    'correo' => $correo
+                ]);
+
+                $asunto = "Nuevo código de verificación - Tienda en Línea";
+                $mensaje_email = "
+                <h2>Nuevo código de verificación</h2>
+                <p>Hola $nombre $apellido,</p>
+                <p>Has solicitado un nuevo código de verificación para tu cuenta.</p>
+                <p>Tu nuevo código de verificación es:</p>
+                <h3 style='background-color: #f0f0f0; padding: 10px; text-align: center; border-radius: 5px;'>$nuevo_codigo</h3>
+                <p>Haz clic en el siguiente enlace para verificar tu cuenta:</p>
+                <p><a href='$verification_url' 
+                   style='background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>
+                   Verificar Cuenta
+                </a></p>
+                <p><small>Este código expira en 24 horas.</small></p>
+                ";
+
+                if (enviarCorreo($correo, $asunto, $mensaje_email)) {
+                    $mensaje = "Se ha enviado un nuevo código de verificación a tu correo electrónico.";
+                    $tipo_mensaje = "success";
+                } else {
+                    $mensaje = "Se generó un nuevo código pero hubo un problema al enviar el correo. Puedes intentar verificar manualmente con el código: $nuevo_codigo";
+                    $tipo_mensaje = "warning";
+                }
+                $correo_prefill = $correo;
+            } else {
+                $mensaje = "Error al generar nuevo código. Inténtalo de nuevo.";
+                $tipo_mensaje = "error";
+            }
+            $stmt_update->close();
+        } else {
+            $mensaje = "No se encontró una cuenta pendiente de verificación con este correo.";
+            $tipo_mensaje = "error";
+        }
+        $stmt->close();
+    } else {
+        $mensaje = "Por favor, ingresa tu correo electrónico.";
+        $tipo_mensaje = "error";
+    }
+}
+
 // Verificación manual por formulario
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['resend_code'])) {
     $correo = $_POST['correo'] ?? '';
     $codigo = $_POST['codigo'] ?? '';
     
@@ -117,76 +189,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Verificar Cuenta - Cliente</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .verification-card {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            padding: 2rem;
-            margin-top: 2rem;
-        }
-        .verification-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        .verification-header i {
-            font-size: 3rem;
-            color: #667eea;
-            margin-bottom: 1rem;
-        }
-        .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            padding: 0.75rem 1.5rem;
-            font-weight: 500;
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-        .alert {
-            border: none;
-            border-radius: 10px;
-            padding: 1rem 1.25rem;
-        }
-        .alert-success {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-        }
-        .alert-danger {
-            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
-            color: white;
-        }
-        .alert-warning {
-            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
-            color: white;
-        }
-        .alert-info {
-            background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
-            color: white;
-        }
-    </style>
 </head>
-<body>
+<body class="bg-light">
 
-<div class="container">
+<div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="verification-card">
-                <div class="verification-header">
-                    <i class="fas fa-envelope-circle-check"></i>
-                    <h2>Verificar Cuenta</h2>
-                    <p class="text-muted">Ingresa el código que recibiste en tu correo</p>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h4><i class="fas fa-envelope-check me-2"></i>Verificar Cuenta</h4>
                 </div>
+                <div class="card-body">
             
             <?php if (!empty($mensaje)): ?>
                 <?php 
@@ -208,7 +221,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 ?>
                 <div class="alert <?= $alert_class ?>" role="alert">
-                    <?= htmlspecialchars($mensaje) ?>
+                    <i class="fas fa-info-circle me-2"></i><?= htmlspecialchars($mensaje) ?>
                 </div>
                 
                 <?php if ($tipo_mensaje === 'success'): ?>
@@ -220,105 +233,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endif; ?>
             
             <?php if ($tipo_mensaje !== 'success'): ?>
-                <form method="POST" class="needs-validation" novalidate>
+                <form method="POST">
                     <div class="mb-3">
-                        <label class="form-label">
-                            <i class="fas fa-envelope me-2"></i>Correo Electrónico
-                        </label>
+                        <label class="form-label">Correo Electrónico</label>
                         <input type="email" class="form-control" name="correo" 
                                value="<?= $correo_prefill ?: htmlspecialchars($_GET['correo'] ?? '') ?>" 
                                placeholder="tu@correo.com" required>
-                        <div class="invalid-feedback">
-                            Por favor ingresa un correo válido.
-                        </div>
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label">
-                            <i class="fas fa-key me-2"></i>Código de Verificación
-                        </label>
-                        <input type="text" class="form-control text-center" name="codigo" 
-                               placeholder="000000" maxlength="6" required
-                               style="font-size: 1.2rem; letter-spacing: 0.5rem;">
-                        <div class="form-text">Código de 6 caracteres enviado a tu correo</div>
-                        <div class="invalid-feedback">
-                            Por favor ingresa el código de verificación.
-                        </div>
+                        <label class="form-label">Código de Verificación</label>
+                        <input type="text" class="form-control" name="codigo" 
+                               placeholder="Ingresa el código de 6 dígitos" maxlength="6" required>
+                        <div class="form-text">Revisa tu correo electrónico para obtener el código</div>
                     </div>
                     
                     <button type="submit" class="btn btn-primary w-100 mb-3">
-                        <i class="fas fa-check-circle me-2"></i>Verificar Cuenta
+                        Verificar Cuenta
                     </button>
                 </form>
                 
+                <!-- Resend Code Form -->
                 <div class="text-center">
-                    <hr class="my-3">
-                    <a href="<?= AppConfig::vistaUrl('loginCliente.php') ?>" class="text-decoration-none">
+                    <hr>
+                    <p class="text-muted">¿No recibiste el código?</p>
+                    <form method="POST" class="d-inline">
+                        <input type="hidden" name="correo" value="<?= $correo_prefill ?: htmlspecialchars($_GET['correo'] ?? '') ?>">
+                        <button type="submit" name="resend_code" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-paper-plane me-1"></i>Reenviar código
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <a href="<?= AppConfig::vistaUrl('loginCliente.php') ?>" class="text-decoration-none me-3">
                         <i class="fas fa-arrow-left me-1"></i>Volver al login
                     </a>
-                    <span class="mx-2">|</span>
                     <a href="<?= AppConfig::vistaUrl('registroCliente.php') ?>" class="text-decoration-none">
                         <i class="fas fa-user-plus me-1"></i>Registrarse
                     </a>
                 </div>
             <?php endif; ?>
             
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    // Form validation
-    (function() {
-        'use strict';
-        window.addEventListener('load', function() {
-            var forms = document.getElementsByClassName('needs-validation');
-            var validation = Array.prototype.filter.call(forms, function(form) {
-                form.addEventListener('submit', function(event) {
-                    if (form.checkValidity() === false) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-                    form.classList.add('was-validated');
-                }, false);
-            });
-        }, false);
-    })();
-
-    // Auto-format verification code input
-    const codigoInput = document.querySelector('input[name="codigo"]');
-    if (codigoInput) {
-        codigoInput.addEventListener('input', function(e) {
-            // Only allow numbers
-            e.target.value = e.target.value.replace(/[^0-9]/g, '');
-            
-            // Auto-submit when 6 digits are entered
-            if (e.target.value.length === 6) {
-                // Optional: auto-submit the form
-                // e.target.closest('form').submit();
-            }
-        });
-        
-        // Focus on load if email is prefilled
-        const emailInput = document.querySelector('input[name="correo"]');
-        if (emailInput && emailInput.value.trim() !== '') {
-            codigoInput.focus();
-        }
-    }
-
-    // Auto-hide alerts after 10 seconds
-    setTimeout(function() {
-        const alerts = document.querySelectorAll('.alert');
-        alerts.forEach(function(alert) {
-            if (!alert.classList.contains('alert-success')) {
-                alert.style.transition = 'opacity 0.5s';
-                alert.style.opacity = '0';
-                setTimeout(() => alert.remove(), 500);
-            }
-        });
-    }, 10000);
-</script>
 </body>
 </html>
