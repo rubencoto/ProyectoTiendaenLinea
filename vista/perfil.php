@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($nombre)) $errores[] = "El nombre es obligatorio";
     if (empty($apellidos)) $errores[] = "Los apellidos son obligatorios";
     if (empty($telefono)) $errores[] = "El teléfono es obligatorio";
-    if (empty($direccion)) $errores[] = "La dirección es obligatoria";
+    // Direccion is optional - user can add it later for shipping
     if (empty($provincia)) $errores[] = "La provincia es obligatoria";
     
     // Validar formato de teléfono (básico)
@@ -434,8 +434,9 @@ $conn->close();
                     </div>
 
                     <div class="form-group">
-                        <label for="direccion">Dirección *</label>
-                        <textarea id="direccion" name="direccion" rows="3" required><?php echo htmlspecialchars($cliente['direccion']); ?></textarea>
+                        <label for="direccion">Dirección (opcional - para envío de productos)</label>
+                        <textarea id="direccion" name="direccion" rows="3" placeholder="Ingresa tu dirección para el envío de productos"><?php echo htmlspecialchars($cliente['direccion'] ?? ''); ?></textarea>
+                        <small class="form-text text-muted">Puedes agregar tu dirección ahora o más tarde cuando hagas una compra</small>
                     </div>
 
                     <div class="form-row">
