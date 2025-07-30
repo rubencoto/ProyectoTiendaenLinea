@@ -60,7 +60,7 @@ try {
     ");
     
     $stmt->bind_param(
-        "ssssssis", 
+        "sssssssis", 
         $nombre, $apellidos, $correo, $contrasena, $telefono,
         $fecha_nacimiento, $genero, $newsletter, $codigo_verificacion
     );
