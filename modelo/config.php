@@ -6,7 +6,7 @@
 
 class AppConfig {
     // Your Heroku app URL - UPDATE THIS WITH YOUR ACTUAL HEROKU APP URL
-    const HEROKU_APP_URL = 'https://proyectotiendaenlinea-9acfaa0e4138.herokuapp.com';
+    const HEROKU_APP_URL = 'https://reventazon-27b010286492.herokuapp.com';
     
     // Detect if we're running on Heroku
     public static function isHeroku() {
