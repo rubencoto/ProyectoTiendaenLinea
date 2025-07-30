@@ -20,6 +20,23 @@ require_once '../modelo/config.php';
 <body>
 <div class="container mt-5">
     <h2 class="mb-4">Registro de Emprendedor</h2>
+    
+    <?php if (isset($_GET['error'])): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i> 
+            <?php if ($_GET['error'] === 'email_exists_verified'): ?>
+                <strong>Error:</strong> Este correo electrónico ya está registrado y verificado. 
+                <a href="<?= AppConfig::vistaUrl('loginVendedor.php') ?>" class="alert-link">Inicia sesión aquí</a>
+            <?php elseif ($_GET['error'] === 'invalid_email'): ?>
+                <strong>Error:</strong> El formato del correo electrónico no es válido. Por favor, verifica e intenta nuevamente.
+            <?php else: ?>
+                <strong>Error:</strong> Este correo electrónico ya está registrado. 
+                <a href="<?= AppConfig::vistaUrl('loginVendedor.php') ?>" class="alert-link">¿Ya tienes cuenta? Inicia sesión aquí</a>
+            <?php endif; ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+    
     <form id="registroForm" action="<?= AppConfig::controladorUrl('procesarRegistroVendedor.php') ?>" method="POST" enctype="multipart/form-data">
 
         <div class="mb-3">
