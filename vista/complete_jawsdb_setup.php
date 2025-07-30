@@ -44,27 +44,38 @@ try {
     }
 
     // Add missing columns to existing tables if needed
-    $column_additions = [
-        // If vendedores table is missing columns
-        "ALTER TABLE vendedores ADD COLUMN IF NOT EXISTS direccion1 TEXT" => "Add direccion1 to vendedores",
-        "ALTER TABLE vendedores ADD COLUMN IF NOT EXISTS direccion2 TEXT" => "Add direccion2 to vendedores", 
-        "ALTER TABLE vendedores ADD COLUMN IF NOT EXISTS categoria VARCHAR(100)" => "Add categoria to vendedores",
-        "ALTER TABLE vendedores ADD COLUMN IF NOT EXISTS cedula_juridica VARCHAR(20)" => "Add cedula_juridica to vendedores",
-        
-        // If productos table needs column name fixes
-        "ALTER TABLE productos ADD COLUMN IF NOT EXISTS unidades INT DEFAULT 0" => "Add unidades to productos (if using different name)"
+    // First, check what columns exist in vendedores table
+    $vendedores_result = $conn->query("DESCRIBE vendedores");
+    $vendedores_columns = [];
+    if ($vendedores_result) {
+        while ($row = $vendedores_result->fetch_assoc()) {
+            $vendedores_columns[] = $row['Field'];
+        }
+    }
+
+    $output[] = "Current vendedores columns: " . implode(', ', $vendedores_columns);
+
+    // Define columns to add if they don't exist
+    $columns_to_add = [
+        'direccion1' => "ALTER TABLE vendedores ADD COLUMN direccion1 TEXT",
+        'direccion2' => "ALTER TABLE vendedores ADD COLUMN direccion2 TEXT", 
+        'categoria' => "ALTER TABLE vendedores ADD COLUMN categoria VARCHAR(100)",
+        'cedula_juridica' => "ALTER TABLE vendedores ADD COLUMN cedula_juridica VARCHAR(20)"
     ];
 
-    $output[] = "\nAdding missing columns...";
+    $output[] = "\nAdding missing columns to vendedores...";
 
-    foreach ($column_additions as $sql => $description) {
-        $output[] = "Attempting: $description";
-        
-        if ($conn->query($sql)) {
-            $output[] = "✅ $description - Success";
+    foreach ($columns_to_add as $column_name => $sql) {
+        if (!in_array($column_name, $vendedores_columns)) {
+            $output[] = "Adding column: $column_name";
+            
+            if ($conn->query($sql)) {
+                $output[] = "✅ Added column: $column_name";
+            } else {
+                $output[] = "❌ Error adding $column_name: " . $conn->error;
+            }
         } else {
-            // Don't show error for "IF NOT EXISTS" failures - column might already exist
-            $output[] = "ℹ️ $description - Skipped (column may already exist)";
+            $output[] = "ℹ️ Column $column_name already exists";
         }
     }
 
