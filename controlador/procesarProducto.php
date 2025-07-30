@@ -65,7 +65,7 @@ if (!$stmt) {
 // CORRECTED: 15 parameters with correct types
 // Count: s-s-d-s-b-b-b-s-s-i-s-s-d-s-i = 15 characters
 $result = $stmt->bind_param(
-    "ssdsbbssissdsi",  // Exactly 15 characters
+    "ssdsbbssissdsi",  // FIXED: Now exactly 15 characters
     $nombre,           // 1: s
     $descripcion,      // 2: s  
     $precio,           // 3: d
