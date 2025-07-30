@@ -1,6 +1,7 @@
 <?php
 require_once '../modelo/conexion.php';
 require_once '../modelo/enviarCorreo.php';
+require_once '../modelo/config.php';
 
 // Recolectar datos del formulario
 $nombre_empresa = $_POST['nombre'] ?? ''; // Form sends 'nombre' for company name
@@ -65,6 +66,6 @@ if (!enviarCorreoVerificacion($correo, $codigo_verificacion)) {
 }
 
 // Redirigir a mensaje de éxito
-header("Location: ../vista/mensajeRegistro.php?correo=" . urlencode($correo));
+header("Location: " . AppConfig::vistaUrl('mensajeRegistro.php') . "?correo=" . urlencode($correo));
 exit;
 ?>

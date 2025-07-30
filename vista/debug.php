@@ -34,7 +34,7 @@ echo "AppConfig::controladorUrl('procesarLogin.php'): " . AppConfig::controlador
 
 echo "<h3>🚀 Quick Fix Verification:</h3>";
 echo "<p style='background: #d4edda; padding: 10px; border-radius: 5px;'>";
-echo "✅ Your Heroku URL is now set to: <strong>https://reventazon-27b010286492.herokuapp.com</strong><br>";
+echo "✅ Your Heroku URL is now set to: <strong>https://proyectotiendaenlinea-9acfaa0e4138.herokuapp.com</strong><br>";
 echo "✅ Links should now generate correctly without /vista/ prefix<br>";
 echo "✅ Test the links above to confirm they work!";
 echo "</p>";
