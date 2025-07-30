@@ -30,8 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             error_log("Error al guardar código: " . $update->error);
         }
 
-        // Use centralized configuration for URL generation
-        $enlace = AppConfig::emailUrl('/vista/verificarCodigoReset.php', ['correo' => $correo]);
+        // Use centralized configuration for URL generation  
+        $enlace = AppConfig::emailUrl('verificarCodigoReset.php', ['correo' => $correo]);
 
         // Preparar el mensaje del correo
         $asunto = "Recuperacion de contrasena - Tu Tienda Online";

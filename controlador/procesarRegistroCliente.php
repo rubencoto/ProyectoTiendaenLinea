@@ -89,7 +89,7 @@ try {
         $cliente_id = $conn->insert_id;
         
         // Create dynamic URL that works for both localhost and Heroku
-        $verification_url = AppConfig::emailUrl('/vista/verificarCuentaCliente.php', [
+        $verification_url = AppConfig::emailUrl('verificarCuentaCliente.php', [
             'codigo' => $codigo_verificacion,
             'correo' => $correo
         ]);

@@ -34,7 +34,7 @@ echo "<tr><th>Function</th><th>Generated URL</th></tr>";
 echo "<tr><td>AppConfig::url('/vista/index.php')</td><td>" . AppConfig::url('/vista/index.php') . "</td></tr>";
 echo "<tr><td>AppConfig::vistaUrl('loginCliente.php')</td><td>" . AppConfig::vistaUrl('loginCliente.php') . "</td></tr>";
 echo "<tr><td>AppConfig::controladorUrl('procesarLogin.php')</td><td>" . AppConfig::controladorUrl('procesarLogin.php') . "</td></tr>";
-echo "<tr><td>AppConfig::emailUrl('/vista/verificarCuentaCliente.php', ['codigo' => '123456'])</td><td>" . AppConfig::emailUrl('/vista/verificarCuentaCliente.php', ['codigo' => '123456']) . "</td></tr>";
+echo "<tr><td>AppConfig::emailUrl('verificarCuentaCliente.php', ['codigo' => '123456'])</td><td>" . AppConfig::emailUrl('verificarCuentaCliente.php', ['codigo' => '123456']) . "</td></tr>";
 echo "</table>";
 
 // Environment info

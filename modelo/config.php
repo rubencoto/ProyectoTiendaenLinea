@@ -33,6 +33,11 @@ class AppConfig {
     
     // Create URLs for email links with parameters
     public static function emailUrl($path, $params = []) {
+        // Ensure path starts with / for proper URL construction
+        if (strpos($path, '/') !== 0) {
+            $path = '/' . $path;
+        }
+        
         $url = self::getBaseUrl() . $path;
         if (!empty($params)) {
             $query = http_build_query($params);
