@@ -6,6 +6,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 require_once '../modelo/conexion.php';
+require_once '../modelo/config.php';
 
 $isLoggedIn = !empty($_SESSION['cliente_id']);
 
@@ -217,7 +218,7 @@ $stmt->close();
                 <?php if ($isLoggedIn): ?>
                     <div class="user-info">
                         <span>Bienvenido, Cliente</span>
-                        <a href="carrito.php" class="btn btn-success btn-sm ms-3">
+                        <a href="<?= AppConfig::link('carrito.php') ?>" class="btn btn-success btn-sm ms-3">
                             Ver Carrito
                             <?php 
                             $cantidad_total = 0;
@@ -227,7 +228,7 @@ $stmt->close();
                             ?>
                             <span id="cart-count" class="badge bg-danger ms-1 <?= $cantidad_total > 0 ? '' : 'd-none' ?>"><?= $cantidad_total ?></span>
                         </a>
-                        <a href="inicioCliente.php" class="btn btn-info btn-sm ms-2">Panel</a>
+                        <a href="<?= AppConfig::link('inicioCliente.php') ?>" class="btn btn-info btn-sm ms-2">Panel</a>
                         <a href="?logout=1" class="btn btn-outline-light btn-sm ms-2">Cerrar Sesión</a>
                     </div>
                 <?php else: ?>
@@ -238,8 +239,8 @@ $stmt->close();
             </div>
             <div class="col-md-4 text-end">
                 <?php if (!$isLoggedIn): ?>
-                    <a href="loginCliente.php" class="btn btn-primary btn-sm">Clientes</a>
-                    <a href="loginVendedor.php" class="btn btn-outline-light btn-sm">Vendedores</a>
+                    <a href="<?= AppConfig::link('loginCliente.php') ?>" class="btn btn-primary btn-sm">Clientes</a>
+                    <a href="<?= AppConfig::link('loginVendedor.php') ?>" class="btn btn-outline-light btn-sm">Vendedores</a>
                 <?php endif; ?>
             </div>
         </div>
@@ -263,6 +264,7 @@ $stmt->close();
 <script>
 const productos = <?= json_encode($productos, JSON_HEX_TAG) ?>;
 const isLoggedIn = <?= json_encode($isLoggedIn) ?>;
+const baseUrl = '<?= AppConfig::link('') ?>';
 
 function renderizarProductos(lista) {
     const contenedor = document.getElementById("productosContenedor");
@@ -288,7 +290,7 @@ function renderizarProductos(lista) {
             <div class="vendedor">Vendido por: ${p.vendedor_nombre}</div>
             <div class="descripcion">${p.descripcion || 'Sin descripción disponible'}</div>
             <div class="botones">
-                <a href="productoDetalleCliente.php?id=${p.id}" class="btn-detalle">Ver Detalle</a>
+                <a href="${baseUrl}productoDetalleCliente.php?id=${p.id}" class="btn-detalle">Ver Detalle</a>
                 ${addToCartButton}
             </div>
         `;

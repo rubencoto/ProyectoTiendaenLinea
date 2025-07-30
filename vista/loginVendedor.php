@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../modelo/conexion.php';
+require_once '../modelo/config.php';
 
 $error = '';
 
@@ -70,8 +71,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <div class="text-center mt-3">
-            <p class="small">¿No tienes cuenta? <a href="registroVendedor.php">Regístrate como vendedor</a></p>
-            <p class="small"><a href="index.php">¿Eres cliente? Ingresa aquí</a></p>
+            <p class="small">¿No tienes cuenta? <a href="<?= AppConfig::link('registroVendedor.php') ?>">Regístrate como vendedor</a></p>
+            <p class="small"><a href="<?= AppConfig::link('index.php') ?>">¿Eres cliente? Ingresa aquí</a></p>
         </div>
     </div>
 </body>

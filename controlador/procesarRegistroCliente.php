@@ -1,6 +1,7 @@
 <?php
 require_once '../modelo/conexion.php';
 require_once '../modelo/enviarCorreo.php';
+require_once '../modelo/config.php';
 
 // Recolectar datos del formulario
 $nombre = $_POST['nombre'] ?? '';
@@ -87,6 +88,12 @@ try {
     if ($stmt->execute()) {
         $cliente_id = $conn->insert_id;
         
+        // Create dynamic URL that works for both localhost and Heroku
+        $verification_url = AppConfig::emailUrl('/vista/verificarCuentaCliente.php', [
+            'codigo' => $codigo_verificacion,
+            'correo' => $correo
+        ]);
+
         // Enviar correo de verificación
         $asunto = "Verificación de cuenta - Tienda en Línea";
         $mensaje = "
@@ -95,12 +102,12 @@ try {
         <p>Para activar tu cuenta, usa el siguiente código de verificación:</p>
         <h3 style='background-color: #f0f0f0; padding: 10px; text-align: center; border-radius: 5px;'>$codigo_verificacion</h3>
         <p>Haz clic en el siguiente enlace para verificar tu cuenta:</p>
-        <p><a href='http://localhost/ProyectoTiendaenLinea/vista/verificarCuentaCliente.php?codigo=$codigo_verificacion&correo=" . urlencode($correo) . "' 
+        <p><a href='$verification_url' 
            style='background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>
            Verificar Cuenta
         </a></p>
         <p>Si no puedes hacer clic en el enlace, copia y pega la siguiente URL en tu navegador:</p>
-        <p>http://localhost/ProyectoTiendaenLinea/vista/verificarCuentaCliente.php?codigo=$codigo_verificacion&correo=" . urlencode($correo) . "</p>
+        <p>$verification_url</p>
         <p><small>Este código expira en 24 horas.</small></p>
         ";
 

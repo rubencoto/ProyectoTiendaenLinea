@@ -1,6 +1,7 @@
 <?php
 require_once '../modelo/conexion.php';
 require_once '../modelo/enviarCorreo.php';
+require_once '../modelo/config.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $correo = $_POST['correo'];
@@ -29,7 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             error_log("Error al guardar código: " . $update->error);
         }
 
-        $enlace = "http://localhost/ProyectoTiendaenLinea/vista/verificarCodigoReset.php?correo=" . urlencode($correo);
+        // Use centralized configuration for URL generation
+        $enlace = AppConfig::emailUrl('/vista/verificarCodigoReset.php', ['correo' => $correo]);
 
         // Preparar el mensaje del correo
         $asunto = "Recuperacion de contrasena - Tu Tienda Online";
