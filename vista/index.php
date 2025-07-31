@@ -51,13 +51,14 @@ $stmt = $conn->prepare(
 );
 
 $stmt->execute();
-$resultado = $stmt->get_result();
 $productos = [];
-while ($row = $resultado->fetch_assoc()) {
-    $row['imagen_principal'] = base64_encode($row['imagen_principal']);
+while ($row = $stmt->fetch()) {
+    if ($row['imagen_principal']) {
+        $row['imagen_principal'] = base64_encode($row['imagen_principal']);
+    }
     $productos[] = $row;
 }
-$stmt->close();
+// PDO statements don't need explicit closing
 // Connection managed by singleton, no need to close explicitly
 ?>
 

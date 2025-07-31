@@ -121,11 +121,11 @@ class DatabaseConnection {
             }
             public function query($sql) { return false; }
             public function ping() { return false; }
-            public $error = "Database connection not available";
+            public $error = "Database connection not available - Please configure MySQL extensions";
             public $insert_id = 0;
         };
         $this->connectionType = 'mock';
-        $this->lastError = "No database extensions available";
+        $this->lastError = "No database extensions available. Please install mysqli or pdo_mysql extensions.";
     }
     
     public static function getInstance() {
