@@ -8,6 +8,10 @@ ini_set('display_errors', 1);
 require_once '../modelo/conexion.php';
 require_once '../modelo/config.php';
 
+// Get database connection
+$db = DatabaseConnection::getInstance();
+$conn = $db->getConnection();
+
 $isLoggedIn = !empty($_SESSION['cliente_id']);
 
 // Handle logout
@@ -48,7 +52,6 @@ $stmt = $conn->prepare(
 
 $stmt->execute();
 $resultado = $stmt->get_result();
-
 $productos = [];
 while ($row = $resultado->fetch_assoc()) {
     $row['imagen_principal'] = base64_encode($row['imagen_principal']);
