@@ -10,13 +10,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $contrasena = $_POST['contrasena'] ?? '';
 
     $stmt = $conn->prepare("SELECT id, contrasena, verificado FROM clientes WHERE correo = ?");
-    $stmt->bind_param("s", $correo);
-    $stmt->execute();
-    $stmt->store_result();
+    $stmt->execute([$correo]);
+    $result = $stmt->fetch();
 
-    if ($stmt->num_rows === 1) {
-        $stmt->bind_result($id, $hash, $verificado);
-        $stmt->fetch();
+    if ($result) {
+        $id = $result['id'];
+        $hash = $result['contrasena'];
+        $verificado = $result['verificado'];
 
         if (!$verificado) {
             $error = "La cuenta aún no ha sido verificada.";
@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = "Correo no registrado.";
     }
 
-    $stmt->close();
+    // PDO handles statement cleanup automatically
     // Connection managed by singleton, no need to close explicitly
 }
 ?>

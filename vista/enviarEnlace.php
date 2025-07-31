@@ -7,21 +7,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $correo = $_POST['correo'];
 
     $stmt = $conn->prepare("SELECT id FROM clientes WHERE correo = ?");
-    $stmt->bind_param("s", $correo);
-    $stmt->execute();
-    $stmt->store_result();
+    $stmt->execute([$correo]);
+    $result = $stmt->fetch();
 
-    if ($stmt->num_rows === 1) {
-        $stmt->bind_result($id);
-        $stmt->fetch();
+    if ($result) {
+        $id = $result['id'];
 
         $codigo_verificacion = random_int(100000, 999999);
 
         // Usar solo la columna codigo_verificacion existente para el reset
         $codigo_str = (string)$codigo_verificacion;
         $update = $conn->prepare("UPDATE clientes SET codigo_verificacion = ? WHERE correo = ?");
-        $update->bind_param("ss", $codigo_str, $correo);
-        $result = $update->execute();
+        $updateResult = $update->execute([$codigo_str, $correo]);
         
         // Debug: verificar que se guardó correctamente
         if ($result) {

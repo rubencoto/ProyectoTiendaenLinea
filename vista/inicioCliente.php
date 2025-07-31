@@ -11,18 +11,16 @@ if (!isset($_SESSION['cliente_id'])) {
 require_once '../modelo/conexion.php';
 $cliente_id = $_SESSION['cliente_id'];
 $stmt = $conn->prepare("SELECT nombre, apellido FROM clientes WHERE id = ?");
-$stmt->bind_param("i", $cliente_id);
-$stmt->execute();
-$result = $stmt->get_result();
+$stmt->execute([$cliente_id]);
+$cliente = $stmt->fetch();
 
-if ($result->num_rows > 0) {
-    $cliente = $result->fetch_assoc();
+if ($cliente) {
     $nombre_completo = $cliente['nombre'] . ' ' . $cliente['apellido'];
 } else {
     $nombre_completo = 'Cliente';
 }
 
-$stmt->close();
+// PDO handles statement cleanup automatically
 // Connection managed by singleton, no need to close explicitly
 ?>
 <!DOCTYPE html>
