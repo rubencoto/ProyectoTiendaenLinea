@@ -50,21 +50,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 WHERE id = ?
             ");
             
-            $stmt_update->bind_param(
-                "sssssssii",
+            $executed = $stmt_update->execute([
                 $nombre, $apellidos, $telefono,
                 $direccion, $provincia, $fecha_nacimiento,
                 $genero, $newsletter, $cliente_id
-            );
+            ]);
                 
-            if ($stmt_update->execute()) {
+            if ($executed) {
                 $mensaje = "Perfil actualizado exitosamente";
                 $tipo_mensaje = "success";
             } else {
                 $mensaje = "Error al actualizar el perfil";
                 $tipo_mensaje = "error";
             }
-            $stmt_update->close();
             
         } catch (Exception $e) {
             $mensaje = "Error: " . $e->getMessage();
@@ -84,18 +82,13 @@ $stmt = $conn->prepare("
     FROM clientes 
     WHERE id = ?
 ");
-$stmt->bind_param("i", $cliente_id);
-$stmt->execute();
-$result = $stmt->get_result();
+$stmt->execute([$cliente_id]);
+$cliente = $stmt->fetch();
 
-if ($result->num_rows > 0) {
-    $cliente = $result->fetch_assoc();
-} else {
+if (!$cliente) {
     header('Location: loginCliente.php');
     exit;
 }
-$stmt->close();
-$conn->close();
 ?>
 
 <!DOCTYPE html>
