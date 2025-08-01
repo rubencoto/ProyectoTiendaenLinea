@@ -13,17 +13,14 @@ $cliente_id = $_SESSION['cliente_id'];
 
 // Obtener información del cliente
 $stmt = $conn->prepare("SELECT nombre, apellido FROM clientes WHERE id = ?");
-$stmt->bind_param("i", $cliente_id);
-$stmt->execute();
-$result = $stmt->get_result();
+$stmt->execute([$cliente_id]);
+$cliente_data = $stmt->fetch();
 
-if ($result->num_rows > 0) {
-    $cliente = $result->fetch_assoc();
-    $nombre_completo = $cliente['nombre'] . ' ' . $cliente['apellido'];
+if ($cliente_data) {
+    $nombre_completo = $cliente_data['nombre'] . ' ' . $cliente_data['apellido'];
 } else {
     $nombre_completo = 'Cliente';
 }
-$stmt->close();
 
 // Obtener las órdenes del cliente con paginación
 $limite = 10; // Número de órdenes por página
@@ -32,12 +29,10 @@ $offset = ($pagina - 1) * $limite;
 
 // Contar total de órdenes
 $stmt_count = $conn->prepare("SELECT COUNT(*) as total FROM ordenes WHERE cliente_id = ?");
-$stmt_count->bind_param("i", $cliente_id);
-$stmt_count->execute();
-$result_count = $stmt_count->get_result();
-$total_ordenes = $result_count->fetch_assoc()['total'];
+$stmt_count->execute([$cliente_id]);
+$count_result = $stmt_count->fetch();
+$total_ordenes = $count_result['total'];
 $total_paginas = ceil($total_ordenes / $limite);
-$stmt_count->close();
 
 // Obtener órdenes del cliente
 $stmt_ordenes = $conn->prepare("
@@ -46,17 +41,14 @@ $stmt_ordenes = $conn->prepare("
     FROM ordenes o 
     WHERE o.cliente_id = ? 
     ORDER BY o.fecha_orden DESC 
-    LIMIT ? OFFSET ?
+    LIMIT $limite OFFSET $offset
 ");
-$stmt_ordenes->bind_param("iii", $cliente_id, $limite, $offset);
-$stmt_ordenes->execute();
-$result_ordenes = $stmt_ordenes->get_result();
+$stmt_ordenes->execute([$cliente_id]);
 
 $ordenes = [];
-while ($row = $result_ordenes->fetch_assoc()) {
+while ($row = $stmt_ordenes->fetch()) {
     $ordenes[] = $row;
 }
-$stmt_ordenes->close();
 
 // Para cada orden, obtener los productos
 foreach ($ordenes as &$orden) {
@@ -67,22 +59,18 @@ foreach ($ordenes as &$orden) {
         JOIN productos p ON dp.producto_id = p.id
         WHERE dp.orden_id = ?
     ");
-    $stmt_detalle->bind_param("i", $orden['id']);
-    $stmt_detalle->execute();
-    $result_detalle = $stmt_detalle->get_result();
+    $stmt_detalle->execute([$orden['id']]);
     
     $productos = [];
-    while ($row_detalle = $result_detalle->fetch_assoc()) {
+    while ($row_detalle = $stmt_detalle->fetch()) {
         if ($row_detalle['imagen_principal']) {
             $row_detalle['imagen_principal'] = base64_encode($row_detalle['imagen_principal']);
         }
         $productos[] = $row_detalle;
     }
     $orden['productos'] = $productos;
-    $stmt_detalle->close();
 }
 
-$conn->close();
 ?>
 
 <!DOCTYPE html>
