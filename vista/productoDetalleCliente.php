@@ -23,12 +23,9 @@ $stmt = $conn->prepare("
     JOIN vendedores v ON p.id_vendedor = v.id 
     WHERE p.id = ?
 ");
-$stmt->bind_param("i", $id);
-$stmt->execute();
-$resultado = $stmt->get_result();
-$producto = $resultado->fetch_assoc();
-$stmt->close();
-$conn->close();
+$stmt->execute([$id]);
+$producto = $stmt->fetch();
+// PDO automatically handles cleanup - no need to close
 
 if (!$producto) {
     echo "Producto no encontrado";
