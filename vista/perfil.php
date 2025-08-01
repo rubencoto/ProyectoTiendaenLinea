@@ -28,7 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validaciones básicas
     $errores = [];
     
-    if (empty($nombre)) $errores[] = "El nombre es obligatorio";
     if (empty($apellidos)) $errores[] = "Los apellidos son obligatorios";
     if (empty($telefono)) $errores[] = "El teléfono es obligatorio";
     // Direccion is optional - user can add it later for shipping
@@ -41,24 +40,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if (empty($errores)) {
         try {
-            // Actualizar información del cliente
+            // Actualizar información del cliente (excluding nombre and fecha_nacimiento)
             $stmt_update = $conn->prepare("
                 UPDATE clientes SET 
-                    nombre = ?, apellido = ?, telefono = ?, 
-                    direccion = ?, provincia = ?, fecha_nacimiento = ?, 
+                    apellido = ?, telefono = ?, 
+                    direccion = ?, provincia = ?, 
                     genero = ?, newsletter = ?
                 WHERE id = ?
             ");
             
             $executed = $stmt_update->execute([
-                $nombre, $apellidos, $telefono,
-                $direccion, $provincia, $fecha_nacimiento,
+                $apellidos, $telefono,
+                $direccion, $provincia, 
                 $genero, $newsletter, $cliente_id
             ]);
                 
             if ($executed) {
                 $mensaje = "Perfil actualizado exitosamente";
                 $tipo_mensaje = "success";
+                
+                // Refresh client data after successful update
+                $stmt_refresh = $conn->prepare("
+                    SELECT nombre, apellido, correo, telefono, direccion, 
+                           provincia, fecha_nacimiento, genero, newsletter, 
+                           verificado, fecha_registro
+                    FROM clientes 
+                    WHERE id = ?
+                ");
+                $stmt_refresh->execute([$cliente_id]);
+                $cliente = $stmt_refresh->fetch();
             } else {
                 $mensaje = "Error al actualizar el perfil";
                 $tipo_mensaje = "error";
@@ -74,20 +84,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Obtener información actual del cliente
-$stmt = $conn->prepare("
-    SELECT nombre, apellido, correo, telefono, direccion, 
-           provincia, fecha_nacimiento, genero, newsletter, 
-           verificado, fecha_registro
-    FROM clientes 
-    WHERE id = ?
-");
-$stmt->execute([$cliente_id]);
-$cliente = $stmt->fetch();
+// Obtener información actual del cliente (only if not already loaded from update)
+if (!isset($cliente)) {
+    $stmt = $conn->prepare("
+        SELECT nombre, apellido, correo, telefono, direccion, 
+               provincia, fecha_nacimiento, genero, newsletter, 
+               verificado, fecha_registro
+        FROM clientes 
+        WHERE id = ?
+    ");
+    $stmt->execute([$cliente_id]);
+    $cliente = $stmt->fetch();
 
-if (!$cliente) {
-    header('Location: loginCliente.php');
-    exit;
+    if (!$cliente) {
+        header('Location: loginCliente.php');
+        exit;
+    }
 }
 ?>
 
@@ -397,9 +409,12 @@ if (!$cliente) {
                 <form method="POST" action="perfil.php">
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="nombre">Nombre *</label>
+                            <label for="nombre">Nombre</label>
                             <input type="text" id="nombre" name="nombre" 
-                                   value="<?php echo htmlspecialchars($cliente['nombre']); ?>" required>
+                                   value="<?php echo htmlspecialchars($cliente['nombre']); ?>" readonly>
+                            <small style="color: #666; font-size: 14px;">
+                                El nombre no se puede cambiar. Si necesitas modificarlo, contacta soporte.
+                            </small>
                         </div>
                         <div class="form-group">
                             <label for="apellidos">Apellidos *</label>
@@ -449,7 +464,10 @@ if (!$cliente) {
                         <div class="form-group">
                             <label for="fecha_nacimiento">Fecha de Nacimiento</label>
                             <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" 
-                                   value="<?php echo $cliente['fecha_nacimiento']; ?>">
+                                   value="<?php echo $cliente['fecha_nacimiento']; ?>" readonly>
+                            <small style="color: #666; font-size: 14px;">
+                                La fecha de nacimiento no se puede cambiar. Si necesitas modificarla, contacta soporte.
+                            </small>
                         </div>
                     </div>
 
