@@ -28,7 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validaciones básicas
     $errores = [];
     
-    if (empty($apellidos)) $errores[] = "Los apellidos son obligatorios";
     if (empty($telefono)) $errores[] = "El teléfono es obligatorio";
     // Direccion is optional - user can add it later for shipping
     if (empty($provincia)) $errores[] = "La provincia es obligatoria";
@@ -40,18 +39,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if (empty($errores)) {
         try {
-            // Actualizar información del cliente (excluding nombre and fecha_nacimiento)
+            // Actualizar información del cliente (excluding nombre, apellido and fecha_nacimiento)
             $stmt_update = $conn->prepare("
                 UPDATE clientes SET 
-                    apellido = ?, telefono = ?, 
-                    direccion = ?, provincia = ?, 
+                    telefono = ?, direccion = ?, provincia = ?, 
                     genero = ?, newsletter = ?
                 WHERE id = ?
             ");
             
             $executed = $stmt_update->execute([
-                $apellidos, $telefono,
-                $direccion, $provincia, 
+                $telefono, $direccion, $provincia, 
                 $genero, $newsletter, $cliente_id
             ]);
                 
@@ -417,9 +414,12 @@ if (!isset($cliente)) {
                             </small>
                         </div>
                         <div class="form-group">
-                            <label for="apellidos">Apellidos *</label>
+                            <label for="apellidos">Apellidos</label>
                             <input type="text" id="apellidos" name="apellidos" 
-                                   value="<?php echo htmlspecialchars($cliente['apellido']); ?>" required>
+                                   value="<?php echo htmlspecialchars($cliente['apellido']); ?>" readonly>
+                            <small style="color: #666; font-size: 14px;">
+                                Los apellidos no se pueden cambiar. Si necesitas modificarlos, contacta soporte.
+                            </small>
                         </div>
                     </div>
 
