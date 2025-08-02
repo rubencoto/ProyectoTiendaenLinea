@@ -77,7 +77,7 @@ try {
     $total_final = $total + $envio;
     
     // Iniciar transacción para garantizar consistencia
-    $conn->begin_transaction();
+    $conn->beginTransaction();
     
     try {
         // Insertar orden en la tabla ordenes
@@ -85,10 +85,8 @@ try {
             INSERT INTO ordenes (numero_orden, cliente_id, subtotal, envio, total, estado, fecha_orden) 
             VALUES (?, ?, ?, ?, ?, 'pendiente', NOW())
         ");
-        $stmt_orden->bind_param("siddd", $numero_orden, $_SESSION['cliente_id'], $total, $envio, $total_final);
-        $stmt_orden->execute();
-        $orden_id = $conn->insert_id;
-        $stmt_orden->close();
+        $stmt_orden->execute([$numero_orden, $cliente_id, $total, $envio, $total_final]);
+        $orden_id = $conn->lastInsertId();
         
         // Insertar detalles de la orden en detalle_pedidos
         $stmt_detalle = $conn->prepare("
@@ -97,25 +95,21 @@ try {
         ");
         
         foreach ($productos_comprados as $producto) {
-            $stmt_detalle->bind_param("iiidd", $orden_id, $producto['id'], $producto['cantidad'], $producto['precio'], $producto['subtotal']);
-            $stmt_detalle->execute();
+            $stmt_detalle->execute([$orden_id, $producto['producto_id'], $producto['cantidad'], $producto['precio'], $producto['subtotal']]);
         }
-        $stmt_detalle->close();
         
         // Actualizar stock de productos
         $stmt_stock = $conn->prepare("UPDATE productos SET unidades = unidades - ? WHERE id = ?");
         foreach ($productos_comprados as $producto) {
-            $stmt_stock->bind_param("ii", $producto['cantidad'], $producto['id']);
-            $stmt_stock->execute();
+            $stmt_stock->execute([$producto['cantidad'], $producto['producto_id']]);
         }
-        $stmt_stock->close();
         
         // Confirmar transacción
         $conn->commit();
         
     } catch (Exception $e) {
         // Revertir transacción en caso de error
-        $conn->rollback();
+        $conn->rollBack();
         throw new Exception("Error al guardar la orden en la base de datos: " . $e->getMessage());
     }
     
