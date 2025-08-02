@@ -93,37 +93,37 @@ if (!$producto) {
 
         <div class="mb-3">
             <label>Tallas</label>
-            <input type="text" name="tallas" class="form-control" value="<?= htmlspecialchars($producto['tallas']) ?>">
+            <input type="text" name="tallas" class="form-control" value="<?= htmlspecialchars($producto['tallas'] ?? '') ?>">
         </div>
 
         <div class="mb-3">
             <label>Color</label>
-            <input type="text" name="color" class="form-control" value="<?= htmlspecialchars($producto['color']) ?>">
+            <input type="text" name="color" class="form-control" value="<?= htmlspecialchars($producto['color'] ?? '') ?>">
         </div>
 
         <div class="mb-3">
             <label>Stock Disponible</label>
-            <input type="number" name="stock" class="form-control" value="<?= htmlspecialchars($producto['stock']) ?>">
+            <input type="number" name="stock" class="form-control" value="<?= htmlspecialchars($producto['stock'] ?? 0) ?>">
         </div>
 
         <div class="mb-3">
             <label>Garantía</label>
-            <input type="text" name="garantia" class="form-control" value="<?= htmlspecialchars($producto['garantia']) ?>">
+            <input type="text" name="garantia" class="form-control" value="<?= htmlspecialchars($producto['garantia'] ?? '') ?>">
         </div>
 
         <div class="mb-3">
             <label>Dimensiones</label>
-            <input type="text" name="dimensiones" class="form-control" value="<?= htmlspecialchars($producto['dimensiones']) ?>">
+            <input type="text" name="dimensiones" class="form-control" value="<?= htmlspecialchars($producto['dimensiones'] ?? '') ?>">
         </div>
 
         <div class="mb-3">
             <label>Peso (kg)</label>
-            <input type="number" step="0.01" name="peso" class="form-control" value="<?= htmlspecialchars($producto['peso']) ?>">
+            <input type="number" step="0.01" name="peso" class="form-control" value="<?= htmlspecialchars($producto['peso'] ?? 0) ?>">
         </div>
 
         <div class="mb-3">
             <label>Tamaño del empaque</label>
-            <input type="text" name="tamano_empaque" class="form-control" value="<?= htmlspecialchars($producto['tamano_empaque']) ?>">
+            <input type="text" name="tamano_empaque" class="form-control" value="<?= htmlspecialchars($producto['tamano_empaque'] ?? '') ?>">
         </div>
 
         <button type="submit" class="btn btn-success">Actualizar</button>
