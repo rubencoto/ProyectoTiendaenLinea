@@ -250,7 +250,7 @@ if (!$producto) {
             <div class="precio-producto">₡<?= number_format($producto['precio'], 0, ',', '.') ?></div>
             
             <?php if ($producto['unidades'] > 0): ?>
-                <div class="disponibilidad">Disponible (<?= $producto['unidades'] ?> unidades)</div>
+                <div class="disponibilidad">Disponible (<?= $producto['stock'] ?> unidades)</div>
             <?php else: ?>
                 <div style="color: #dc3545; font-weight: bold;">Agotado</div>
             <?php endif; ?>
