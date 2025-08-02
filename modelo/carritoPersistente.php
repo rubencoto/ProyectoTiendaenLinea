@@ -16,6 +16,20 @@ class CarritoPersistente {
             // Debug logging
             error_log("CarritoPersistente::agregarProducto - Cliente: $cliente_id, Producto: $producto_id, Cantidad: $cantidad");
             
+            // First, verify the product exists and is active
+            $stmt_verify = $this->conn->prepare("
+                SELECT id, nombre, activo 
+                FROM productos 
+                WHERE id = ? AND activo = 1
+            ");
+            $stmt_verify->execute([$producto_id]);
+            $product_exists = $stmt_verify->fetch();
+            
+            if (!$product_exists) {
+                error_log("CarritoPersistente::agregarProducto - Product $producto_id not found or inactive");
+                return false;
+            }
+            
             // Verificar si el producto ya existe en el carrito
             $stmt = $this->conn->prepare("
                 SELECT id, cantidad 
@@ -131,9 +145,9 @@ class CarritoPersistente {
             $result = [];
             foreach ($cart_items as $item) {
                 $stmt_product = $this->conn->prepare("
-                    SELECT p.id, p.nombre, p.precio, p.imagen1, p.imagen_principal, p.stock, p.id_vendedor
+                    SELECT p.id, p.nombre, p.precio, p.imagen_principal, p.stock, p.id_vendedor, p.activo
                     FROM productos p 
-                    WHERE p.id = ?
+                    WHERE p.id = ? AND p.activo = 1
                 ");
                 $stmt_product->execute([$item['producto_id']]);
                 $product = $stmt_product->fetch(PDO::FETCH_ASSOC);
@@ -141,6 +155,9 @@ class CarritoPersistente {
                 if ($product) {
                     // Merge cart item data with product data
                     $merged = array_merge($item, $product);
+                    
+                    // Map imagen_principal to imagen1 for compatibility
+                    $merged['imagen1'] = $product['imagen_principal'];
                     
                     // Get vendor info
                     if ($product['id_vendedor']) {
@@ -158,7 +175,9 @@ class CarritoPersistente {
                     
                     $result[] = $merged;
                 } else {
-                    error_log("CarritoPersistente::obtenerCarrito - Product not found for producto_id: " . $item['producto_id']);
+                    // Product doesn't exist or is inactive - remove from cart
+                    error_log("CarritoPersistente::obtenerCarrito - Product not found or inactive for producto_id: " . $item['producto_id'] . " - removing from cart");
+                    $this->eliminarProducto($cliente_id, $item['producto_id']);
                 }
             }
             
