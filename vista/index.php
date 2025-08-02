@@ -45,12 +45,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isLoggedIn) {
     }
 }
 
-// Get all products
+// Get featured products (limit to 6 for homepage)
 $stmt = $conn->prepare(
     "SELECT p.id, p.nombre, p.precio, p.imagen_principal, p.descripcion, v.nombre_empresa AS vendedor_nombre 
     FROM productos p 
     JOIN vendedores v ON p.id_vendedor = v.id 
-    ORDER BY p.id DESC"
+    ORDER BY p.id DESC 
+    LIMIT 6"
 );
 
 $stmt->execute();
@@ -215,7 +216,7 @@ while ($row = $stmt->fetch()) {
 <script src="js/cart-utils.js"></script>
 
 <div class="header">
-    <h1>Tienda en Línea - Catálogo de Productos</h1>
+    <h1>Tienda en Línea - Productos Destacados</h1>
 </div>
 
 <div class="login-bar">
@@ -264,6 +265,7 @@ while ($row = $stmt->fetch()) {
         <option value="precio_desc">Precio mayor a menor</option>
     </select>
     <button id="aplicarBtn">Buscar</button>
+    <a href="<?= AppConfig::link('catalogo.php') ?>" id="catalogoBtn" style="padding: 10px 20px; background-color: #ff9900; color: white; border: none; border-radius: 5px; text-decoration: none; font-weight: bold; display: inline-block;">Ver Catálogo Completo</a>
 </div>
 
 <div id="productosContenedor"></div>

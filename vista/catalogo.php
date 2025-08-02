@@ -1,13 +1,33 @@
 <?php
 session_start();
+require_once '../modelo/conexion.php';
+require_once '../modelo/config.php';
 
-// Si no hay cliente autenticado, redirige al login
-if (empty($_SESSION['cliente_id'])) {
-    header('Location: loginCliente.php');
-    exit;
+// Check if user is logged in (optional for catalog viewing)
+$isLoggedIn = !empty($_SESSION['cliente_id']);
+
+// Include persistent cart model if user is logged in
+if ($isLoggedIn) {
+    require_once '../modelo/carritoPersistente.php';
+    $carritoPersistente = new CarritoPersistente();
+    $cliente_id = $_SESSION['cliente_id'];
 }
 
-require_once '../modelo/conexion.php';
+// Handle cart operations (only for logged in users)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isLoggedIn) {
+    $accion = $_POST['accion'] ?? '';
+    $producto_id = intval($_POST['producto_id'] ?? 0);
+    
+    if ($accion === 'agregar') {
+        $resultado = $carritoPersistente->agregarProducto($cliente_id, $producto_id, 1);
+        if ($resultado) {
+            echo json_encode(['status' => 'success', 'mensaje' => 'Producto agregado al carrito']);
+        } else {
+            echo json_encode(['status' => 'error', 'mensaje' => 'Error al agregar producto']);
+        }
+        exit;
+    }
+}
 
 // Obtener todos los productos disponibles
 $stmt = $conn->prepare(
@@ -17,17 +37,14 @@ $stmt = $conn->prepare(
     ORDER BY p.id DESC"
 );
 
-
 $stmt->execute();
-$resultado = $stmt->get_result();
-
 $productos = [];
-while ($row = $resultado->fetch_assoc()) {
-    $row['imagen_principal'] = base64_encode($row['imagen_principal']);
+while ($row = $stmt->fetch()) {
+    if ($row['imagen_principal']) {
+        $row['imagen_principal'] = base64_encode($row['imagen_principal']);
+    }
     $productos[] = $row;
 }
-$stmt->close();
-$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -183,20 +200,25 @@ $conn->close();
     <h1>Catálogo de Productos</h1>
 </div>
 
-<a href="inicioCliente.php" class="volver-btn">← Volver al Inicio</a>
+<a href="<?= AppConfig::link('index.php') ?>" class="volver-btn">← Volver al Inicio</a>
 
+<?php if ($isLoggedIn): ?>
 <div style="text-align: right; margin-bottom: 10px;">
     <a href="carrito.php" style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; font-weight: bold;">
         Ver Carrito
         <?php 
-        $cantidad_total = 0;
-        if (isset($_SESSION['carrito'])) {
-            $cantidad_total = array_sum($_SESSION['carrito']);
-        }
+        $cantidad_total = $carritoPersistente->contarProductos($cliente_id);
         ?>
         <span id="cart-count" style="background-color: #dc3545; border-radius: 50%; padding: 2px 6px; font-size: 0.8em; margin-left: 5px; <?= $cantidad_total > 0 ? '' : 'display: none;' ?>"><?= $cantidad_total ?></span>
     </a>
+    <a href="inicioCliente.php" style="background-color: #007185; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; font-weight: bold; margin-left: 10px;">Panel Cliente</a>
 </div>
+<?php else: ?>
+<div style="text-align: right; margin-bottom: 10px;">
+    <a href="<?= AppConfig::link('loginCliente.php') ?>" style="background-color: #007185; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; font-weight: bold;">Iniciar Sesión</a>
+    <a href="<?= AppConfig::link('loginVendedor.php') ?>" style="background-color: #6c757d; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; font-weight: bold; margin-left: 10px;">Vendedores</a>
+</div>
+<?php endif; ?>
 
 <div class="busqueda-container">
     <input type="text" id="busqueda" placeholder="Buscar productos...">
@@ -214,6 +236,7 @@ $conn->close();
 
 <script>
 const productos = <?= json_encode($productos, JSON_HEX_TAG) ?>;
+const isLoggedIn = <?= json_encode($isLoggedIn) ?>;
 
 function renderizarProductos(lista) {
     const contenedor = document.getElementById("productosContenedor");
@@ -235,7 +258,7 @@ function renderizarProductos(lista) {
             <div class="descripcion">${p.descripcion || 'Sin descripción disponible'}</div>
             <div class="botones">
                 <a href="productoDetalleCliente.php?id=${p.id}" class="btn-detalle">Ver Detalle</a>
-                <button onclick="agregarAlCarrito(${p.id})" class="btn-carrito">Agregar</button>
+                ${isLoggedIn ? `<button onclick="agregarAlCarrito(${p.id})" class="btn-carrito">Agregar</button>` : `<a href="loginCliente.php" class="btn-carrito" style="text-decoration: none;">Iniciar Sesión</a>`}
             </div>
         `;
         contenedor.appendChild(card);
