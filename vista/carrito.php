@@ -9,10 +9,15 @@ if (empty($_SESSION['cliente_id'])) {
 
 require_once '../modelo/conexion.php';
 require_once '../modelo/config.php';
+require_once '../modelo/carritoPersistente.php';
 
-// Inicializar carrito si no existe
-if (!isset($_SESSION['carrito'])) {
-    $_SESSION['carrito'] = [];
+$cliente_id = $_SESSION['cliente_id'];
+$carritoPersistente = new CarritoPersistente();
+
+// Migrar carrito de sesión a base de datos si existe
+if (isset($_SESSION['carrito']) && !empty($_SESSION['carrito'])) {
+    $carritoPersistente->sincronizarConSesion($cliente_id, $_SESSION['carrito']);
+    unset($_SESSION['carrito']); // Limpiar sesión después de migrar
 }
 
 // Procesar acciones del carrito
@@ -22,65 +27,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     switch ($accion) {
         case 'agregar':
-            if (!isset($_SESSION['carrito'][$producto_id])) {
-                $_SESSION['carrito'][$producto_id] = 0;
+            $resultado = $carritoPersistente->agregarProducto($cliente_id, $producto_id, 1);
+            if ($resultado) {
+                echo json_encode(['status' => 'success', 'mensaje' => 'Producto agregado al carrito']);
+            } else {
+                echo json_encode(['status' => 'error', 'mensaje' => 'Error al agregar producto']);
             }
-            $_SESSION['carrito'][$producto_id]++;
-            echo json_encode(['status' => 'success', 'mensaje' => 'Producto agregado al carrito']);
             exit;
             
         case 'actualizar':
             $cantidad = intval($_POST['cantidad'] ?? 1);
-            if ($cantidad > 0) {
-                $_SESSION['carrito'][$producto_id] = $cantidad;
+            $resultado = $carritoPersistente->actualizarCantidad($cliente_id, $producto_id, $cantidad);
+            if ($resultado) {
+                echo json_encode(['status' => 'success', 'mensaje' => 'Cantidad actualizada']);
             } else {
-                unset($_SESSION['carrito'][$producto_id]);
+                echo json_encode(['status' => 'error', 'mensaje' => 'Error al actualizar cantidad']);
             }
-            echo json_encode(['status' => 'success', 'mensaje' => 'Cantidad actualizada']);
             exit;
             
         case 'eliminar':
-            unset($_SESSION['carrito'][$producto_id]);
-            echo json_encode(['status' => 'success', 'mensaje' => 'Producto eliminado del carrito']);
+            $resultado = $carritoPersistente->eliminarProducto($cliente_id, $producto_id);
+            if ($resultado) {
+                echo json_encode(['status' => 'success', 'mensaje' => 'Producto eliminado del carrito']);
+            } else {
+                echo json_encode(['status' => 'error', 'mensaje' => 'Error al eliminar producto']);
+            }
             exit;
             
         case 'vaciar':
-            $_SESSION['carrito'] = [];
-            echo json_encode(['status' => 'success', 'mensaje' => 'Carrito vaciado']);
+            $resultado = $carritoPersistente->vaciarCarrito($cliente_id);
+            if ($resultado) {
+                echo json_encode(['status' => 'success', 'mensaje' => 'Carrito vaciado']);
+            } else {
+                echo json_encode(['status' => 'error', 'mensaje' => 'Error al vaciar carrito']);
+            }
             exit;
     }
     exit;
 }
 
-// Obtener productos del carrito
-$productos_carrito = [];
+// Obtener productos del carrito desde la base de datos
+$productos_carrito = $carritoPersistente->obtenerCarrito($cliente_id);
 $total = 0;
 
-if (!empty($_SESSION['carrito'])) {
-    $ids = array_keys($_SESSION['carrito']);
-    $placeholders = implode(',', array_fill(0, count($ids), '?'));
+// Calcular total
+foreach ($productos_carrito as &$producto) {
+    $producto['subtotal'] = $producto['precio'] * $producto['cantidad'];
+    $total += $producto['subtotal'];
     
-    $stmt = $conn->prepare("
-        SELECT p.id, p.nombre, p.precio, p.imagen_principal, v.nombre_empresa as vendedor_nombre 
-        FROM productos p 
-        JOIN vendedores v ON p.id_vendedor = v.id 
-        WHERE p.id IN ($placeholders)
-    ");
-    
-    $types = str_repeat('i', count($ids));
-    $stmt->bind_param($types, ...$ids);
-    $stmt->execute();
-    $resultado = $stmt->get_result();
-    
-    while ($row = $resultado->fetch_assoc()) {
-        $row['cantidad'] = $_SESSION['carrito'][$row['id']];
-        $row['subtotal'] = $row['precio'] * $row['cantidad'];
-        $row['imagen_principal'] = base64_encode($row['imagen_principal']);
-        $productos_carrito[] = $row;
-        $total += $row['subtotal'];
+    // Convertir imagen a base64 si existe
+    if ($producto['imagen1']) {
+        $producto['imagen_principal'] = base64_encode($producto['imagen1']);
     }
-    $stmt->close();
 }
+unset($producto); // Romper la referencia
 ?>
 
 <!DOCTYPE html>
@@ -312,7 +312,7 @@ if (!empty($_SESSION['carrito'])) {
         
         <div class="resumen-carrito">
             <div class="total-line">
-                <span>Subtotal (<?= array_sum($_SESSION['carrito']) ?> productos):</span>
+                <span>Subtotal (<?= array_sum(array_column($productos_carrito, 'cantidad')) ?> productos):</span>
                 <span>₡<?= number_format($total, 0, ',', '.') ?></span>
             </div>
             <div class="total-line">

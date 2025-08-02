@@ -21,9 +21,11 @@ if (isset($_GET['logout'])) {
     exit;
 }
 
-// Initialize cart if not exists
-if (!isset($_SESSION['carrito'])) {
-    $_SESSION['carrito'] = [];
+// Include persistent cart model if user is logged in
+if ($isLoggedIn) {
+    require_once '../modelo/carritoPersistente.php';
+    $carritoPersistente = new CarritoPersistente();
+    $cliente_id = $_SESSION['cliente_id'];
 }
 
 // Handle cart operations (only for logged in users)
@@ -33,11 +35,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isLoggedIn) {
     
     switch ($accion) {
         case 'agregar':
-            if (!isset($_SESSION['carrito'][$producto_id])) {
-                $_SESSION['carrito'][$producto_id] = 0;
+            $resultado = $carritoPersistente->agregarProducto($cliente_id, $producto_id, 1);
+            if ($resultado) {
+                echo json_encode(['status' => 'success', 'mensaje' => 'Producto agregado al carrito']);
+            } else {
+                echo json_encode(['status' => 'error', 'mensaje' => 'Error al agregar producto']);
             }
-            $_SESSION['carrito'][$producto_id]++;
-            echo json_encode(['status' => 'success', 'mensaje' => 'Producto agregado al carrito']);
             exit;
     }
 }
@@ -226,8 +229,8 @@ while ($row = $stmt->fetch()) {
                             Ver Carrito
                             <?php 
                             $cantidad_total = 0;
-                            if (isset($_SESSION['carrito'])) {
-                                $cantidad_total = array_sum($_SESSION['carrito']);
+                            if ($isLoggedIn) {
+                                $cantidad_total = $carritoPersistente->contarProductos($cliente_id);
                             }
                             ?>
                             <span id="cart-count" class="badge bg-danger ms-1 <?= $cantidad_total > 0 ? '' : 'd-none' ?>"><?= $cantidad_total ?></span>

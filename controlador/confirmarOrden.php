@@ -2,6 +2,7 @@
 session_start();
 require_once '../modelo/conexion.php';
 require_once '../modelo/enviarCorreo.php';
+require_once '../modelo/carritoPersistente.php';
 
 // Verificar que el usuario esté autenticado
 if (empty($_SESSION['cliente_id'])) {
@@ -9,8 +10,12 @@ if (empty($_SESSION['cliente_id'])) {
     exit;
 }
 
+$cliente_id = $_SESSION['cliente_id'];
+$carritoPersistente = new CarritoPersistente();
+
 // Verificar que hay productos en el carrito
-if (empty($_SESSION['carrito'])) {
+$productos_carrito = $carritoPersistente->obtenerCarrito($cliente_id);
+if (empty($productos_carrito)) {
     header('Location: ../vista/carrito.php');
     exit;
 }
@@ -18,50 +23,37 @@ if (empty($_SESSION['carrito'])) {
 try {
     // Obtener información del cliente
     $stmt = $conn->prepare("SELECT nombre, apellido, correo FROM clientes WHERE id = ?");
-    $stmt->bind_param("i", $_SESSION['cliente_id']);
-    $stmt->execute();
-    $cliente = $stmt->get_result()->fetch_assoc();
-    $stmt->close();
+    $stmt->execute([$cliente_id]);
+    $cliente = $stmt->fetch();
 
     if (!$cliente) {
         throw new Exception("Cliente no encontrado");
     }
 
-    // Obtener productos del carrito con información del vendedor
-    $ids = array_keys($_SESSION['carrito']);
-    $placeholders = implode(',', array_fill(0, count($ids), '?'));
-    
-    $stmt = $conn->prepare("
-        SELECT p.id, p.nombre, p.precio, p.imagen_principal, v.nombre_empresa as vendedor_nombre, v.correo as vendedor_correo, p.id_vendedor
-        FROM productos p 
-        JOIN vendedores v ON p.id_vendedor = v.id 
-        WHERE p.id IN ($placeholders)
-    ");
-    
-    $types = str_repeat('i', count($ids));
-    $stmt->bind_param($types, ...$ids);
-    $stmt->execute();
-    $resultado = $stmt->get_result();
-    
+    // Los productos del carrito ya están cargados desde la base de datos
     $productos_comprados = [];
     $vendedores_notificar = [];
     $total = 0;
     
-    while ($row = $resultado->fetch_assoc()) {
-        $row['cantidad'] = $_SESSION['carrito'][$row['id']];
-        $row['subtotal'] = $row['precio'] * $row['cantidad'];
-        $productos_comprados[] = $row;
-        $total += $row['subtotal'];
+    foreach ($productos_carrito as $producto) {
+        $producto['subtotal'] = $producto['precio'] * $producto['cantidad'];
+        $productos_comprados[] = $producto;
+        $total += $producto['subtotal'];
+        
+        // Obtener información del vendedor para notificaciones
+        $stmt_vendedor = $conn->prepare("SELECT nombre_empresa, correo FROM vendedores WHERE id = ?");
+        $stmt_vendedor->execute([$producto['id_vendedor']]);
+        $vendedor = $stmt_vendedor->fetch();
         
         // Agrupar productos por vendedor para las notificaciones
-        if (!isset($vendedores_notificar[$row['id_vendedor']])) {
-            $vendedores_notificar[$row['id_vendedor']] = [
-                'nombre_empresa' => $row['vendedor_nombre'],
-                'correo' => $row['vendedor_correo'],
+        if (!isset($vendedores_notificar[$producto['id_vendedor']])) {
+            $vendedores_notificar[$producto['id_vendedor']] = [
+                'nombre_empresa' => $vendedor['nombre_empresa'],
+                'correo' => $vendedor['correo'],
                 'productos' => []
             ];
         }
-        $vendedores_notificar[$row['id_vendedor']]['productos'][] = $row;
+        $vendedores_notificar[$producto['id_vendedor']]['productos'][] = $producto;
     }
     $stmt->close();
 
@@ -246,7 +238,7 @@ try {
     }
 
     // Limpiar el carrito después del envío exitoso
-    $_SESSION['carrito'] = [];
+    $carritoPersistente->vaciarCarrito($cliente_id);
 
     // Mostrar página de confirmación
     echo '
