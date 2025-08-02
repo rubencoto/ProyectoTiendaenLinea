@@ -212,13 +212,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
                 
                 <!-- Stock Status Indicator -->
                 <div class="stock-indicator <?= $producto['stock'] <= 0 ? 'stock-out' : ($producto['stock'] <= 5 ? 'stock-low' : 'stock-ok') ?>">
-                    📦 Stock Actual: <?= $producto['stock'] ?> unidades
+                    Stock Actual: <?= $producto['stock'] ?> unidades
                     <?php if ($producto['stock'] <= 0): ?>
-                        | ⚠️ AGOTADO
+                        | AGOTADO
                     <?php elseif ($producto['stock'] <= 5): ?>
-                        | ⚠️ STOCK BAJO
+                        | STOCK BAJO
                     <?php else: ?>
-                        | ✅ EN STOCK
+                        | EN STOCK
                     <?php endif; ?>
                 </div>
                 
@@ -237,16 +237,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
                 <?php endif; ?>
 
                 <div class="btn-group">
-                    <a href="editarProducto.php?id=<?= $producto['id'] ?>" class="btn btn-primary">✏️ Editar Producto</a>
-                    <button class="btn btn-danger" onclick="eliminarProducto(<?= $producto['id'] ?>)">🗑️ Eliminar</button>
-                    <a href="productos.php" class="btn btn-secondary">← Volver a Productos</a>
+                    <a href="editarProducto.php?id=<?= $producto['id'] ?>" class="btn btn-primary">Editar Producto</a>
+                    <button class="btn btn-danger" onclick="eliminarProducto(<?= $producto['id'] ?>)">Eliminar</button>
+                    <a href="productos.php" class="btn btn-secondary">Volver a Productos</a>
                 </div>
             </div>
         </div>
 
         <!-- Stock Management Section -->
         <div class="stock-section">
-            <h4>🔄 Gestión de Inventario</h4>
+            <h4>Gestión de Inventario</h4>
             <p class="text-muted">Actualiza las cantidades de stock y unidades para mantener el inventario sincronizado.</p>
             
             <form method="POST" class="stock-form">
@@ -267,13 +267,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
                 </div>
                 
                 <div>
-                    <button type="submit" class="btn btn-success">💾 Actualizar Stock</button>
+                    <button type="submit" class="btn btn-success">Actualizar Stock</button>
                 </div>
             </form>
             
             <div class="mt-3">
                 <small class="text-info">
-                    💡 <strong>Tip:</strong> Mantén ambos valores sincronizados. El stock es lo que ven los clientes, 
+                    <strong>Tip:</strong> Mantén ambos valores sincronizados. El stock es lo que ven los clientes, 
                     las unidades se usan para control interno y reportes.
                 </small>
             </div>
