@@ -36,11 +36,11 @@ $total_paginas = ceil($total_ordenes / $limite);
 
 // Obtener órdenes del cliente
 $stmt_ordenes = $conn->prepare("
-    SELECT o.id, o.numero_orden, o.subtotal, o.envio, o.total, 
-           o.estado, o.fecha_orden
+    SELECT o.id, o.total, o.estado, o.fecha_pedido, 
+           o.direccion_envio, o.telefono_contacto
     FROM pedidos o 
     WHERE o.cliente_id = ? 
-    ORDER BY o.fecha_orden DESC 
+    ORDER BY o.fecha_pedido DESC 
     LIMIT $limite OFFSET $offset
 ");
 $stmt_ordenes->execute([$cliente_id]);
@@ -320,12 +320,12 @@ foreach ($ordenes as &$orden) {
                 <div class="orden-card">
                     <div class="orden-header">
                         <div class="orden-info">
-                            <strong>Número de Orden</strong>
-                            <span><?php echo htmlspecialchars($orden['numero_orden']); ?></span>
+                            <strong>ID de Pedido</strong>
+                            <span>#<?php echo htmlspecialchars($orden['id']); ?></span>
                         </div>
                         <div class="orden-info">
                             <strong>Fecha del Pedido</strong>
-                            <span><?php echo date('d/m/Y H:i', strtotime($orden['fecha_orden'])); ?></span>
+                            <span><?php echo date('d/m/Y H:i', strtotime($orden['fecha_pedido'])); ?></span>
                         </div>
                         <div class="orden-info">
                             <strong>Estado</strong>
@@ -373,16 +373,20 @@ foreach ($ordenes as &$orden) {
                     </div>
 
                     <div class="orden-total">
+                        <?php if (!empty($orden['direccion_envio'])): ?>
                         <div class="total-linea">
-                            <span>Subtotal:</span>
-                            <span>$<?php echo number_format($orden['subtotal'], 2); ?></span>
+                            <span>Dirección de envío:</span>
+                            <span><?php echo htmlspecialchars($orden['direccion_envio']); ?></span>
                         </div>
+                        <?php endif; ?>
+                        <?php if (!empty($orden['telefono_contacto'])): ?>
                         <div class="total-linea">
-                            <span>Envío:</span>
-                            <span>$<?php echo number_format($orden['envio'], 2); ?></span>
+                            <span>Teléfono de contacto:</span>
+                            <span><?php echo htmlspecialchars($orden['telefono_contacto']); ?></span>
                         </div>
+                        <?php endif; ?>
                         <div class="total-linea total-final">
-                            <span>Total:</span>
+                            <span>Total del Pedido:</span>
                             <span>$<?php echo number_format($orden['total'], 2); ?></span>
                         </div>
                     </div>
