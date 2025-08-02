@@ -243,8 +243,8 @@ if (!isset($_SESSION['id'])) {
         <label>Color</label>
         <input type="text" name="color">
 
-        <label>Unidades</label>
-        <input type="number" name="unidades">
+        <label>Stock Disponible</label>
+        <input type="number" name="stock">
 
         <label>Garantía</label>
         <input type="text" name="garantia">

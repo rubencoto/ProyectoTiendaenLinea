@@ -89,8 +89,8 @@ if (!$producto) {
         </div>
 
         <div class="mb-3">
-            <label>Unidades</label>
-            <input type="number" name="unidades" class="form-control" value="<?= htmlspecialchars($producto['unidades']) ?>">
+            <label>Stock Disponible</label>
+            <input type="number" name="stock" class="form-control" value="<?= htmlspecialchars($producto['stock']) ?>">
         </div>
 
         <div class="mb-3">

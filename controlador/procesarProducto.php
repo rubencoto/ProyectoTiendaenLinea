@@ -38,7 +38,7 @@ try {
     $categoria = $_POST['categoria'] ?? '';
     $tallas = $_POST['tallas'] ?? '';
     $color = $_POST['color'] ?? '';
-    $unidades = intval($_POST['unidades'] ?? 0);
+    $stock = intval($_POST['stock'] ?? 0);
     $garantia = $_POST['garantia'] ?? '';
     $dimensiones = $_POST['dimensiones'] ?? '';
     $peso = floatval($_POST['peso'] ?? 0);
@@ -70,7 +70,7 @@ try {
     $sql = "INSERT INTO productos (
         nombre, descripcion, precio, categoria, 
         imagen_principal, imagen_secundaria1, imagen_secundaria2, 
-        tallas, color, unidades, garantia, dimensiones, peso, tamano_empaque, id_vendedor
+        tallas, color, stock, garantia, dimensiones, peso, tamano_empaque, id_vendedor
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     
     $stmt = $conn->prepare($sql);
@@ -93,7 +93,7 @@ try {
         $imagen_secundaria2,// 7: b
         $tallas,            // 8: s
         $color,             // 9: s
-        $unidades,          // 10: i
+        $stock,             // 10: i
         $garantia,          // 11: s
         $dimensiones,       // 12: s
         $peso,              // 13: d

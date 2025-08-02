@@ -18,7 +18,7 @@ class CarritoPersistente {
             
             // First, verify the product exists, is active, and has sufficient stock
             $stmt_verify = $this->conn->prepare("
-                SELECT id, nombre, activo, stock, unidades 
+                SELECT id, nombre, activo, stock 
                 FROM productos 
                 WHERE id = ? AND activo = 1
             ");
@@ -95,7 +95,7 @@ class CarritoPersistente {
             
             // Verificar stock disponible antes de actualizar
             $stmt_stock = $this->conn->prepare("
-                SELECT stock, unidades, nombre 
+                SELECT stock, nombre 
                 FROM productos 
                 WHERE id = ? AND activo = 1
             ");

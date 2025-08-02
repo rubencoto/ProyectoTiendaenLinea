@@ -10,7 +10,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $categoria = $_POST['categoria'];
     $tallas = $_POST['tallas'];
     $color = $_POST['color'];
-    $unidades = $_POST['unidades'];
+    $stock = $_POST['stock'];
     $garantia = $_POST['garantia'];
     $dimensiones = $_POST['dimensiones'];
     $peso = $_POST['peso'];
@@ -23,13 +23,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 categoria = ?, 
                 tallas = ?, 
                 color = ?, 
-                unidades = ?, 
+                stock = ?, 
                 garantia = ?, 
                 dimensiones = ?, 
                 peso = ?, 
                 tamano_empaque = ?";
 
-    $params = [$nombre, $descripcion, $precio, $categoria, $tallas, $color, $unidades, $garantia, $dimensiones, $peso, $tamano_empaque];
+    $params = [$nombre, $descripcion, $precio, $categoria, $tallas, $color, $stock, $garantia, $dimensiones, $peso, $tamano_empaque];
     $types = "ssdsssissds";
 
     if (!empty($_FILES['imagen_principal']['tmp_name'])) {

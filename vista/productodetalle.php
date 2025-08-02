@@ -39,11 +39,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
     
     if ($accion === 'actualizar_stock') {
         $nuevo_stock = intval($_POST['nuevo_stock']);
-        $nuevas_unidades = intval($_POST['nuevas_unidades']);
         
-        if ($nuevo_stock >= 0 && $nuevas_unidades >= 0) {
-            $stmt_update = $conn->prepare("UPDATE productos SET stock = ?, unidades = ? WHERE id = ?");
-            if ($stmt_update->execute([$nuevo_stock, $nuevas_unidades, $id])) {
+        if ($nuevo_stock >= 0) {
+            $stmt_update = $conn->prepare("UPDATE productos SET stock = ? WHERE id = ?");
+            if ($stmt_update->execute([$nuevo_stock, $id])) {
                 $mensaje = "Stock actualizado correctamente";
                 $tipo_mensaje = "success";
                 // Refresh product data
@@ -60,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
                 $tipo_mensaje = "error";
             }
         } else {
-            $mensaje = "Los valores de stock deben ser mayores o iguales a 0";
+            $mensaje = "El stock debe ser mayor o igual a 0";
             $tipo_mensaje = "error";
         }
     }
@@ -222,7 +221,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
                     <?php endif; ?>
                 </div>
                 
-                <p><strong>Unidades (para sync):</strong> <?= htmlspecialchars($producto['unidades']) ?></p>
+                <p><strong>Stock Disponible:</strong> <?= htmlspecialchars($producto['stock']) ?> unidades</p>
                 <?php if ($producto['garantia']): ?>
                 <p><strong>Garantía:</strong> <?= htmlspecialchars($producto['garantia']) ?></p>
                 <?php endif; ?>
@@ -247,7 +246,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
         <!-- Stock Management Section -->
         <div class="stock-section">
             <h4>Gestión de Inventario</h4>
-            <p class="text-muted">Actualiza las cantidades de stock y unidades para mantener el inventario sincronizado.</p>
+            <p class="text-muted">Actualiza la cantidad de stock disponible para la venta.</p>
             
             <form method="POST" class="stock-form">
                 <input type="hidden" name="accion" value="actualizar_stock">
@@ -256,14 +255,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
                     <label for="nuevo_stock" class="form-label">Stock Disponible</label>
                     <input type="number" class="form-control" id="nuevo_stock" name="nuevo_stock" 
                            value="<?= $producto['stock'] ?>" min="0" required>
-                    <small class="form-text text-muted">Cantidad visible para clientes</small>
-                </div>
-                
-                <div class="stock-input">
-                    <label for="nuevas_unidades" class="form-label">Unidades (Sync)</label>
-                    <input type="number" class="form-control" id="nuevas_unidades" name="nuevas_unidades" 
-                           value="<?= $producto['unidades'] ?>" min="0" required>
-                    <small class="form-text text-muted">Para sincronización interna</small>
+                    <small class="form-text text-muted">Cantidad disponible para clientes</small>
                 </div>
                 
                 <div>
@@ -273,8 +265,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
             
             <div class="mt-3">
                 <small class="text-info">
-                    <strong>Tip:</strong> Mantén ambos valores sincronizados. El stock es lo que ven los clientes, 
-                    las unidades se usan para control interno y reportes.
+                    <strong>Tip:</strong> Este valor se usa para mostrar disponibilidad a los clientes y controlar las ventas.
                 </small>
             </div>
         </div>
@@ -360,9 +351,8 @@ window.onclick = function(event) {
 // Confirm stock update before submitting
 document.querySelector('.stock-form').addEventListener('submit', function(e) {
     const nuevoStock = document.getElementById('nuevo_stock').value;
-    const nuevasUnidades = document.getElementById('nuevas_unidades').value;
     
-    if (!confirm(`¿Confirmas actualizar el stock a ${nuevoStock} unidades y unidades a ${nuevasUnidades}?`)) {
+    if (!confirm(`¿Confirmas actualizar el stock a ${nuevoStock} unidades?`)) {
         e.preventDefault();
     }
 });

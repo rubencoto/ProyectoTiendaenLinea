@@ -116,7 +116,7 @@ try {
         
         // Validar y actualizar stock de productos
         $stmt_check_stock = $pdo_conn->prepare("SELECT stock FROM productos WHERE id = ?");
-        $stmt_stock = $pdo_conn->prepare("UPDATE productos SET stock = stock - ?, unidades = stock - ? WHERE id = ? AND stock >= ?");
+        $stmt_stock = $pdo_conn->prepare("UPDATE productos SET stock = stock - ? WHERE id = ? AND stock >= ?");
         
         foreach ($productos_comprados as $producto) {
             // Verificar stock disponible
@@ -127,8 +127,8 @@ try {
                 throw new Exception("Stock insuficiente para el producto ID: " . $producto['producto_id'] . ". Stock disponible: $current_stock, cantidad solicitada: " . $producto['cantidad']);
             }
             
-            // Actualizar stock y unidades solo si hay suficiente
-            $updated = $stmt_stock->execute([$producto['cantidad'], $producto['cantidad'], $producto['producto_id'], $producto['cantidad']]);
+            // Actualizar stock solo si hay suficiente
+            $updated = $stmt_stock->execute([$producto['cantidad'], $producto['producto_id'], $producto['cantidad']]);
             if (!$updated || $stmt_stock->rowCount() === 0) {
                 throw new Exception("Error al actualizar stock para producto ID: " . $producto['producto_id']);
             }
