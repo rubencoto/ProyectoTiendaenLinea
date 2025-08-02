@@ -25,7 +25,7 @@ try {
     error_log("ConfirmarOrden: Starting order processing for cliente_id: $cliente_id");
     
     // Obtener información del cliente
-    $stmt = $conn->prepare("SELECT nombre, apellido, correo FROM clientes WHERE id = ?");
+    $stmt = $conn->prepare("SELECT nombre, apellido, correo, direccion, telefono FROM clientes WHERE id = ?");
     $stmt->execute([$cliente_id]);
     $cliente = $stmt->fetch();
 
@@ -89,13 +89,20 @@ try {
     $pdo_conn->beginTransaction();
     
     try {
-        // Insertar orden en la tabla ordenes
+        // Insertar orden en la tabla pedidos (not ordenes)
         $stmt_orden = $pdo_conn->prepare("
-            INSERT INTO ordenes (numero_orden, cliente_id, subtotal, envio, total, estado, fecha_orden) 
-            VALUES (?, ?, ?, ?, ?, 'pendiente', NOW())
+            INSERT INTO pedidos (cliente_id, total, estado, fecha_pedido, direccion_envio, telefono_contacto) 
+            VALUES (?, ?, 'pendiente', NOW(), ?, ?)
         ");
-        $stmt_orden->execute([$numero_orden, $cliente_id, $total, $envio, $total_final]);
+        
+        // Get client contact info for the order
+        $direccion_envio = $cliente['direccion'] ?? 'Por definir';
+        $telefono_contacto = $cliente['telefono'] ?? 'Por definir';
+        
+        $stmt_orden->execute([$cliente_id, $total_final, $direccion_envio, $telefono_contacto]);
         $orden_id = $pdo_conn->lastInsertId();
+        
+        error_log("ConfirmarOrden: Order created with ID: $orden_id");
         
         // Insertar detalles de la orden en detalle_pedidos
         $stmt_detalle = $pdo_conn->prepare("
@@ -108,10 +115,12 @@ try {
         }
         
         // Actualizar stock de productos
-        $stmt_stock = $pdo_conn->prepare("UPDATE productos SET unidades = unidades - ? WHERE id = ?");
+        $stmt_stock = $pdo_conn->prepare("UPDATE productos SET stock = stock - ? WHERE id = ?");
         foreach ($productos_comprados as $producto) {
             $stmt_stock->execute([$producto['cantidad'], $producto['producto_id']]);
         }
+        
+        error_log("ConfirmarOrden: Stock updated for " . count($productos_comprados) . " products");
         
         // Confirmar transacción
         $pdo_conn->commit();
