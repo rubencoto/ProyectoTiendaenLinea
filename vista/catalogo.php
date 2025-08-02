@@ -54,11 +54,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isLoggedIn) {
     }
 }
 
-// Obtener todos los productos disponibles
+// Obtener todos los productos disponibles (excluir productos destacados)
 $stmt = $conn->prepare(
     "SELECT p.id, p.nombre, p.precio, p.imagen_principal, p.descripcion, v.nombre_empresa AS vendedor_nombre 
     FROM productos p 
     JOIN vendedores v ON p.id_vendedor = v.id 
+    WHERE p.destacado = 0 OR p.destacado IS NULL
     ORDER BY p.id DESC"
 );
 
