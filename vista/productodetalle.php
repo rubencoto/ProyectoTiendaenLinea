@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
         if ($nuevo_stock >= 0) {
             $stmt_update = $conn->prepare("UPDATE productos SET stock = ? WHERE id = ?");
             if ($stmt_update->execute([$nuevo_stock, $id])) {
-                $mensaje = "Stock actualizado correctamente";
+                $mensaje = "Unidades actualizadas correctamente";
                 $tipo_mensaje = "success";
                 // Refresh product data
                 $stmt = $conn->prepare("
@@ -55,11 +55,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
                 $stmt->execute([$id]);
                 $producto = $stmt->fetch();
             } else {
-                $mensaje = "Error al actualizar el stock";
+                $mensaje = "Error al actualizar las unidades";
                 $tipo_mensaje = "error";
             }
         } else {
-            $mensaje = "El stock debe ser mayor o igual a 0";
+            $mensaje = "Las unidades deben ser mayor o igual a 0";
             $tipo_mensaje = "error";
         }
     }
@@ -211,7 +211,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
                 
                 <!-- Stock Status Indicator -->
                 <div class="stock-indicator <?= $producto['stock'] <= 0 ? 'stock-out' : ($producto['stock'] <= 5 ? 'stock-low' : 'stock-ok') ?>">
-                    Stock Actual: <?= $producto['stock'] ?> unidades
+                    Unidades Actuales: <?= $producto['stock'] ?> unidades
                     <?php if ($producto['stock'] <= 0): ?>
                         | AGOTADO
                     <?php elseif ($producto['stock'] <= 5): ?>
@@ -221,7 +221,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
                     <?php endif; ?>
                 </div>
                 
-                <p><strong>Stock Disponible:</strong> <?= htmlspecialchars($producto['stock']) ?> unidades</p>
+                <p><strong>Unidades Disponibles:</strong> <?= htmlspecialchars($producto['stock']) ?> unidades</p>
                 <?php if ($producto['garantia']): ?>
                 <p><strong>Garantía:</strong> <?= htmlspecialchars($producto['garantia']) ?></p>
                 <?php endif; ?>
@@ -246,13 +246,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
         <!-- Stock Management Section -->
         <div class="stock-section">
             <h4>Gestión de Inventario</h4>
-            <p class="text-muted">Actualiza la cantidad de stock disponible para la venta.</p>
+            <p class="text-muted">Actualiza la cantidad de unidades disponibles para la venta.</p>
             
             <form method="POST" class="stock-form">
                 <input type="hidden" name="accion" value="actualizar_stock">
                 
                 <div class="stock-input">
-                    <label for="nuevo_stock" class="form-label">Stock Disponible</label>
+                    <label for="nuevo_stock" class="form-label">Unidades Disponibles</label>
                     <input type="number" class="form-control" id="nuevo_stock" name="nuevo_stock" 
                            value="<?= $producto['stock'] ?>" min="0" required>
                     <small class="form-text text-muted">Cantidad disponible para clientes</small>
