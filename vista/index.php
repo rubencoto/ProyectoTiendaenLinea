@@ -60,12 +60,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isLoggedIn) {
     }
 }
 
-// Get featured products (products marked as destacado = 1, fallback to recent if none)
+// Get featured products (only products explicitly marked as destacado = 1)
 $stmt = $conn->prepare(
     "SELECT p.id, p.nombre, p.precio, p.imagen_principal, p.descripcion, v.nombre_empresa AS vendedor_nombre 
     FROM productos p 
     JOIN vendedores v ON p.id_vendedor = v.id 
-    WHERE p.destacado = 1
+    WHERE p.destacado = 1 AND p.activo = 1
     ORDER BY p.id DESC 
     LIMIT 6"
 );
@@ -78,25 +78,7 @@ while ($row = $stmt->fetch()) {
     }
     $productos[] = $row;
 }
-
-// If no featured products, fallback to most recent products
-if (empty($productos)) {
-    $stmt = $conn->prepare(
-        "SELECT p.id, p.nombre, p.precio, p.imagen_principal, p.descripcion, v.nombre_empresa AS vendedor_nombre 
-        FROM productos p 
-        JOIN vendedores v ON p.id_vendedor = v.id 
-        ORDER BY p.id DESC 
-        LIMIT 6"
-    );
-    
-    $stmt->execute();
-    while ($row = $stmt->fetch()) {
-        if ($row['imagen_principal']) {
-            $row['imagen_principal'] = base64_encode($row['imagen_principal']);
-        }
-        $productos[] = $row;
-    }
-}
+// No fallback - only show explicitly featured products
 // PDO statements don't need explicit closing
 // Connection managed by singleton, no need to close explicitly
 ?>

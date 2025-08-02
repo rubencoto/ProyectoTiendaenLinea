@@ -59,7 +59,7 @@ $stmt = $conn->prepare(
     "SELECT p.id, p.nombre, p.precio, p.imagen_principal, p.descripcion, v.nombre_empresa AS vendedor_nombre 
     FROM productos p 
     JOIN vendedores v ON p.id_vendedor = v.id 
-    WHERE p.destacado = 0 OR p.destacado IS NULL
+    WHERE (p.destacado = 0 OR p.destacado IS NULL) AND p.activo = 1
     ORDER BY p.id DESC"
 );
 
