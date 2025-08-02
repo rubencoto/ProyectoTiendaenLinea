@@ -474,10 +474,10 @@ if (!isset($cliente)) {
                     <div class="form-group">
                         <label for="genero">Género</label>
                         <select id="genero" name="genero">
-                            <option value="">No especificar</option>
-                            <option value="masculino" <?php echo $cliente['genero'] === 'masculino' ? 'selected' : ''; ?>>Masculino</option>
-                            <option value="femenino" <?php echo $cliente['genero'] === 'femenino' ? 'selected' : ''; ?>>Femenino</option>
-                            <option value="otro" <?php echo $cliente['genero'] === 'otro' ? 'selected' : ''; ?>>Otro</option>
+                            <option value="" <?php echo ($cliente['genero'] === '' || $cliente['genero'] === null) ? 'selected' : ''; ?>>No especificar</option>
+                            <option value="m" <?php echo $cliente['genero'] === 'm' ? 'selected' : ''; ?>>Masculino</option>
+                            <option value="f" <?php echo $cliente['genero'] === 'f' ? 'selected' : ''; ?>>Femenino</option>
+                            <option value="o" <?php echo $cliente['genero'] === 'o' ? 'selected' : ''; ?>>Otro</option>
                         </select>
                     </div>
 
