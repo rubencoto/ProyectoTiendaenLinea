@@ -91,6 +91,10 @@ $nombre_empresa = $vendedor ? $vendedor['nombre_empresa'] : 'Vendedor';
                 <a href="<?= AppConfig::vistaUrl('productos.php') ?>">Administrar</a>
             </div>
             <div class="card">
+                <h3>Productos Destacados</h3>
+                <a href="<?= AppConfig::vistaUrl('gestionarDestacados.php') ?>">Gestionar Destacados</a>
+            </div>
+            <div class="card">
                 <h3>Cerrar Sesión</h3>
                 <a href="logout.php">Salir</a>
             </div>

@@ -35,21 +35,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isLoggedIn) {
     
     switch ($accion) {
         case 'agregar':
+            // Check product stock before adding
+            $stmt_stock = $conn->prepare("SELECT stock, nombre FROM productos WHERE id = ? AND activo = 1");
+            $stmt_stock->execute([$producto_id]);
+            $product = $stmt_stock->fetch();
+            
+            if (!$product) {
+                echo json_encode(['status' => 'error', 'mensaje' => 'Producto no encontrado']);
+                exit;
+            }
+            
+            if ($product['stock'] <= 0) {
+                echo json_encode(['status' => 'error', 'mensaje' => 'Producto agotado. No hay unidades disponibles.']);
+                exit;
+            }
+            
             $resultado = $carritoPersistente->agregarProducto($cliente_id, $producto_id, 1);
             if ($resultado) {
                 echo json_encode(['status' => 'success', 'mensaje' => 'Producto agregado al carrito']);
             } else {
-                echo json_encode(['status' => 'error', 'mensaje' => 'Error al agregar producto']);
+                echo json_encode(['status' => 'error', 'mensaje' => 'Stock insuficiente. Solo quedan ' . $product['stock'] . ' unidades disponibles.']);
             }
             exit;
     }
 }
 
-// Get featured products (limit to 6 for homepage)
+// Get featured products (products marked as destacado = 1, fallback to recent if none)
 $stmt = $conn->prepare(
     "SELECT p.id, p.nombre, p.precio, p.imagen_principal, p.descripcion, v.nombre_empresa AS vendedor_nombre 
     FROM productos p 
     JOIN vendedores v ON p.id_vendedor = v.id 
+    WHERE p.destacado = 1
     ORDER BY p.id DESC 
     LIMIT 6"
 );
@@ -61,6 +77,25 @@ while ($row = $stmt->fetch()) {
         $row['imagen_principal'] = base64_encode($row['imagen_principal']);
     }
     $productos[] = $row;
+}
+
+// If no featured products, fallback to most recent products
+if (empty($productos)) {
+    $stmt = $conn->prepare(
+        "SELECT p.id, p.nombre, p.precio, p.imagen_principal, p.descripcion, v.nombre_empresa AS vendedor_nombre 
+        FROM productos p 
+        JOIN vendedores v ON p.id_vendedor = v.id 
+        ORDER BY p.id DESC 
+        LIMIT 6"
+    );
+    
+    $stmt->execute();
+    while ($row = $stmt->fetch()) {
+        if ($row['imagen_principal']) {
+            $row['imagen_principal'] = base64_encode($row['imagen_principal']);
+        }
+        $productos[] = $row;
+    }
 }
 // PDO statements don't need explicit closing
 // Connection managed by singleton, no need to close explicitly

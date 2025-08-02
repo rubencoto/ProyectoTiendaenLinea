@@ -16,17 +16,23 @@ class CarritoPersistente {
             // Debug logging
             error_log("CarritoPersistente::agregarProducto - Cliente: $cliente_id, Producto: $producto_id, Cantidad: $cantidad");
             
-            // First, verify the product exists and is active
+            // First, verify the product exists, is active, and has sufficient stock
             $stmt_verify = $this->conn->prepare("
-                SELECT id, nombre, activo 
+                SELECT id, nombre, activo, stock, unidades 
                 FROM productos 
                 WHERE id = ? AND activo = 1
             ");
             $stmt_verify->execute([$producto_id]);
-            $product_exists = $stmt_verify->fetch();
+            $product = $stmt_verify->fetch();
             
-            if (!$product_exists) {
+            if (!$product) {
                 error_log("CarritoPersistente::agregarProducto - Product $producto_id not found or inactive");
+                return false;
+            }
+            
+            // Check if product has enough stock (prevent negative stock)
+            if ($product['stock'] <= 0) {
+                error_log("CarritoPersistente::agregarProducto - Product $producto_id out of stock. Stock: {$product['stock']}");
                 return false;
             }
             
@@ -40,8 +46,14 @@ class CarritoPersistente {
             $existing = $stmt->fetch();
             
             if ($existing) {
-                // Actualizar cantidad existente
+                // Verificar stock disponible para la nueva cantidad total
                 $nueva_cantidad = $existing['cantidad'] + $cantidad;
+                if ($product['stock'] < $nueva_cantidad) {
+                    error_log("CarritoPersistente::agregarProducto - Insufficient stock. Available: {$product['stock']}, Requested total: $nueva_cantidad");
+                    return false;
+                }
+                
+                // Actualizar cantidad existente
                 $stmt_update = $this->conn->prepare("
                     UPDATE carrito_persistente 
                     SET cantidad = ?, fecha_actualizado = NOW() 
@@ -51,6 +63,12 @@ class CarritoPersistente {
                 error_log("CarritoPersistente::agregarProducto - Actualizado. Resultado: " . ($result ? 'true' : 'false'));
                 return $result;
             } else {
+                // Verificar stock disponible para nuevo producto
+                if ($product['stock'] < $cantidad) {
+                    error_log("CarritoPersistente::agregarProducto - Insufficient stock for new item. Available: {$product['stock']}, Requested: $cantidad");
+                    return false;
+                }
+                
                 // Insertar nuevo producto
                 $stmt_insert = $this->conn->prepare("
                     INSERT INTO carrito_persistente (cliente_id, producto_id, cantidad, fecha_agregado, fecha_actualizado) 
@@ -73,6 +91,25 @@ class CarritoPersistente {
         try {
             if ($cantidad <= 0) {
                 return $this->eliminarProducto($cliente_id, $producto_id);
+            }
+            
+            // Verificar stock disponible antes de actualizar
+            $stmt_stock = $this->conn->prepare("
+                SELECT stock, unidades, nombre 
+                FROM productos 
+                WHERE id = ? AND activo = 1
+            ");
+            $stmt_stock->execute([$producto_id]);
+            $product = $stmt_stock->fetch();
+            
+            if (!$product) {
+                error_log("CarritoPersistente::actualizarCantidad - Product $producto_id not found or inactive");
+                return false;
+            }
+            
+            if ($product['stock'] < $cantidad) {
+                error_log("CarritoPersistente::actualizarCantidad - Insufficient stock. Available: {$product['stock']}, Requested: $cantidad");
+                return false;
             }
             
             $stmt = $this->conn->prepare("
