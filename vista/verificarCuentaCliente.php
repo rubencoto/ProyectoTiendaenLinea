@@ -23,7 +23,7 @@ if (isset($_GET['registro']) && $_GET['registro'] == 1) {
         $tipo_mensaje = "warning";
     } else {
         $mensaje = "¡Registro exitoso! Se ha enviado un código de verificación a tu correo electrónico. Por favor, ingresa el código para activar tu cuenta.";
-        $tipo_mensaje = "success";
+        $tipo_mensaje = "info"; // Changed from "success" to "info" so form still shows
     }
     
     if (isset($_GET['correo'])) {
