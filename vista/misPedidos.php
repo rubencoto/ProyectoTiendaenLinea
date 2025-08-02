@@ -336,7 +336,7 @@ foreach ($ordenes as &$orden) {
                         <div class="orden-info">
                             <strong>Total</strong>
                             <span style="font-size: 18px; font-weight: bold; color: #007185;">
-                                $<?php echo number_format($orden['total'], 2); ?>
+                                ₡<?php echo number_format($orden['total'], 2); ?>
                             </span>
                         </div>
                     </div>
@@ -361,12 +361,12 @@ foreach ($ordenes as &$orden) {
                                     </div>
                                     <div class="producto-detalles">
                                         Cantidad: <?php echo $producto['cantidad']; ?> | 
-                                        Precio unitario: $<?php echo number_format($producto['precio_unitario'], 2); ?>
+                                        Precio unitario: ₡<?php echo number_format($producto['precio_unitario'], 2); ?>
                                     </div>
                                 </div>
                                 
                                 <div class="producto-precio">
-                                    $<?php echo number_format($producto['subtotal'], 2); ?>
+                                    ₡<?php echo number_format($producto['subtotal'], 2); ?>
                                 </div>
                             </div>
                         <?php endforeach; ?>
@@ -387,7 +387,7 @@ foreach ($ordenes as &$orden) {
                         <?php endif; ?>
                         <div class="total-linea total-final">
                             <span>Total del Pedido:</span>
-                            <span>$<?php echo number_format($orden['total'], 2); ?></span>
+                            <span>₡<?php echo number_format($orden['total'], 2); ?></span>
                         </div>
                     </div>
                 </div>
