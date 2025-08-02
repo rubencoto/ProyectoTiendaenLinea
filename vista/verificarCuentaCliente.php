@@ -8,6 +8,10 @@ ini_set('display_errors', 1);
 require_once '../modelo/conexion.php';
 require_once '../modelo/config.php';
 
+// Get database connection
+$db = DatabaseConnection::getInstance();
+$conn = $db->getConnection();
+
 $mensaje = '';
 $tipo_mensaje = '';
 $correo_prefill = '';
@@ -43,31 +47,26 @@ if (isset($_GET['codigo']) && isset($_GET['correo'])) {
     $correo = $_GET['correo'];
     
     $stmt = $conn->prepare("SELECT id FROM clientes WHERE correo = ? AND codigo_verificacion = ? AND verificado = 0");
-    $stmt->bind_param("ss", $correo, $codigo);
-    $stmt->execute();
-    $resultado = $stmt->get_result();
+    $stmt->execute([$correo, $codigo]);
+    $row = $stmt->fetch();
     
-    if ($resultado->num_rows === 1) {
-        $row = $resultado->fetch_assoc();
+    if ($row) {
         $cliente_id = $row['id'];
         
         // Actualizar estado de verificación
         $stmt_update = $conn->prepare("UPDATE clientes SET verificado = 1, codigo_verificacion = NULL WHERE id = ?");
-        $stmt_update->bind_param("i", $cliente_id);
         
-        if ($stmt_update->execute()) {
+        if ($stmt_update->execute([$cliente_id])) {
             $mensaje = "¡Cuenta verificada exitosamente! Ya puedes iniciar sesión.";
             $tipo_mensaje = "success";
         } else {
             $mensaje = "Error al verificar la cuenta. Inténtalo de nuevo.";
             $tipo_mensaje = "error";
         }
-        $stmt_update->close();
     } else {
         $mensaje = "Código de verificación inválido o cuenta ya verificada.";
         $tipo_mensaje = "error";
     }
-    $stmt->close();
 }
 
 // Handle resend verification code
@@ -77,12 +76,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resend_code'])) {
     if (!empty($correo)) {
         // Check if user exists and is not verified
         $stmt = $conn->prepare("SELECT id, nombre, apellido FROM clientes WHERE correo = ? AND verificado = 0");
-        $stmt->bind_param("s", $correo);
-        $stmt->execute();
-        $resultado = $stmt->get_result();
+        $stmt->execute([$correo]);
+        $row = $stmt->fetch();
         
-        if ($resultado->num_rows === 1) {
-            $row = $resultado->fetch_assoc();
+        if ($row) {
             $cliente_id = $row['id'];
             $nombre = $row['nombre'];
             $apellido = $row['apellido'];
@@ -92,9 +89,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resend_code'])) {
             
             // Update verification code in database
             $stmt_update = $conn->prepare("UPDATE clientes SET codigo_verificacion = ? WHERE id = ?");
-            $stmt_update->bind_param("si", $nuevo_codigo, $cliente_id);
             
-            if ($stmt_update->execute()) {
+            if ($stmt_update->execute([$nuevo_codigo, $cliente_id])) {
                 // Send new verification email
                 require_once '../modelo/enviarCorreo.php';
                 
@@ -130,12 +126,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resend_code'])) {
                 $mensaje = "Error al generar nuevo código. Inténtalo de nuevo.";
                 $tipo_mensaje = "error";
             }
-            $stmt_update->close();
         } else {
             $mensaje = "No se encontró una cuenta pendiente de verificación con este correo.";
             $tipo_mensaje = "error";
         }
-        $stmt->close();
     } else {
         $mensaje = "Por favor, ingresa tu correo electrónico.";
         $tipo_mensaje = "error";
@@ -149,31 +143,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['resend_code'])) {
     
     if (!empty($correo) && !empty($codigo)) {
         $stmt = $conn->prepare("SELECT id FROM clientes WHERE correo = ? AND codigo_verificacion = ? AND verificado = 0");
-        $stmt->bind_param("ss", $correo, $codigo);
-        $stmt->execute();
-        $resultado = $stmt->get_result();
+        $stmt->execute([$correo, $codigo]);
+        $row = $stmt->fetch();
         
-        if ($resultado->num_rows === 1) {
-            $row = $resultado->fetch_assoc();
+        if ($row) {
             $cliente_id = $row['id'];
             
             // Actualizar estado de verificación
             $stmt_update = $conn->prepare("UPDATE clientes SET verificado = 1, codigo_verificacion = NULL WHERE id = ?");
-            $stmt_update->bind_param("i", $cliente_id);
             
-            if ($stmt_update->execute()) {
+            if ($stmt_update->execute([$cliente_id])) {
                 $mensaje = "¡Cuenta verificada exitosamente! Ya puedes iniciar sesión.";
                 $tipo_mensaje = "success";
             } else {
                 $mensaje = "Error al verificar la cuenta. Inténtalo de nuevo.";
                 $tipo_mensaje = "error";
             }
-            $stmt_update->close();
         } else {
             $mensaje = "Código de verificación inválido o cuenta ya verificada.";
             $tipo_mensaje = "error";
         }
-        $stmt->close();
     } else {
         $mensaje = "Por favor, completa todos los campos.";
         $tipo_mensaje = "error";
