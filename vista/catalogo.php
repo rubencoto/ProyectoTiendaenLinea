@@ -1,7 +1,16 @@
 <?php
 session_start();
+
+// Add error reporting for debugging on Heroku
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 require_once '../modelo/conexion.php';
 require_once '../modelo/config.php';
+
+// Get database connection
+$db = DatabaseConnection::getInstance();
+$conn = $db->getConnection();
 
 // Check if user is logged in (optional for catalog viewing)
 $isLoggedIn = !empty($_SESSION['cliente_id']);
@@ -18,14 +27,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isLoggedIn) {
     $accion = $_POST['accion'] ?? '';
     $producto_id = intval($_POST['producto_id'] ?? 0);
     
-    if ($accion === 'agregar') {
-        $resultado = $carritoPersistente->agregarProducto($cliente_id, $producto_id, 1);
-        if ($resultado) {
-            echo json_encode(['status' => 'success', 'mensaje' => 'Producto agregado al carrito']);
-        } else {
-            echo json_encode(['status' => 'error', 'mensaje' => 'Error al agregar producto']);
-        }
-        exit;
+    switch ($accion) {
+        case 'agregar':
+            // Check product stock before adding
+            $stmt_stock = $conn->prepare("SELECT stock, nombre FROM productos WHERE id = ? AND activo = 1");
+            $stmt_stock->execute([$producto_id]);
+            $product = $stmt_stock->fetch();
+            
+            if (!$product) {
+                echo json_encode(['status' => 'error', 'mensaje' => 'Producto no encontrado']);
+                exit;
+            }
+            
+            if ($product['stock'] <= 0) {
+                echo json_encode(['status' => 'error', 'mensaje' => 'Producto agotado. No hay unidades disponibles.']);
+                exit;
+            }
+            
+            $resultado = $carritoPersistente->agregarProducto($cliente_id, $producto_id, 1);
+            if ($resultado) {
+                echo json_encode(['status' => 'success', 'mensaje' => 'Producto agregado al carrito']);
+            } else {
+                echo json_encode(['status' => 'error', 'mensaje' => 'Stock insuficiente. Solo quedan ' . $product['stock'] . ' unidades disponibles.']);
+            }
+            exit;
     }
 }
 
@@ -309,7 +334,7 @@ function agregarAlCarrito(productoId) {
     form.append('accion', 'agregar');
     form.append('producto_id', productoId);
     
-    fetch('carrito.php', {
+    fetch('catalogo.php', {
         method: 'POST',
         body: form
     })
@@ -320,12 +345,12 @@ function agregarAlCarrito(productoId) {
             // Update cart count immediately
             updateCartCount();
         } else {
-            mostrarToast("Error al agregar al carrito", 'error');
+            mostrarToast(data.mensaje, 'error');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        mostrarToast("Error al agregar al carrito", 'error');
+        mostrarToast("Error al procesar la solicitud", 'error');
     });
 }
 
