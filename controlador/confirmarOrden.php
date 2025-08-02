@@ -21,6 +21,9 @@ if (empty($productos_carrito)) {
 }
 
 try {
+    // Debug: Log start of order processing
+    error_log("ConfirmarOrden: Starting order processing for cliente_id: $cliente_id");
+    
     // Obtener información del cliente
     $stmt = $conn->prepare("SELECT nombre, apellido, correo FROM clientes WHERE id = ?");
     $stmt->execute([$cliente_id]);
@@ -29,6 +32,8 @@ try {
     if (!$cliente) {
         throw new Exception("Cliente no encontrado");
     }
+    
+    error_log("ConfirmarOrden: Cliente found: " . $cliente['nombre'] . " " . $cliente['apellido']);
 
     // Los productos del carrito ya están cargados desde la base de datos
     $productos_comprados = [];
@@ -338,6 +343,7 @@ try {
             .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; text-align: center; }
             .error-icon { font-size: 4em; color: #dc3545; margin-bottom: 20px; }
             .btn { background-color: #007185; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; }
+            .error-details { background: #f8f9fa; padding: 15px; margin: 20px 0; border-radius: 5px; font-family: monospace; }
         </style>
     </head>
     <body>
@@ -345,6 +351,10 @@ try {
             <div class="error-icon">✗</div>
             <h1>Error al Procesar la Orden</h1>
             <p>Ha ocurrido un error inesperado. Por favor, inténtalo de nuevo.</p>
+            <div class="error-details">
+                <strong>Debug Error:</strong><br>
+                ' . htmlspecialchars($e->getMessage()) . '
+            </div>
             <a href="../vista/carrito.php" class="btn">Volver al Carrito</a>
         </div>
     </body>
