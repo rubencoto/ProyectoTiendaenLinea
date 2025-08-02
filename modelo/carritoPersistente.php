@@ -13,6 +13,9 @@ class CarritoPersistente {
      */
     public function agregarProducto($cliente_id, $producto_id, $cantidad = 1) {
         try {
+            // Debug logging
+            error_log("CarritoPersistente::agregarProducto - Cliente: $cliente_id, Producto: $producto_id, Cantidad: $cantidad");
+            
             // Verificar si el producto ya existe en el carrito
             $stmt = $this->conn->prepare("
                 SELECT id, cantidad 
@@ -30,14 +33,18 @@ class CarritoPersistente {
                     SET cantidad = ?, fecha_actualizado = NOW() 
                     WHERE id = ?
                 ");
-                return $stmt_update->execute([$nueva_cantidad, $existing['id']]);
+                $result = $stmt_update->execute([$nueva_cantidad, $existing['id']]);
+                error_log("CarritoPersistente::agregarProducto - Actualizado. Resultado: " . ($result ? 'true' : 'false'));
+                return $result;
             } else {
                 // Insertar nuevo producto
                 $stmt_insert = $this->conn->prepare("
                     INSERT INTO carrito_persistente (cliente_id, producto_id, cantidad, fecha_agregado, fecha_actualizado) 
                     VALUES (?, ?, ?, NOW(), NOW())
                 ");
-                return $stmt_insert->execute([$cliente_id, $producto_id, $cantidad]);
+                $result = $stmt_insert->execute([$cliente_id, $producto_id, $cantidad]);
+                error_log("CarritoPersistente::agregarProducto - Insertado. Resultado: " . ($result ? 'true' : 'false'));
+                return $result;
             }
         } catch (Exception $e) {
             error_log("Error en agregarProducto: " . $e->getMessage());
@@ -104,7 +111,9 @@ class CarritoPersistente {
     public function obtenerCarrito($cliente_id) {
         try {
             $stmt = $this->conn->prepare("
-                SELECT cp.*, p.nombre, p.precio, p.imagen1, p.stock, p.id_vendedor, v.nombre_empresa as vendedor_nombre
+                SELECT cp.id, cp.cliente_id, cp.producto_id, cp.cantidad, cp.fecha_agregado, cp.fecha_actualizado,
+                       p.nombre, p.precio, p.imagen1, p.stock, p.id_vendedor, 
+                       v.nombre_empresa as vendedor_nombre
                 FROM carrito_persistente cp
                 INNER JOIN productos p ON cp.producto_id = p.id
                 LEFT JOIN vendedores v ON p.id_vendedor = v.id
@@ -112,7 +121,12 @@ class CarritoPersistente {
                 ORDER BY cp.fecha_agregado DESC
             ");
             $stmt->execute([$cliente_id]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Debug logging
+            error_log("CarritoPersistente::obtenerCarrito - Cliente ID: $cliente_id, Productos encontrados: " . count($result));
+            
+            return $result;
         } catch (Exception $e) {
             error_log("Error en obtenerCarrito: " . $e->getMessage());
             return [];

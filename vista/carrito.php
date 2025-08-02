@@ -70,24 +70,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $productos_carrito = $carritoPersistente->obtenerCarrito($cliente_id);
 $total = 0;
 
-// DEBUG: Temporarily show what we're getting
+// DEBUG: Show cart data and count
+echo "<!-- DEBUG: Cliente ID: $cliente_id -->";
+echo "<!-- DEBUG: Productos en carrito: " . count($productos_carrito) . " -->";
 echo "<!-- DEBUG: Cart items: " . print_r($productos_carrito, true) . " -->";
 
-// Calcular total
+// Calcular total y preparar datos para mostrar
 foreach ($productos_carrito as &$producto) {
     $producto['subtotal'] = $producto['precio'] * $producto['cantidad'];
     $total += $producto['subtotal'];
     
-    // Convertir imagen a base64 si existe y mapear campo de imagen
-    if ($producto['imagen1']) {
+    // Convertir imagen a base64 si existe
+    if (!empty($producto['imagen1'])) {
         $producto['imagen_principal'] = base64_encode($producto['imagen1']);
     } else {
         $producto['imagen_principal'] = '';
-    }
-    
-    // Asegurar que tenemos el ID del producto correcto
-    if (!isset($producto['id']) && isset($producto['producto_id'])) {
-        $producto['id'] = $producto['producto_id'];
     }
 }
 unset($producto); // Romper la referencia
