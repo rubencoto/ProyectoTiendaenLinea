@@ -249,7 +249,7 @@ if (!$producto) {
             <h1 class="titulo-producto"><?= htmlspecialchars($producto['nombre']) ?></h1>
             <div class="precio-producto">₡<?= number_format($producto['precio'], 0, ',', '.') ?></div>
             
-            <?php if ($producto['unidades'] > 0): ?>
+            <?php if ($producto['stock'] > 0): ?>
                 <div class="disponibilidad">Disponible (<?= $producto['stock'] ?> unidades)</div>
             <?php else: ?>
                 <div style="color: #dc3545; font-weight: bold;">Agotado</div>

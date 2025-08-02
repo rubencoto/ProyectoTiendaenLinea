@@ -28,7 +28,7 @@ $pagina = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
 $offset = ($pagina - 1) * $limite;
 
 // Contar total de órdenes
-$stmt_count = $conn->prepare("SELECT COUNT(*) as total FROM ordenes WHERE cliente_id = ?");
+$stmt_count = $conn->prepare("SELECT COUNT(*) as total FROM pedidos WHERE cliente_id = ?");
 $stmt_count->execute([$cliente_id]);
 $count_result = $stmt_count->fetch();
 $total_ordenes = $count_result['total'];
@@ -38,7 +38,7 @@ $total_paginas = ceil($total_ordenes / $limite);
 $stmt_ordenes = $conn->prepare("
     SELECT o.id, o.numero_orden, o.subtotal, o.envio, o.total, 
            o.estado, o.fecha_orden
-    FROM ordenes o 
+    FROM pedidos o 
     WHERE o.cliente_id = ? 
     ORDER BY o.fecha_orden DESC 
     LIMIT $limite OFFSET $offset
@@ -57,7 +57,7 @@ foreach ($ordenes as &$orden) {
                p.nombre as producto_nombre, p.imagen_principal
         FROM detalle_pedidos dp
         JOIN productos p ON dp.producto_id = p.id
-        WHERE dp.orden_id = ?
+        WHERE dp.pedido_id = ?
     ");
     $stmt_detalle->execute([$orden['id']]);
     
