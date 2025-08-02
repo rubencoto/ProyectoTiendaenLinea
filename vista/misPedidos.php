@@ -57,7 +57,7 @@ foreach ($ordenes as &$orden) {
                p.nombre as producto_nombre, p.imagen_principal
         FROM detalle_pedidos dp
         JOIN productos p ON dp.producto_id = p.id
-        WHERE dp.pedido_id = ?
+        WHERE dp.orden_id = ?
     ");
     $stmt_detalle->execute([$orden['id']]);
     
