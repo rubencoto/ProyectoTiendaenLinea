@@ -67,13 +67,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Obtener productos del carrito desde la base de datos
-$productos_carrito = $carritoPersistente->obtenerCarrito($cliente_id);
-$total = 0;
+try {
+    $productos_carrito = $carritoPersistente->obtenerCarrito($cliente_id);
+    $total = 0;
 
-// DEBUG: Show cart data and count
-echo "<!-- DEBUG: Cliente ID: $cliente_id -->";
-echo "<!-- DEBUG: Productos en carrito: " . count($productos_carrito) . " -->";
-echo "<!-- DEBUG: Cart items: " . print_r($productos_carrito, true) . " -->";
+    // DEBUG: Show cart data and count
+    echo "<!-- DEBUG: Cliente ID: $cliente_id -->";
+    echo "<!-- DEBUG: Productos en carrito: " . count($productos_carrito) . " -->";
+    if (count($productos_carrito) > 0) {
+        echo "<!-- DEBUG: Primer producto: " . print_r($productos_carrito[0], true) . " -->";
+    }
+} catch (Exception $e) {
+    echo "<!-- ERROR: " . $e->getMessage() . " -->";
+    $productos_carrito = [];
+    $total = 0;
+}
 
 // Calcular total y preparar datos para mostrar
 foreach ($productos_carrito as &$producto) {

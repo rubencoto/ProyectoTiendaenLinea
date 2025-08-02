@@ -112,8 +112,10 @@ class CarritoPersistente {
         try {
             $stmt = $this->conn->prepare("
                 SELECT cp.id, cp.cliente_id, cp.producto_id, cp.cantidad, cp.fecha_agregado, cp.fecha_actualizado,
-                       p.nombre, p.precio, p.imagen1, p.stock, p.id_vendedor, 
-                       v.nombre_empresa as vendedor_nombre
+                       p.nombre, p.precio, 
+                       COALESCE(p.imagen1, p.imagen_principal) as imagen1, 
+                       p.stock, p.id_vendedor, 
+                       COALESCE(v.nombre_empresa, 'Vendedor no encontrado') as vendedor_nombre
                 FROM carrito_persistente cp
                 INNER JOIN productos p ON cp.producto_id = p.id
                 LEFT JOIN vendedores v ON p.id_vendedor = v.id
@@ -125,6 +127,9 @@ class CarritoPersistente {
             
             // Debug logging
             error_log("CarritoPersistente::obtenerCarrito - Cliente ID: $cliente_id, Productos encontrados: " . count($result));
+            if (count($result) > 0) {
+                error_log("CarritoPersistente::obtenerCarrito - Primer producto: " . print_r($result[0], true));
+            }
             
             return $result;
         } catch (Exception $e) {
