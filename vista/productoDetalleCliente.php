@@ -298,10 +298,8 @@ if (!$producto) {
             <div class="acciones">
                 <?php if ($producto['stock'] > 0): ?>
                     <button onclick="agregarAlCarrito(<?= $producto['id'] ?>)" class="btn btn-primary">Agregar al Carrito</button>
-                    <a href="carrito.php" class="btn btn-secondary">Ver Carrito</a>
                 <?php else: ?>
                     <button class="btn btn-primary" disabled style="background-color: #6c757d; cursor: not-allowed;">Producto Agotado</button>
-                    <a href="carrito.php" class="btn btn-secondary">Ver Carrito</a>
                 <?php endif; ?>
             </div>
             

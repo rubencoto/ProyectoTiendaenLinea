@@ -401,12 +401,12 @@ function agregarAlCarrito(productoId) {
             mostrarToast(data.mensaje);
             updateCartCount();
         } else {
-            mostrarToast("Error al agregar al carrito", 'error');
+            mostrarToast(data.mensaje, 'error');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        mostrarToast("Error al agregar al carrito", 'error');
+        mostrarToast("Error al procesar la solicitud", 'error');
     });
 }
 
