@@ -9,6 +9,10 @@ if (!isset($_SESSION['cliente_id'])) {
 }
 
 require_once '../modelo/conexion.php';
+
+// Get database connection
+$db = DatabaseConnection::getInstance();
+$conn = $db->getConnection();
 $cliente_id = $_SESSION['cliente_id'];
 
 // Variables para mensajes
@@ -40,11 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             // Verificar contraseña actual
             $stmt = $conn->prepare("SELECT contrasena FROM clientes WHERE id = ?");
-            $stmt->bind_param("i", $cliente_id);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $cliente = $result->fetch_assoc();
-            $stmt->close();
+            $stmt->execute([$cliente_id]);
+            $cliente = $stmt->fetch();
             
             if (!password_verify($password_actual, $cliente['contrasena'])) {
                 $errores[] = "La contraseña actual es incorrecta";
@@ -52,16 +53,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Actualizar contraseña
                 $password_hash = password_hash($password_nueva, PASSWORD_DEFAULT);
                 $stmt_update = $conn->prepare("UPDATE clientes SET contrasena = ? WHERE id = ?");
-                $stmt_update->bind_param("si", $password_hash, $cliente_id);
                 
-                if ($stmt_update->execute()) {
+                if ($stmt_update->execute([$password_hash, $cliente_id])) {
                     $mensaje = "Contraseña actualizada exitosamente";
                     $tipo_mensaje = "success";
                 } else {
                     $mensaje = "Error al actualizar la contraseña";
                     $tipo_mensaje = "error";
                 }
-                $stmt_update->close();
             }
             
         } catch (Exception $e) {
@@ -78,12 +77,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Obtener información básica del cliente
 $stmt = $conn->prepare("SELECT nombre, apellidos, correo FROM clientes WHERE id = ?");
-$stmt->bind_param("i", $cliente_id);
-$stmt->execute();
-$result = $stmt->get_result();
-$cliente = $result->fetch_assoc();
-$stmt->close();
-$conn->close();
+$stmt->execute([$cliente_id]);
+$cliente = $stmt->fetch();
 ?>
 
 <!DOCTYPE html>
