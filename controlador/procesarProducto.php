@@ -1,11 +1,11 @@
 <?php
 session_start();
-require_once '../modelo/conexion.php';
-require_once '../modelo/config.php';
 
-// Debug: Output something immediately so we know this file is reached
-echo "<!-- Debug: procesarProducto.php loaded at " . date('Y-m-d H:i:s') . " -->";
-error_log("procesarProducto.php called with POST data: " . print_r($_POST, true));
+// Add error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+require_once '../modelo/conexion.php';
 
 // Check if this is a POST request
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -22,14 +22,9 @@ if (!isset($_SESSION['id'])) {
 $id_vendedor = $_SESSION['id'];
 
 try {
-    // Get connection from the included file
-    if (!isset($conn) || !$conn) {
-        echo "Error: No se pudo conectar a la base de datos";
-        exit;
-    }
-    
-    // Set charset
-    $conn->set_charset("utf8mb4");
+    // Get database connection
+    $db = DatabaseConnection::getInstance();
+    $conn = $db->getConnection();
     
     // Get form data
     $nombre = $_POST['nombre'] ?? '';
@@ -66,7 +61,7 @@ try {
     }
 
     
-    // Simple SQL insert with string concatenation for testing
+    // PDO SQL insert
     $sql = "INSERT INTO productos (
         nombre, descripcion, precio, categoria, 
         imagen_principal, imagen_secundaria1, imagen_secundaria2, 
@@ -76,47 +71,34 @@ try {
     $stmt = $conn->prepare($sql);
     
     if (!$stmt) {
-        echo "Error preparando consulta: " . $conn->error;
+        echo "Error preparando consulta";
         exit;
     }
     
-    // Simple bind with exact count: 15 parameters need 15 characters
-    // Let me count: s-s-d-s-b-b-b-s-s-i-s-s-d-s-i = 15 characters
-    $bind_result = $stmt->bind_param(
-        "ssdsbbssissdsi",  // 15 characters for 15 parameters 
-        $nombre,            // 1: s
-        $descripcion,       // 2: s
-        $precio,            // 3: d
-        $categoria,         // 4: s
-        $imagen_principal,  // 5: b
-        $imagen_secundaria1,// 6: b
-        $imagen_secundaria2,// 7: b
-        $tallas,            // 8: s
-        $color,             // 9: s
-        $stock,             // 10: i
-        $garantia,          // 11: s
-        $dimensiones,       // 12: s
-        $peso,              // 13: d
-        $tamano_empaque,    // 14: s
-        $id_vendedor        // 15: i
-    );
-    
-    if (!$bind_result) {
-        echo "Error vinculando parámetros: " . $stmt->error;
-        exit;
-    }
-    
-    // Execute
-    $execute_result = $stmt->execute();
+    // Execute with PDO parameters array
+    $execute_result = $stmt->execute([
+        $nombre,            // 1
+        $descripcion,       // 2
+        $precio,            // 3
+        $categoria,         // 4
+        $imagen_principal,  // 5
+        $imagen_secundaria1,// 6
+        $imagen_secundaria2,// 7
+        $tallas,            // 8
+        $color,             // 9
+        $stock,             // 10
+        $garantia,          // 11
+        $dimensiones,       // 12
+        $peso,              // 13
+        $tamano_empaque,    // 14
+        $id_vendedor        // 15
+    ]);
     
     if ($execute_result) {
         echo "Producto agregado con éxito";
     } else {
-        echo "Error al guardar producto: " . $stmt->error;
+        echo "Error al guardar producto";
     }
-    
-    $stmt->close();
-    $conn->close();
     
 } catch (Exception $e) {
     echo "Error del sistema: " . $e->getMessage();
