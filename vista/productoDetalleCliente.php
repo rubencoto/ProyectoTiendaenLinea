@@ -296,7 +296,7 @@ if (!$producto) {
             <?php endif; ?>
             
             <div class="acciones">
-                <?php if ($producto['unidades'] > 0): ?>
+                <?php if ($producto['stock'] > 0): ?>
                     <button onclick="agregarAlCarrito(<?= $producto['id'] ?>)" class="btn btn-primary">Agregar al Carrito</button>
                 <?php endif; ?>
                 <a href="carrito.php" class="btn btn-secondary">Ver Carrito</a>
