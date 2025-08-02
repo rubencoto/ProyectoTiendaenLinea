@@ -76,20 +76,24 @@ try {
     $envio = 2500;
     $total_final = $total + $envio;
     
+    // Get the actual PDO connection for transactions
+    $db_instance = DatabaseConnection::getInstance();
+    $pdo_conn = $db_instance->getConnection();
+    
     // Iniciar transacción para garantizar consistencia
-    $conn->beginTransaction();
+    $pdo_conn->beginTransaction();
     
     try {
         // Insertar orden en la tabla ordenes
-        $stmt_orden = $conn->prepare("
+        $stmt_orden = $pdo_conn->prepare("
             INSERT INTO ordenes (numero_orden, cliente_id, subtotal, envio, total, estado, fecha_orden) 
             VALUES (?, ?, ?, ?, ?, 'pendiente', NOW())
         ");
         $stmt_orden->execute([$numero_orden, $cliente_id, $total, $envio, $total_final]);
-        $orden_id = $conn->lastInsertId();
+        $orden_id = $pdo_conn->lastInsertId();
         
         // Insertar detalles de la orden en detalle_pedidos
-        $stmt_detalle = $conn->prepare("
+        $stmt_detalle = $pdo_conn->prepare("
             INSERT INTO detalle_pedidos (orden_id, producto_id, cantidad, precio_unitario, subtotal) 
             VALUES (?, ?, ?, ?, ?)
         ");
@@ -99,17 +103,17 @@ try {
         }
         
         // Actualizar stock de productos
-        $stmt_stock = $conn->prepare("UPDATE productos SET unidades = unidades - ? WHERE id = ?");
+        $stmt_stock = $pdo_conn->prepare("UPDATE productos SET unidades = unidades - ? WHERE id = ?");
         foreach ($productos_comprados as $producto) {
             $stmt_stock->execute([$producto['cantidad'], $producto['producto_id']]);
         }
         
         // Confirmar transacción
-        $conn->commit();
+        $pdo_conn->commit();
         
     } catch (Exception $e) {
         // Revertir transacción en caso de error
-        $conn->rollBack();
+        $pdo_conn->rollBack();
         throw new Exception("Error al guardar la orden en la base de datos: " . $e->getMessage());
     }
     
