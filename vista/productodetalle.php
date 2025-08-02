@@ -1,5 +1,15 @@
 <?php
-include '../modelo/conexion.php';
+session_start();
+
+// Add error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+require_once '../modelo/conexion.php';
+
+// Get database connection
+$db = DatabaseConnection::getInstance();
+$conn = $db->getConnection();
 
 if (!isset($_GET['id'])) {
     echo "ID no especificado";
@@ -8,17 +18,52 @@ if (!isset($_GET['id'])) {
 
 $id = intval($_GET['id']);
 
-$stmt = $conn->prepare("SELECT * FROM productos WHERE id = ?");
-$stmt->bind_param("i", $id);
-$stmt->execute();
-$resultado = $stmt->get_result();
-$producto = $resultado->fetch_assoc();
-$stmt->close();
-$conn->close();
+// Get product with vendor info
+$stmt = $conn->prepare("
+    SELECT p.*, v.nombre_empresa as vendedor_nombre 
+    FROM productos p 
+    JOIN vendedores v ON p.id_vendedor = v.id 
+    WHERE p.id = ?
+");
+$stmt->execute([$id]);
+$producto = $stmt->fetch();
 
 if (!$producto) {
     echo "Producto no encontrado";
     exit;
+}
+
+// Handle stock update
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
+    $accion = $_POST['accion'];
+    
+    if ($accion === 'actualizar_stock') {
+        $nuevo_stock = intval($_POST['nuevo_stock']);
+        $nuevas_unidades = intval($_POST['nuevas_unidades']);
+        
+        if ($nuevo_stock >= 0 && $nuevas_unidades >= 0) {
+            $stmt_update = $conn->prepare("UPDATE productos SET stock = ?, unidades = ? WHERE id = ?");
+            if ($stmt_update->execute([$nuevo_stock, $nuevas_unidades, $id])) {
+                $mensaje = "Stock actualizado correctamente";
+                $tipo_mensaje = "success";
+                // Refresh product data
+                $stmt = $conn->prepare("
+                    SELECT p.*, v.nombre_empresa as vendedor_nombre 
+                    FROM productos p 
+                    JOIN vendedores v ON p.id_vendedor = v.id 
+                    WHERE p.id = ?
+                ");
+                $stmt->execute([$id]);
+                $producto = $stmt->fetch();
+            } else {
+                $mensaje = "Error al actualizar el stock";
+                $tipo_mensaje = "error";
+            }
+        } else {
+            $mensaje = "Los valores de stock deben ser mayores o iguales a 0";
+            $tipo_mensaje = "error";
+        }
+    }
 }
 ?>
 
@@ -26,7 +71,7 @@ if (!$producto) {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Detalle del producto</title>
+    <title>Detalle del producto - <?= htmlspecialchars($producto['nombre']) ?></title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <style>
         .producto-detalle {
@@ -64,12 +109,80 @@ if (!$producto) {
             display: flex;
             gap: 10px;
         }
+
+        .stock-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 2px solid #007185;
+        }
+
+        .stock-form {
+            display: flex;
+            gap: 15px;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .stock-input {
+            min-width: 120px;
+        }
+
+        .mensaje {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .mensaje.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .mensaje.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .stock-indicator {
+            font-size: 1.2em;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .stock-ok {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .stock-low {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .stock-out {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
     </style>
 </head>
 <body style="background-color: #f8f8f8;">
 <div class="container mt-5">
+    <?php if (isset($mensaje)): ?>
+        <div class="mensaje <?= $tipo_mensaje ?>">
+            <?= $mensaje ?>
+        </div>
+    <?php endif; ?>
+
     <div class="card p-4 shadow">
         <h2 class="mb-4"><?= htmlspecialchars($producto['nombre']) ?></h2>
+        <p class="text-muted">Vendedor: <?= htmlspecialchars($producto['vendedor_nombre']) ?></p>
 
         <div class="producto-detalle">
             <!-- Galería -->
@@ -90,24 +203,95 @@ if (!$producto) {
                 <p><strong>Descripción:</strong> <?= htmlspecialchars($producto['descripcion']) ?></p>
                 <p><strong>Precio:</strong> ₡<?= number_format($producto['precio'], 2) ?></p>
                 <p><strong>Categoría:</strong> <?= htmlspecialchars($producto['categoria']) ?></p>
+                <?php if ($producto['tallas']): ?>
                 <p><strong>Tallas:</strong> <?= htmlspecialchars($producto['tallas']) ?></p>
+                <?php endif; ?>
+                <?php if ($producto['color']): ?>
                 <p><strong>Color:</strong> <?= htmlspecialchars($producto['color']) ?></p>
-                <p><strong>Unidades:</strong> <?= htmlspecialchars($producto['unidades']) ?></p>
+                <?php endif; ?>
+                
+                <!-- Stock Status Indicator -->
+                <div class="stock-indicator <?= $producto['stock'] <= 0 ? 'stock-out' : ($producto['stock'] <= 5 ? 'stock-low' : 'stock-ok') ?>">
+                    📦 Stock Actual: <?= $producto['stock'] ?> unidades
+                    <?php if ($producto['stock'] <= 0): ?>
+                        | ⚠️ AGOTADO
+                    <?php elseif ($producto['stock'] <= 5): ?>
+                        | ⚠️ STOCK BAJO
+                    <?php else: ?>
+                        | ✅ EN STOCK
+                    <?php endif; ?>
+                </div>
+                
+                <p><strong>Unidades (para sync):</strong> <?= htmlspecialchars($producto['unidades']) ?></p>
+                <?php if ($producto['garantia']): ?>
                 <p><strong>Garantía:</strong> <?= htmlspecialchars($producto['garantia']) ?></p>
+                <?php endif; ?>
+                <?php if ($producto['dimensiones']): ?>
                 <p><strong>Dimensiones:</strong> <?= htmlspecialchars($producto['dimensiones']) ?></p>
+                <?php endif; ?>
+                <?php if ($producto['peso']): ?>
                 <p><strong>Peso:</strong> <?= number_format($producto['peso'], 2) ?> kg</p>
+                <?php endif; ?>
+                <?php if ($producto['tamano_empaque']): ?>
                 <p><strong>Tamaño del empaque:</strong> <?= htmlspecialchars($producto['tamano_empaque']) ?></p>
+                <?php endif; ?>
 
                 <div class="btn-group">
-                    <a href="editarProducto.php?id=<?= $producto['id'] ?>" class="btn btn-primary">Editar</a>
-                    <button class="btn btn-danger" onclick="eliminarProducto(<?= $producto['id'] ?>)">Eliminar</button>
+                    <a href="editarProducto.php?id=<?= $producto['id'] ?>" class="btn btn-primary">✏️ Editar Producto</a>
+                    <button class="btn btn-danger" onclick="eliminarProducto(<?= $producto['id'] ?>)">🗑️ Eliminar</button>
+                    <a href="productos.php" class="btn btn-secondary">← Volver a Productos</a>
                 </div>
+            </div>
+        </div>
+
+        <!-- Stock Management Section -->
+        <div class="stock-section">
+            <h4>🔄 Gestión de Inventario</h4>
+            <p class="text-muted">Actualiza las cantidades de stock y unidades para mantener el inventario sincronizado.</p>
+            
+            <form method="POST" class="stock-form">
+                <input type="hidden" name="accion" value="actualizar_stock">
+                
+                <div class="stock-input">
+                    <label for="nuevo_stock" class="form-label">Stock Disponible</label>
+                    <input type="number" class="form-control" id="nuevo_stock" name="nuevo_stock" 
+                           value="<?= $producto['stock'] ?>" min="0" required>
+                    <small class="form-text text-muted">Cantidad visible para clientes</small>
+                </div>
+                
+                <div class="stock-input">
+                    <label for="nuevas_unidades" class="form-label">Unidades (Sync)</label>
+                    <input type="number" class="form-control" id="nuevas_unidades" name="nuevas_unidades" 
+                           value="<?= $producto['unidades'] ?>" min="0" required>
+                    <small class="form-text text-muted">Para sincronización interna</small>
+                </div>
+                
+                <div>
+                    <button type="submit" class="btn btn-success">💾 Actualizar Stock</button>
+                </div>
+            </form>
+            
+            <div class="mt-3">
+                <small class="text-info">
+                    💡 <strong>Tip:</strong> Mantén ambos valores sincronizados. El stock es lo que ven los clientes, 
+                    las unidades se usan para control interno y reportes.
+                </small>
             </div>
         </div>
     </div>
 </div>
 
 <script>
+// Auto-hide messages after 5 seconds
+setTimeout(function() {
+    const mensaje = document.querySelector('.mensaje');
+    if (mensaje) {
+        mensaje.style.transition = 'opacity 0.5s';
+        mensaje.style.opacity = '0';
+        setTimeout(() => mensaje.remove(), 500);
+    }
+}, 5000);
+
 function eliminarProducto(id) {
     document.getElementById('modalEliminarProducto').style.display = 'block';
     document.getElementById('productoIdEliminar').value = id;
@@ -142,7 +326,7 @@ function cerrarModalProducto(modalId) {
 
 function mostrarMensaje(mensaje, tipo) {
     const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${tipo}`;
+    messageDiv.className = `mensaje ${tipo}`;
     messageDiv.textContent = mensaje;
     messageDiv.style.cssText = `
         position: fixed;
@@ -160,7 +344,9 @@ function mostrarMensaje(mensaje, tipo) {
     document.body.appendChild(messageDiv);
     
     setTimeout(() => {
-        document.body.removeChild(messageDiv);
+        if (document.body.contains(messageDiv)) {
+            document.body.removeChild(messageDiv);
+        }
     }, 4000);
 }
 
@@ -170,6 +356,16 @@ window.onclick = function(event) {
         event.target.style.display = 'none';
     }
 }
+
+// Confirm stock update before submitting
+document.querySelector('.stock-form').addEventListener('submit', function(e) {
+    const nuevoStock = document.getElementById('nuevo_stock').value;
+    const nuevasUnidades = document.getElementById('nuevas_unidades').value;
+    
+    if (!confirm(`¿Confirmas actualizar el stock a ${nuevoStock} unidades y unidades a ${nuevasUnidades}?`)) {
+        e.preventDefault();
+    }
+});
 </script>
 
 <!-- Modal para eliminar producto -->
