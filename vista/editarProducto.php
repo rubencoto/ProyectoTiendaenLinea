@@ -1,15 +1,28 @@
 <?php
-require_once '../controlador/ProductoControlador.php';
+session_start();
+
+// Add error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+require_once '../modelo/conexion.php';
 require_once '../modelo/config.php';
+
+// Get database connection
+$db = DatabaseConnection::getInstance();
+$conn = $db->getConnection();
 
 if (!isset($_GET['id'])) {
     echo "<p>Error: ID no especificado</p>";
     exit;
 }
 
-$id = $_GET['id'];
-$productoControlador = new ProductoControlador();
-$producto = $productoControlador->obtenerProductoPorId($id);
+$id = intval($_GET['id']);
+
+// Get product data
+$stmt = $conn->prepare("SELECT * FROM productos WHERE id = ?");
+$stmt->execute([$id]);
+$producto = $stmt->fetch();
 
 if (!$producto) {
     echo "<p>Error: Producto no encontrado</p>";
