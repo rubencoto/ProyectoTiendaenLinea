@@ -70,14 +70,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $productos_carrito = $carritoPersistente->obtenerCarrito($cliente_id);
 $total = 0;
 
+// DEBUG: Temporarily show what we're getting
+echo "<!-- DEBUG: Cart items: " . print_r($productos_carrito, true) . " -->";
+
 // Calcular total
 foreach ($productos_carrito as &$producto) {
     $producto['subtotal'] = $producto['precio'] * $producto['cantidad'];
     $total += $producto['subtotal'];
     
-    // Convertir imagen a base64 si existe
+    // Convertir imagen a base64 si existe y mapear campo de imagen
     if ($producto['imagen1']) {
         $producto['imagen_principal'] = base64_encode($producto['imagen1']);
+    } else {
+        $producto['imagen_principal'] = '';
+    }
+    
+    // Asegurar que tenemos el ID del producto correcto
+    if (!isset($producto['id']) && isset($producto['producto_id'])) {
+        $producto['id'] = $producto['producto_id'];
     }
 }
 unset($producto); // Romper la referencia
@@ -292,10 +302,10 @@ unset($producto); // Romper la referencia
                 <div class="cantidad-controls">
                     <form method="POST" style="display: inline;">
                         <input type="hidden" name="accion" value="actualizar">
-                        <input type="hidden" name="producto_id" value="<?= $producto['id'] ?>">
-                        <button type="button" class="cantidad-btn" onclick="cambiarCantidad(<?= $producto['id'] ?>, -1)">-</button>
-                        <input type="number" name="cantidad" value="<?= $producto['cantidad'] ?>" min="1" class="cantidad-input" id="cantidad_<?= $producto['id'] ?>" onchange="actualizarCantidad(<?= $producto['id'] ?>)">
-                        <button type="button" class="cantidad-btn" onclick="cambiarCantidad(<?= $producto['id'] ?>, 1)">+</button>
+                        <input type="hidden" name="producto_id" value="<?= $producto['producto_id'] ?>">
+                        <button type="button" class="cantidad-btn" onclick="cambiarCantidad(<?= $producto['producto_id'] ?>, -1)">-</button>
+                        <input type="number" name="cantidad" value="<?= $producto['cantidad'] ?>" min="1" class="cantidad-input" id="cantidad_<?= $producto['producto_id'] ?>" onchange="actualizarCantidad(<?= $producto['producto_id'] ?>)">
+                        <button type="button" class="cantidad-btn" onclick="cambiarCantidad(<?= $producto['producto_id'] ?>, 1)">+</button>
                     </form>
                 </div>
                 
@@ -303,8 +313,8 @@ unset($producto); // Romper la referencia
                     <div style="font-weight: bold; color: #007185;">₡<?= number_format($producto['subtotal'], 0, ',', '.') ?></div>
                     <form method="POST" style="display: inline; margin-top: 10px;">
                         <input type="hidden" name="accion" value="eliminar">
-                        <input type="hidden" name="producto_id" value="<?= $producto['id'] ?>">
-                        <button type="button" class="eliminar-btn" onclick="mostrarModalEliminar(<?= $producto['id'] ?>)">Eliminar</button>
+                        <input type="hidden" name="producto_id" value="<?= $producto['producto_id'] ?>">
+                        <button type="button" class="eliminar-btn" onclick="mostrarModalEliminar(<?= $producto['producto_id'] ?>)">Eliminar</button>
                     </form>
                 </div>
             </div>
