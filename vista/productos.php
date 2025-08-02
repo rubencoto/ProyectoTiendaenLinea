@@ -172,7 +172,7 @@ function renderizarProductos(lista) {
             <img src="data:image/jpeg;base64,${p.imagen_principal}">
             <h3>${p.nombre}</h3>
             <p><strong>₡${parseFloat(p.precio).toLocaleString()}</strong></p>
-            <a href="productoDetalle.php?id=${p.id}">Ver Detalle</a>
+            <a href="productodetalle.php?id=${p.id}">Ver Detalle</a>
             <button onclick="eliminarProducto(${p.id}, this)">Eliminar</button>
         `;
         contenedor.appendChild(card);
