@@ -86,7 +86,7 @@
         </div>
 
         <?php
-        require_once '../modelo/conexion.php';
+        require_once __DIR__ . '/../modelo/conexion.php';
 
         $action = $_GET['action'] ?? '';
         $showStatus = $_GET['status'] ?? false;
@@ -239,7 +239,7 @@
             SELECT id, nombre, stock, unidades FROM productos ORDER BY id;
         </div>
         
-        <p><a href="../vista/index.php" class="btn">← Back to Store</a></p>
+        <p><a href="index.php" class="btn">← Back to Store</a></p>
     </div>
 </body>
 </html>
