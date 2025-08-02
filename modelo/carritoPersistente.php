@@ -110,28 +110,61 @@ class CarritoPersistente {
      */
     public function obtenerCarrito($cliente_id) {
         try {
+            // First, get cart items
             $stmt = $this->conn->prepare("
-                SELECT cp.id, cp.cliente_id, cp.producto_id, cp.cantidad, cp.fecha_agregado, cp.fecha_actualizado,
-                       p.nombre, p.precio, 
-                       COALESCE(p.imagen1, p.imagen_principal) as imagen1, 
-                       p.stock, p.id_vendedor, 
-                       COALESCE(v.nombre_empresa, 'Vendedor no encontrado') as vendedor_nombre
-                FROM carrito_persistente cp
-                INNER JOIN productos p ON cp.producto_id = p.id
-                LEFT JOIN vendedores v ON p.id_vendedor = v.id
-                WHERE cp.cliente_id = ?
-                ORDER BY cp.fecha_agregado DESC
+                SELECT id, cliente_id, producto_id, cantidad, fecha_agregado, fecha_actualizado
+                FROM carrito_persistente 
+                WHERE cliente_id = ?
+                ORDER BY fecha_agregado DESC
             ");
             $stmt->execute([$cliente_id]);
-            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $cart_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
-            // Debug logging
-            error_log("CarritoPersistente::obtenerCarrito - Cliente ID: $cliente_id, Productos encontrados: " . count($result));
-            if (count($result) > 0) {
-                error_log("CarritoPersistente::obtenerCarrito - Primer producto: " . print_r($result[0], true));
+            if (empty($cart_items)) {
+                error_log("CarritoPersistente::obtenerCarrito - No cart items found for cliente_id: $cliente_id");
+                return [];
             }
             
+            error_log("CarritoPersistente::obtenerCarrito - Found " . count($cart_items) . " cart items for cliente_id: $cliente_id");
+            
+            // Then get product details for each item
+            $result = [];
+            foreach ($cart_items as $item) {
+                $stmt_product = $this->conn->prepare("
+                    SELECT p.id, p.nombre, p.precio, p.imagen1, p.imagen_principal, p.stock, p.id_vendedor
+                    FROM productos p 
+                    WHERE p.id = ?
+                ");
+                $stmt_product->execute([$item['producto_id']]);
+                $product = $stmt_product->fetch(PDO::FETCH_ASSOC);
+                
+                if ($product) {
+                    // Merge cart item data with product data
+                    $merged = array_merge($item, $product);
+                    
+                    // Get vendor info
+                    if ($product['id_vendedor']) {
+                        $stmt_vendor = $this->conn->prepare("
+                            SELECT nombre_empresa 
+                            FROM vendedores 
+                            WHERE id = ?
+                        ");
+                        $stmt_vendor->execute([$product['id_vendedor']]);
+                        $vendor = $stmt_vendor->fetch(PDO::FETCH_ASSOC);
+                        $merged['vendedor_nombre'] = $vendor ? $vendor['nombre_empresa'] : 'Vendedor no encontrado';
+                    } else {
+                        $merged['vendedor_nombre'] = 'Sin vendedor';
+                    }
+                    
+                    $result[] = $merged;
+                } else {
+                    error_log("CarritoPersistente::obtenerCarrito - Product not found for producto_id: " . $item['producto_id']);
+                }
+            }
+            
+            error_log("CarritoPersistente::obtenerCarrito - Returning " . count($result) . " products with details");
             return $result;
+            
         } catch (Exception $e) {
             error_log("Error en obtenerCarrito: " . $e->getMessage());
             return [];
