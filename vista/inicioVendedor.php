@@ -1,12 +1,21 @@
 <?php
 session_start(); // Iniciar sesión
 require_once '../modelo/config.php';
+require_once '../modelo/conexion.php';
 
 // 🚫 Verificar si hay sesión activa del vendedor
 if (!isset($_SESSION['id'])) {
     header('Location: ' . AppConfig::vistaUrl('loginVendedor.php'));
     exit;
 }
+
+// Obtener información del vendedor
+$vendedor_id = $_SESSION['id'];
+$stmt = $conn->prepare("SELECT nombre_empresa FROM vendedores WHERE id = ?");
+$stmt->execute([$vendedor_id]);
+$vendedor = $stmt->fetch();
+
+$nombre_empresa = $vendedor ? $vendedor['nombre_empresa'] : 'Vendedor';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -68,7 +77,7 @@ if (!isset($_SESSION['id'])) {
 <body>
 
     <div class="header">
-        <h1>Bienvenido, <?= htmlspecialchars($_SESSION['id']) ?></h1>
+        <h1>Bienvenido, <?= htmlspecialchars($nombre_empresa) ?></h1>
     </div>
 
     <div class="container">
