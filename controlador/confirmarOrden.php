@@ -327,9 +327,9 @@ try {
             <p>Vendedores: ' . (array_sum($envios_vendedores) === count($envios_vendedores) ? '<span style="color: green;">Todos notificados</span>' : '<span style="color: orange;">Algunos errores</span>') . '</p>
             
             <div style="margin-top: 30px;">
-                <a href="../vista/catalogo.php" class="btn">Seguir Comprando</a>
-                <a href="../vista/misPedidos.php" class="btn">Ver Mis Pedidos</a>
-                <a href="../vista/index.php.php" class="btn">Ir al Inicio</a>
+                <a href="..catalogo.php" class="btn">Seguir Comprando</a>
+                <a href="..misPedidos.php" class="btn">Ver Mis Pedidos</a>
+                <a href="..index.php.php" class="btn">Ir al Inicio</a>
             </div>
         </div>
     </body>
