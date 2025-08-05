@@ -247,8 +247,6 @@ while ($row = $stmt->fetch()) {
         }
         .dropdown-toggle {
             position: relative;
-            background: none;
-            border: none;
             cursor: pointer;
         }
         .dropdown-arrow {
@@ -262,7 +260,7 @@ while ($row = $stmt->fetch()) {
             right: 0;
             background: white;
             min-width: 200px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
             border-radius: 8px;
             border: 1px solid #ddd;
             z-index: 1000;
@@ -270,14 +268,7 @@ while ($row = $stmt->fetch()) {
             visibility: hidden;
             transform: translateY(-10px);
             transition: all 0.3s ease;
-        }
-        .dropdown-container:hover .dropdown-menu {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-        .dropdown-container:hover .dropdown-arrow {
-            transform: rotate(180deg);
+            margin-top: 5px;
         }
         .dropdown-item {
             display: block;
@@ -352,11 +343,11 @@ while ($row = $stmt->fetch()) {
             <div class="col-md-4 text-end">
                 <?php if ($isLoggedIn): ?>
                     <div class="dropdown-container">
-                        <button class="btn btn-info btn-sm dropdown-toggle" id="userDropdown">
+                        <a href="<?= AppConfig::link('inicioCliente.php') ?>" class="btn btn-info btn-sm dropdown-toggle" id="userDropdown">
                             Bienvenido, <?php echo htmlspecialchars($nombre_completo); ?> <span class="dropdown-arrow">▼</span>
-                        </button>
+                        </a>
                         <div class="dropdown-menu" id="dropdownMenu">
-                            <a href="<?= AppConfig::link('index.php') ?>" class="dropdown-item">Ver Productos</a>
+                            <a href="<?= AppConfig::link('catalogo.php') ?>" class="dropdown-item">Ver Catálogo</a>
                             <a href="<?= AppConfig::link('carrito.php') ?>" class="dropdown-item">
                                 Mi Carrito
                                 <?php if ($cantidad_total > 0): ?>
@@ -365,7 +356,6 @@ while ($row = $stmt->fetch()) {
                             </a>
                             <a href="<?= AppConfig::link('misPedidos.php') ?>" class="dropdown-item">Mis Pedidos</a>
                             <a href="<?= AppConfig::link('perfil.php') ?>" class="dropdown-item">Mi Perfil</a>
-                            <a href="<?= AppConfig::link('inicioCliente.php') ?>" class="dropdown-item">Panel Principal</a>
                             <div class="dropdown-divider"></div>
                             <a href="?logout=1" class="dropdown-item logout">Cerrar Sesión</a>
                         </div>
@@ -539,6 +529,42 @@ function mostrarToast(msg, type = 'success') {
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
 }
+
+// Handle dropdown functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const dropdownContainer = document.querySelector('.dropdown-container');
+    const dropdownToggle = document.querySelector('.dropdown-toggle');
+    const dropdownMenu = document.querySelector('.dropdown-menu');
+    
+    if (dropdownContainer && dropdownToggle && dropdownMenu) {
+        let isDropdownOpen = false;
+        
+        // Prevent default link behavior when hovering
+        dropdownToggle.addEventListener('click', function(e) {
+            if (isDropdownOpen) {
+                e.preventDefault();
+            }
+        });
+        
+        // Show dropdown on hover
+        dropdownContainer.addEventListener('mouseenter', function() {
+            isDropdownOpen = true;
+            dropdownMenu.style.opacity = '1';
+            dropdownMenu.style.visibility = 'visible';
+            dropdownMenu.style.transform = 'translateY(0)';
+            dropdownToggle.querySelector('.dropdown-arrow').style.transform = 'rotate(180deg)';
+        });
+        
+        // Hide dropdown when not hovering
+        dropdownContainer.addEventListener('mouseleave', function() {
+            isDropdownOpen = false;
+            dropdownMenu.style.opacity = '0';
+            dropdownMenu.style.visibility = 'hidden';
+            dropdownMenu.style.transform = 'translateY(-10px)';
+            dropdownToggle.querySelector('.dropdown-arrow').style.transform = 'rotate(0deg)';
+        });
+    }
+});
 </script>
 
 </body>
