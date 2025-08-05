@@ -294,12 +294,8 @@ while ($row = $stmt->fetch()) {
         <div class="row align-items-center">
             <div class="col-md-8">
                 <?php if ($isLoggedIn): ?>
-                    <div class="user-info">
-                        <a href="<?= AppConfig::link('carrito.php') ?>" class="btn btn-success btn-sm">
-                            Ver Carrito
-                            <span id="cart-count" class="badge bg-danger ms-1 <?= $cantidad_total > 0 ? '' : 'd-none' ?>"><?= $cantidad_total ?></span>
-                        </a>
-                        <a href="?logout=1" class="btn btn-outline-light btn-sm ms-2">Cerrar Sesión</a>
+                    <div class="welcome-message">
+                        <span class="text-light">¡Bienvenido a nuestra tienda en línea!</span>
                     </div>
                 <?php else: ?>
                     <div class="welcome-message">
@@ -309,7 +305,11 @@ while ($row = $stmt->fetch()) {
             </div>
             <div class="col-md-4 text-end">
                 <?php if ($isLoggedIn): ?>
-                    <div class="user-dropdown">
+                    <a href="<?= AppConfig::link('carrito.php') ?>" class="btn btn-success btn-sm me-2">
+                        Carrito
+                        <span id="cart-count" class="badge bg-danger ms-1 <?= $cantidad_total > 0 ? '' : 'd-none' ?>"><?= $cantidad_total ?></span>
+                    </a>
+                    <div class="user-dropdown" style="display: inline-block;">
                         <a href="<?= AppConfig::link('inicioCliente.php') ?>" class="btn btn-info btn-sm" id="userButton">
                             Bienvenido, <?php echo htmlspecialchars($nombre_completo); ?> <span id="arrow">▼</span>
                         </a>
