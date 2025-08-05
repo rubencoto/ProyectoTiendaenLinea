@@ -245,9 +245,13 @@ while ($row = $stmt->fetch()) {
             position: relative;
             display: inline-block;
         }
-        .dropdown-toggle {
+        .user-dropdown-btn {
             position: relative;
             cursor: pointer;
+            text-decoration: none;
+        }
+        .user-dropdown-btn:hover {
+            text-decoration: none;
         }
         .dropdown-arrow {
             font-size: 0.8em;
@@ -343,7 +347,7 @@ while ($row = $stmt->fetch()) {
             <div class="col-md-4 text-end">
                 <?php if ($isLoggedIn): ?>
                     <div class="dropdown-container">
-                        <a href="<?= AppConfig::link('inicioCliente.php') ?>" class="btn btn-info btn-sm dropdown-toggle" id="userDropdown">
+                        <a href="<?= AppConfig::link('inicioCliente.php') ?>" class="btn btn-info btn-sm user-dropdown-btn" id="userDropdown">
                             Bienvenido, <?php echo htmlspecialchars($nombre_completo); ?> <span class="dropdown-arrow">▼</span>
                         </a>
                         <div class="dropdown-menu" id="dropdownMenu">
@@ -533,35 +537,63 @@ function mostrarToast(msg, type = 'success') {
 // Handle dropdown functionality
 document.addEventListener('DOMContentLoaded', function() {
     const dropdownContainer = document.querySelector('.dropdown-container');
-    const dropdownToggle = document.querySelector('.dropdown-toggle');
+    const dropdownToggle = document.querySelector('.user-dropdown-btn');
     const dropdownMenu = document.querySelector('.dropdown-menu');
     
     if (dropdownContainer && dropdownToggle && dropdownMenu) {
-        let isDropdownOpen = false;
-        
-        // Prevent default link behavior when hovering
-        dropdownToggle.addEventListener('click', function(e) {
-            if (isDropdownOpen) {
-                e.preventDefault();
-            }
-        });
+        let isHovering = false;
         
         // Show dropdown on hover
         dropdownContainer.addEventListener('mouseenter', function() {
-            isDropdownOpen = true;
+            isHovering = true;
             dropdownMenu.style.opacity = '1';
             dropdownMenu.style.visibility = 'visible';
             dropdownMenu.style.transform = 'translateY(0)';
-            dropdownToggle.querySelector('.dropdown-arrow').style.transform = 'rotate(180deg)';
+            const arrow = dropdownToggle.querySelector('.dropdown-arrow');
+            if (arrow) {
+                arrow.style.transform = 'rotate(180deg)';
+            }
         });
         
         // Hide dropdown when not hovering
         dropdownContainer.addEventListener('mouseleave', function() {
-            isDropdownOpen = false;
+            isHovering = false;
             dropdownMenu.style.opacity = '0';
             dropdownMenu.style.visibility = 'hidden';
             dropdownMenu.style.transform = 'translateY(-10px)';
-            dropdownToggle.querySelector('.dropdown-arrow').style.transform = 'rotate(0deg)';
+            const arrow = dropdownToggle.querySelector('.dropdown-arrow');
+            if (arrow) {
+                arrow.style.transform = 'rotate(0deg)';
+            }
+        });
+        
+        // Prevent navigation when dropdown is showing
+        dropdownToggle.addEventListener('click', function(e) {
+            if (isHovering) {
+                e.preventDefault();
+                return false;
+            }
+            // Allow normal navigation when not hovering
+        });
+        
+        // Prevent dropdown from closing when clicking inside it
+        dropdownMenu.addEventListener('mouseenter', function() {
+            isHovering = true;
+        });
+        
+        dropdownMenu.addEventListener('mouseleave', function() {
+            isHovering = false;
+            setTimeout(function() {
+                if (!isHovering) {
+                    dropdownMenu.style.opacity = '0';
+                    dropdownMenu.style.visibility = 'hidden';
+                    dropdownMenu.style.transform = 'translateY(-10px)';
+                    const arrow = dropdownToggle.querySelector('.dropdown-arrow');
+                    if (arrow) {
+                        arrow.style.transform = 'rotate(0deg)';
+                    }
+                }
+            }, 100);
         });
     }
 });
