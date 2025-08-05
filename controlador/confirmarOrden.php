@@ -343,7 +343,7 @@ try {
             <div style="margin-top: 30px;">
                 <a href="catalogo.php" class="btn">Seguir Comprando</a>
                 <a href="misPedidos.php" class="btn">Ver Mis Pedidos</a>
-                <a href="index.php.php" class="btn">Ir al Inicio</a>
+                <a href="index.php" class="btn">Ir al Inicio</a>
             </div>
         </div>
     </body>
