@@ -275,6 +275,14 @@ while ($row = $stmt->fetch()) {
             transition: all 0.3s ease;
             margin-top: 8px;
         }
+        .dropdown-container:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .dropdown-container:hover .dropdown-arrow {
+            transform: rotate(180deg);
+        }
         .dropdown-item {
             display: block;
             padding: 12px 16px;
@@ -535,73 +543,19 @@ function mostrarToast(msg, type = 'success') {
     setTimeout(() => toast.remove(), 3000);
 }
 
-// Working dropdown functionality
+// Simple click prevention for dropdown
 document.addEventListener('DOMContentLoaded', function() {
-    const dropdownContainer = document.querySelector('.dropdown-container');
     const dropdownBtn = document.querySelector('.user-dropdown-btn');
-    const dropdownMenu = document.querySelector('.dropdown-menu');
+    const dropdownContainer = document.querySelector('.dropdown-container');
     
-    if (dropdownContainer && dropdownBtn && dropdownMenu) {
-        let isMenuOpen = false;
-        let hoverTimeout;
-        
-        // Show dropdown on hover
-        dropdownContainer.addEventListener('mouseenter', function() {
-            clearTimeout(hoverTimeout);
-            isMenuOpen = true;
-            dropdownMenu.style.opacity = '1';
-            dropdownMenu.style.visibility = 'visible';
-            dropdownMenu.style.transform = 'translateY(0)';
-            
-            const arrow = dropdownBtn.querySelector('.dropdown-arrow');
-            if (arrow) {
-                arrow.style.transform = 'rotate(180deg)';
-            }
-        });
-        
-        // Hide dropdown when leaving
-        dropdownContainer.addEventListener('mouseleave', function() {
-            hoverTimeout = setTimeout(function() {
-                isMenuOpen = false;
-                dropdownMenu.style.opacity = '0';
-                dropdownMenu.style.visibility = 'hidden';
-                dropdownMenu.style.transform = 'translateY(-10px)';
-                
-                const arrow = dropdownBtn.querySelector('.dropdown-arrow');
-                if (arrow) {
-                    arrow.style.transform = 'rotate(0deg)';
-                }
-            }, 150);
-        });
-        
-        // Prevent navigation only when dropdown is visible
+    if (dropdownBtn && dropdownContainer) {
         dropdownBtn.addEventListener('click', function(e) {
-            if (isMenuOpen) {
+            // Check if the dropdown is currently visible (using CSS hover)
+            const isHovering = dropdownContainer.matches(':hover');
+            if (isHovering) {
                 e.preventDefault();
-                e.stopPropagation();
                 return false;
             }
-            // Allow normal navigation when dropdown is not showing
-        });
-        
-        // Keep dropdown open when hovering over menu items
-        dropdownMenu.addEventListener('mouseenter', function() {
-            clearTimeout(hoverTimeout);
-            isMenuOpen = true;
-        });
-        
-        dropdownMenu.addEventListener('mouseleave', function() {
-            hoverTimeout = setTimeout(function() {
-                isMenuOpen = false;
-                dropdownMenu.style.opacity = '0';
-                dropdownMenu.style.visibility = 'hidden';
-                dropdownMenu.style.transform = 'translateY(-10px)';
-                
-                const arrow = dropdownBtn.querySelector('.dropdown-arrow');
-                if (arrow) {
-                    arrow.style.transform = 'rotate(0deg)';
-                }
-            }, 150);
         });
     }
 });
