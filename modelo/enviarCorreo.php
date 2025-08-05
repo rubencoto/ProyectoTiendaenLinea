@@ -8,18 +8,6 @@ if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
         require_once 'C:/Users/leomo/OneDrive/Desktop/PHPMailer-master/PHPMailer-master/src/Exception.php';
         require_once 'C:/Users/leomo/OneDrive/Desktop/PHPMailer-master/PHPMailer-master/src/PHPMailer.php';
         require_once 'C:/Users/leomo/OneDrive/Desktop/PHPMailer-master/PHPMailer-master/src/SMTP.php';
-<<<<<<< HEAD
-    } else {
-        // Fallback para otros usuarios
-        if (file_exists('C:/Users/ruben/OneDrive/Desktop/correo/PHPMailer-master/src/PHPMailer.php')) {
-            require_once 'C:/Users/ruben/OneDrive/Desktop/correo/PHPMailer-master/src/Exception.php';
-            require_once 'C:/Users/ruben/OneDrive/Desktop/correo/PHPMailer-master/src/PHPMailer.php';
-            require_once 'C:/Users/ruben/OneDrive/Desktop/correo/PHPMailer-master/src/SMTP.php';
-        } else {
-            error_log('PHPMailer no encontrado en ninguna ubicación conocida.');
-            return false;
-        }
-=======
     } elseif (file_exists('C:/Users/ruben/OneDrive/Desktop/correo/PHPMailer-master/src/PHPMailer.php')) {
         require_once 'C:/Users/ruben/OneDrive/Desktop/correo/PHPMailer-master/src/Exception.php';
         require_once 'C:/Users/ruben/OneDrive/Desktop/correo/PHPMailer-master/src/PHPMailer.php';
@@ -31,7 +19,6 @@ if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
     } else {
         error_log('PHPMailer no encontrado en ninguna ubicación conocida.');
         return false;
->>>>>>> f56b1ab (Added the function to recover password)
     }
 }
 
