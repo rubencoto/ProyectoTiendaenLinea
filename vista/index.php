@@ -241,89 +241,43 @@ while ($row = $stmt->fetch()) {
         .user-info {
             color: white;
         }
-        .dropdown-container {
+        .user-dropdown {
             position: relative;
             display: inline-block;
         }
-        .user-dropdown-btn {
-            position: relative;
-            cursor: pointer;
-            text-decoration: none;
-        }
-        .user-dropdown-btn:hover {
-            text-decoration: none;
-        }
-        .dropdown-arrow {
-            font-size: 0.8em;
-            margin-left: 5px;
-            transition: transform 0.3s ease;
-            display: inline-block;
-        }
-        .dropdown-menu {
+        .dropdown-options {
             position: absolute;
             top: 100%;
             right: 0;
             background: white;
-            min-width: 220px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            border-radius: 8px;
+            min-width: 200px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 5px;
             border: 1px solid #ddd;
             z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-            margin-top: 8px;
+            display: none;
+            margin-top: 5px;
         }
-        .dropdown-container:hover .dropdown-menu {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-        .dropdown-container:hover .dropdown-arrow {
-            transform: rotate(180deg);
-        }
-        .dropdown-item {
+        .dropdown-option {
             display: block;
-            padding: 12px 16px;
+            padding: 10px 15px;
             color: #333;
             text-decoration: none;
             border-bottom: 1px solid #f0f0f0;
-            transition: background-color 0.2s ease;
-            position: relative;
         }
-        .dropdown-item:first-child {
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
-        }
-        .dropdown-item:last-child {
-            border-bottom-left-radius: 8px;
-            border-bottom-right-radius: 8px;
-            border-bottom: none;
-        }
-        .dropdown-item:hover {
+        .dropdown-option:hover {
             background-color: #f8f9fa;
-            color: #007185;
             text-decoration: none;
+            color: #007185;
         }
-        .dropdown-item.logout:hover {
-            background-color: #f8d7da;
-            color: #721c24;
+        .dropdown-option:first-child {
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
         }
-        .dropdown-divider {
-            height: 1px;
-            background-color: #e9ecef;
-            margin: 0;
-        }
-        .cart-badge {
-            background-color: #dc3545;
-            color: white;
-            border-radius: 50%;
-            padding: 2px 6px;
-            font-size: 0.7em;
-            margin-left: 5px;
-            position: absolute;
-            right: 16px;
+        .dropdown-option:last-child {
+            border-bottom-left-radius: 5px;
+            border-bottom-right-radius: 5px;
+            border-bottom: none;
         }
     </style>
 </head>
@@ -355,22 +309,22 @@ while ($row = $stmt->fetch()) {
             </div>
             <div class="col-md-4 text-end">
                 <?php if ($isLoggedIn): ?>
-                    <div class="dropdown-container">
-                        <a href="<?= AppConfig::link('inicioCliente.php') ?>" class="btn btn-info btn-sm user-dropdown-btn" id="userDropdown">
-                            Bienvenido, <?php echo htmlspecialchars($nombre_completo); ?> <span class="dropdown-arrow">▼</span>
+                    <div class="user-dropdown" onmouseover="showDropdown()" onmouseout="hideDropdown()">
+                        <a href="<?= AppConfig::link('inicioCliente.php') ?>" class="btn btn-info btn-sm" id="userButton" onclick="handleButtonClick(event)">
+                            Bienvenido, <?php echo htmlspecialchars($nombre_completo); ?> <span id="arrow">▼</span>
                         </a>
-                        <div class="dropdown-menu" id="dropdownMenu">
-                            <a href="<?= AppConfig::link('catalogo.php') ?>" class="dropdown-item">Ver Catálogo</a>
-                            <a href="<?= AppConfig::link('carrito.php') ?>" class="dropdown-item">
+                        <div class="dropdown-options" id="dropdownOptions">
+                            <a href="<?= AppConfig::link('catalogo.php') ?>" class="dropdown-option">Ver Catálogo</a>
+                            <a href="<?= AppConfig::link('carrito.php') ?>" class="dropdown-option">
                                 Mi Carrito
                                 <?php if ($cantidad_total > 0): ?>
-                                    <span class="cart-badge"><?= $cantidad_total ?></span>
+                                    <span style="background-color: #dc3545; color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.7em; margin-left: 5px;"><?= $cantidad_total ?></span>
                                 <?php endif; ?>
                             </a>
-                            <a href="<?= AppConfig::link('misPedidos.php') ?>" class="dropdown-item">Mis Pedidos</a>
-                            <a href="<?= AppConfig::link('perfil.php') ?>" class="dropdown-item">Mi Perfil</a>
-                            <div class="dropdown-divider"></div>
-                            <a href="?logout=1" class="dropdown-item logout">Cerrar Sesión</a>
+                            <a href="<?= AppConfig::link('misPedidos.php') ?>" class="dropdown-option">Mis Pedidos</a>
+                            <a href="<?= AppConfig::link('perfil.php') ?>" class="dropdown-option">Mi Perfil</a>
+                            <hr style="margin: 5px 0; border-color: #eee;">
+                            <a href="?logout=1" class="dropdown-option" style="color: #dc3545;">Cerrar Sesión</a>
                         </div>
                     </div>
                 <?php else: ?>
@@ -543,22 +497,43 @@ function mostrarToast(msg, type = 'success') {
     setTimeout(() => toast.remove(), 3000);
 }
 
-// Simple click prevention for dropdown
-document.addEventListener('DOMContentLoaded', function() {
-    const dropdownBtn = document.querySelector('.user-dropdown-btn');
-    const dropdownContainer = document.querySelector('.dropdown-container');
-    
-    if (dropdownBtn && dropdownContainer) {
-        dropdownBtn.addEventListener('click', function(e) {
-            // Check if the dropdown is currently visible (using CSS hover)
-            const isHovering = dropdownContainer.matches(':hover');
-            if (isHovering) {
-                e.preventDefault();
-                return false;
-            }
-        });
+// Simple dropdown functions
+let isDropdownVisible = false;
+
+function showDropdown() {
+    const dropdown = document.getElementById('dropdownOptions');
+    const arrow = document.getElementById('arrow');
+    if (dropdown) {
+        dropdown.style.display = 'block';
+        isDropdownVisible = true;
     }
-});
+    if (arrow) {
+        arrow.style.transform = 'rotate(180deg)';
+        arrow.style.transition = 'transform 0.3s ease';
+    }
+}
+
+function hideDropdown() {
+    const dropdown = document.getElementById('dropdownOptions');
+    const arrow = document.getElementById('arrow');
+    setTimeout(function() {
+        if (dropdown) {
+            dropdown.style.display = 'none';
+            isDropdownVisible = false;
+        }
+        if (arrow) {
+            arrow.style.transform = 'rotate(0deg)';
+        }
+    }, 150);
+}
+
+function handleButtonClick(event) {
+    if (isDropdownVisible) {
+        event.preventDefault();
+        return false;
+    }
+    // Allow normal navigation if dropdown is not visible
+}
 </script>
 
 </body>
