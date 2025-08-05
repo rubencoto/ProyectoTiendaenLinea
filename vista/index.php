@@ -523,14 +523,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 100);
         });
         
-        // Prevent default click when dropdown is visible
-        userButton.addEventListener('click', function(e) {
-            if (dropdownOptions.style.display === 'block') {
-                e.preventDefault();
-                return false;
-            }
-            // Allow normal navigation if dropdown is not visible
-        });
+        // Allow normal navigation on click
+        // The dropdown functionality is handled by hover events only
     }
 });
 </script>
