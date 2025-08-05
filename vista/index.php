@@ -275,14 +275,6 @@ while ($row = $stmt->fetch()) {
             transition: all 0.3s ease;
             margin-top: 8px;
         }
-        .dropdown-container:hover .dropdown-menu {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-        .dropdown-container:hover .dropdown-arrow {
-            transform: rotate(180deg);
-        }
         .dropdown-item {
             display: block;
             padding: 12px 16px;
@@ -359,7 +351,7 @@ while ($row = $stmt->fetch()) {
                         <a href="<?= AppConfig::link('inicioCliente.php') ?>" class="btn btn-info btn-sm user-dropdown-btn" id="userDropdown">
                             Bienvenido, <?php echo htmlspecialchars($nombre_completo); ?> <span class="dropdown-arrow">▼</span>
                         </a>
-                        <div class="dropdown-menu" id="dropdownMenu">
+                        <div class="dropdown-menu" id="dropdownMenu" style="display: block; position: static; opacity: 1; visibility: visible; transform: none; margin: 10px 0; box-shadow: none; border: 2px solid red;">
                             <a href="<?= AppConfig::link('catalogo.php') ?>" class="dropdown-item">Ver Catálogo</a>
                             <a href="<?= AppConfig::link('carrito.php') ?>" class="dropdown-item">
                                 Mi Carrito
@@ -543,21 +535,78 @@ function mostrarToast(msg, type = 'success') {
     setTimeout(() => toast.remove(), 3000);
 }
 
-// Simple dropdown functionality
+// Dropdown functionality temporarily disabled for testing
+/*
 document.addEventListener('DOMContentLoaded', function() {
+    const dropdownContainer = document.querySelector('.dropdown-container');
     const dropdownBtn = document.querySelector('.user-dropdown-btn');
+    const dropdownMenu = document.querySelector('.dropdown-menu');
     
-    if (dropdownBtn) {
-        // Prevent navigation when clicking while hovering
+    if (dropdownContainer && dropdownBtn && dropdownMenu) {
+        let isMenuOpen = false;
+        let hoverTimeout;
+        
+        // Show dropdown on hover
+        dropdownContainer.addEventListener('mouseenter', function() {
+            clearTimeout(hoverTimeout);
+            isMenuOpen = true;
+            dropdownMenu.style.opacity = '1';
+            dropdownMenu.style.visibility = 'visible';
+            dropdownMenu.style.transform = 'translateY(0)';
+            
+            const arrow = dropdownBtn.querySelector('.dropdown-arrow');
+            if (arrow) {
+                arrow.style.transform = 'rotate(180deg)';
+            }
+        });
+        
+        // Hide dropdown when leaving
+        dropdownContainer.addEventListener('mouseleave', function() {
+            hoverTimeout = setTimeout(function() {
+                isMenuOpen = false;
+                dropdownMenu.style.opacity = '0';
+                dropdownMenu.style.visibility = 'hidden';
+                dropdownMenu.style.transform = 'translateY(-10px)';
+                
+                const arrow = dropdownBtn.querySelector('.dropdown-arrow');
+                if (arrow) {
+                    arrow.style.transform = 'rotate(0deg)';
+                }
+            }, 100);
+        });
+        
+        // Prevent navigation only when dropdown is visible
         dropdownBtn.addEventListener('click', function(e) {
-            const container = this.closest('.dropdown-container');
-            if (container && container.matches(':hover')) {
+            if (isMenuOpen) {
                 e.preventDefault();
+                e.stopPropagation();
                 return false;
             }
+            // Allow normal navigation when dropdown is not showing
+        });
+        
+        // Keep dropdown open when hovering over menu items
+        dropdownMenu.addEventListener('mouseenter', function() {
+            clearTimeout(hoverTimeout);
+            isMenuOpen = true;
+        });
+        
+        dropdownMenu.addEventListener('mouseleave', function() {
+            hoverTimeout = setTimeout(function() {
+                isMenuOpen = false;
+                dropdownMenu.style.opacity = '0';
+                dropdownMenu.style.visibility = 'hidden';
+                dropdownMenu.style.transform = 'translateY(-10px)';
+                
+                const arrow = dropdownBtn.querySelector('.dropdown-arrow');
+                if (arrow) {
+                    arrow.style.transform = 'rotate(0deg)';
+                }
+            }, 100);
         });
     }
 });
+*/
 </script>
 
 </body>
