@@ -238,6 +238,13 @@ while ($row = $stmt->fetch()) {
         .user-info {
             color: white;
         }
+        .dropdown-toggle {
+            position: relative;
+        }
+        .dropdown-arrow {
+            font-size: 0.8em;
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
@@ -254,8 +261,7 @@ while ($row = $stmt->fetch()) {
             <div class="col-md-8">
                 <?php if ($isLoggedIn): ?>
                     <div class="user-info">
-                        <span>Bienvenido, <?php echo htmlspecialchars($nombre_completo); ?></span>
-                        <a href="<?= AppConfig::link('carrito.php') ?>" class="btn btn-success btn-sm ms-3">
+                        <a href="<?= AppConfig::link('carrito.php') ?>" class="btn btn-success btn-sm">
                             Ver Carrito
                             <?php 
                             $cantidad_total = 0;
@@ -265,7 +271,6 @@ while ($row = $stmt->fetch()) {
                             ?>
                             <span id="cart-count" class="badge bg-danger ms-1 <?= $cantidad_total > 0 ? '' : 'd-none' ?>"><?= $cantidad_total ?></span>
                         </a>
-                        <a href="<?= AppConfig::link('inicioCliente.php') ?>" class="btn btn-info btn-sm ms-2">Panel</a>
                         <a href="?logout=1" class="btn btn-outline-light btn-sm ms-2">Cerrar Sesión</a>
                     </div>
                 <?php else: ?>
@@ -275,7 +280,11 @@ while ($row = $stmt->fetch()) {
                 <?php endif; ?>
             </div>
             <div class="col-md-4 text-end">
-                <?php if (!$isLoggedIn): ?>
+                <?php if ($isLoggedIn): ?>
+                    <a href="<?= AppConfig::link('inicioCliente.php') ?>" class="btn btn-info btn-sm dropdown-toggle">
+                        Bienvenido, <?php echo htmlspecialchars($nombre_completo); ?> <span class="dropdown-arrow">▼</span>
+                    </a>
+                <?php else: ?>
                     <a href="<?= AppConfig::link('loginCliente.php') ?>" class="btn btn-primary btn-sm">Clientes</a>
                     <a href="<?= AppConfig::link('loginVendedor.php') ?>" class="btn btn-outline-light btn-sm">Vendedores</a>
                 <?php endif; ?>
