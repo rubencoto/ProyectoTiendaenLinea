@@ -38,6 +38,9 @@ if (isset($_GET['logout'])) {
 if ($isLoggedIn) {
     require_once '../modelo/carritoPersistente.php';
     $carritoPersistente = new CarritoPersistente();
+    $cantidad_total = $carritoPersistente->contarProductos($cliente_id);
+} else {
+    $cantidad_total = 0;
 }
 
 // Handle cart operations (only for logged in users)
@@ -238,12 +241,85 @@ while ($row = $stmt->fetch()) {
         .user-info {
             color: white;
         }
+        .dropdown-container {
+            position: relative;
+            display: inline-block;
+        }
         .dropdown-toggle {
             position: relative;
+            background: none;
+            border: none;
+            cursor: pointer;
         }
         .dropdown-arrow {
             font-size: 0.8em;
             margin-left: 5px;
+            transition: transform 0.3s ease;
+        }
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            min-width: 200px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+        .dropdown-container:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .dropdown-container:hover .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+        .dropdown-item {
+            display: block;
+            padding: 12px 16px;
+            color: #333;
+            text-decoration: none;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s ease;
+            position: relative;
+        }
+        .dropdown-item:first-child {
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+        .dropdown-item:last-child {
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            border-bottom: none;
+        }
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+            color: #007185;
+            text-decoration: none;
+        }
+        .dropdown-item.logout:hover {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .dropdown-divider {
+            height: 1px;
+            background-color: #e9ecef;
+            margin: 0;
+        }
+        .cart-badge {
+            background-color: #dc3545;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.7em;
+            margin-left: 5px;
+            position: absolute;
+            right: 16px;
         }
     </style>
 </head>
@@ -263,12 +339,6 @@ while ($row = $stmt->fetch()) {
                     <div class="user-info">
                         <a href="<?= AppConfig::link('carrito.php') ?>" class="btn btn-success btn-sm">
                             Ver Carrito
-                            <?php 
-                            $cantidad_total = 0;
-                            if ($isLoggedIn) {
-                                $cantidad_total = $carritoPersistente->contarProductos($cliente_id);
-                            }
-                            ?>
                             <span id="cart-count" class="badge bg-danger ms-1 <?= $cantidad_total > 0 ? '' : 'd-none' ?>"><?= $cantidad_total ?></span>
                         </a>
                         <a href="?logout=1" class="btn btn-outline-light btn-sm ms-2">Cerrar Sesión</a>
@@ -281,9 +351,25 @@ while ($row = $stmt->fetch()) {
             </div>
             <div class="col-md-4 text-end">
                 <?php if ($isLoggedIn): ?>
-                    <a href="<?= AppConfig::link('inicioCliente.php') ?>" class="btn btn-info btn-sm dropdown-toggle">
-                        Bienvenido, <?php echo htmlspecialchars($nombre_completo); ?> <span class="dropdown-arrow">▼</span>
-                    </a>
+                    <div class="dropdown-container">
+                        <button class="btn btn-info btn-sm dropdown-toggle" id="userDropdown">
+                            Bienvenido, <?php echo htmlspecialchars($nombre_completo); ?> <span class="dropdown-arrow">▼</span>
+                        </button>
+                        <div class="dropdown-menu" id="dropdownMenu">
+                            <a href="<?= AppConfig::link('index.php') ?>" class="dropdown-item">Ver Productos</a>
+                            <a href="<?= AppConfig::link('carrito.php') ?>" class="dropdown-item">
+                                Mi Carrito
+                                <?php if ($cantidad_total > 0): ?>
+                                    <span class="cart-badge"><?= $cantidad_total ?></span>
+                                <?php endif; ?>
+                            </a>
+                            <a href="<?= AppConfig::link('misPedidos.php') ?>" class="dropdown-item">Mis Pedidos</a>
+                            <a href="<?= AppConfig::link('perfil.php') ?>" class="dropdown-item">Mi Perfil</a>
+                            <a href="<?= AppConfig::link('inicioCliente.php') ?>" class="dropdown-item">Panel Principal</a>
+                            <div class="dropdown-divider"></div>
+                            <a href="?logout=1" class="dropdown-item logout">Cerrar Sesión</a>
+                        </div>
+                    </div>
                 <?php else: ?>
                     <a href="<?= AppConfig::link('loginCliente.php') ?>" class="btn btn-primary btn-sm">Clientes</a>
                     <a href="<?= AppConfig::link('loginVendedor.php') ?>" class="btn btn-outline-light btn-sm">Vendedores</a>
