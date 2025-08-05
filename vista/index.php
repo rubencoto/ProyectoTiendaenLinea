@@ -14,6 +14,19 @@ $conn = $db->getConnection();
 
 $isLoggedIn = !empty($_SESSION['cliente_id']);
 
+// Get client information if logged in
+$nombre_completo = 'Cliente';
+if ($isLoggedIn) {
+    $cliente_id = $_SESSION['cliente_id'];
+    $stmt_cliente = $conn->prepare("SELECT nombre, apellido FROM clientes WHERE id = ?");
+    $stmt_cliente->execute([$cliente_id]);
+    $cliente = $stmt_cliente->fetch();
+    
+    if ($cliente) {
+        $nombre_completo = $cliente['nombre'] . ' ' . $cliente['apellido'];
+    }
+}
+
 // Handle logout
 if (isset($_GET['logout'])) {
     session_destroy();
@@ -25,7 +38,6 @@ if (isset($_GET['logout'])) {
 if ($isLoggedIn) {
     require_once '../modelo/carritoPersistente.php';
     $carritoPersistente = new CarritoPersistente();
-    $cliente_id = $_SESSION['cliente_id'];
 }
 
 // Handle cart operations (only for logged in users)
@@ -242,7 +254,7 @@ while ($row = $stmt->fetch()) {
             <div class="col-md-8">
                 <?php if ($isLoggedIn): ?>
                     <div class="user-info">
-                        <span>Bienvenido, Cliente</span>
+                        <span>Bienvenido, <?php echo htmlspecialchars($nombre_completo); ?></span>
                         <a href="<?= AppConfig::link('carrito.php') ?>" class="btn btn-success btn-sm ms-3">
                             Ver Carrito
                             <?php 
