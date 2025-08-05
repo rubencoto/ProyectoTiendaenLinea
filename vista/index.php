@@ -351,7 +351,7 @@ while ($row = $stmt->fetch()) {
                         <a href="<?= AppConfig::link('inicioCliente.php') ?>" class="btn btn-info btn-sm user-dropdown-btn" id="userDropdown">
                             Bienvenido, <?php echo htmlspecialchars($nombre_completo); ?> <span class="dropdown-arrow">▼</span>
                         </a>
-                        <div class="dropdown-menu" id="dropdownMenu" style="display: block; position: static; opacity: 1; visibility: visible; transform: none; margin: 10px 0; box-shadow: none; border: 2px solid red;">
+                        <div class="dropdown-menu" id="dropdownMenu">
                             <a href="<?= AppConfig::link('catalogo.php') ?>" class="dropdown-item">Ver Catálogo</a>
                             <a href="<?= AppConfig::link('carrito.php') ?>" class="dropdown-item">
                                 Mi Carrito
@@ -535,8 +535,7 @@ function mostrarToast(msg, type = 'success') {
     setTimeout(() => toast.remove(), 3000);
 }
 
-// Dropdown functionality temporarily disabled for testing
-/*
+// Working dropdown functionality
 document.addEventListener('DOMContentLoaded', function() {
     const dropdownContainer = document.querySelector('.dropdown-container');
     const dropdownBtn = document.querySelector('.user-dropdown-btn');
@@ -572,7 +571,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (arrow) {
                     arrow.style.transform = 'rotate(0deg)';
                 }
-            }, 100);
+            }, 150);
         });
         
         // Prevent navigation only when dropdown is visible
@@ -602,11 +601,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (arrow) {
                     arrow.style.transform = 'rotate(0deg)';
                 }
-            }, 100);
+            }, 150);
         });
     }
 });
-*/
 </script>
 
 </body>
