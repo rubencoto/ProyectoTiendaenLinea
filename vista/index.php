@@ -256,7 +256,7 @@ while ($row = $stmt->fetch()) {
             border: 1px solid #ddd;
             z-index: 1000;
             display: none;
-            margin-top: 5px;
+            margin-top: 0px;
         }
         .dropdown-option {
             display: block;
@@ -309,8 +309,8 @@ while ($row = $stmt->fetch()) {
             </div>
             <div class="col-md-4 text-end">
                 <?php if ($isLoggedIn): ?>
-                    <div class="user-dropdown" onmouseover="showDropdown()" onmouseout="hideDropdown()">
-                        <a href="<?= AppConfig::link('inicioCliente.php') ?>" class="btn btn-info btn-sm" id="userButton" onclick="handleButtonClick(event)">
+                    <div class="user-dropdown">
+                        <a href="<?= AppConfig::link('inicioCliente.php') ?>" class="btn btn-info btn-sm" id="userButton">
                             Bienvenido, <?php echo htmlspecialchars($nombre_completo); ?> <span id="arrow">▼</span>
                         </a>
                         <div class="dropdown-options" id="dropdownOptions">
@@ -498,42 +498,41 @@ function mostrarToast(msg, type = 'success') {
 }
 
 // Simple dropdown functions
-let isDropdownVisible = false;
-
-function showDropdown() {
-    const dropdown = document.getElementById('dropdownOptions');
+document.addEventListener('DOMContentLoaded', function() {
+    const userDropdown = document.querySelector('.user-dropdown');
+    const dropdownOptions = document.getElementById('dropdownOptions');
     const arrow = document.getElementById('arrow');
-    if (dropdown) {
-        dropdown.style.display = 'block';
-        isDropdownVisible = true;
+    const userButton = document.getElementById('userButton');
+    
+    if (userDropdown && dropdownOptions && arrow && userButton) {
+        let dropdownTimer;
+        
+        // Show dropdown on hover
+        userDropdown.addEventListener('mouseenter', function() {
+            clearTimeout(dropdownTimer);
+            dropdownOptions.style.display = 'block';
+            arrow.style.transform = 'rotate(180deg)';
+            arrow.style.transition = 'transform 0.3s ease';
+        });
+        
+        // Hide dropdown when leaving the entire dropdown area
+        userDropdown.addEventListener('mouseleave', function() {
+            dropdownTimer = setTimeout(function() {
+                dropdownOptions.style.display = 'none';
+                arrow.style.transform = 'rotate(0deg)';
+            }, 100);
+        });
+        
+        // Prevent default click when dropdown is visible
+        userButton.addEventListener('click', function(e) {
+            if (dropdownOptions.style.display === 'block') {
+                e.preventDefault();
+                return false;
+            }
+            // Allow normal navigation if dropdown is not visible
+        });
     }
-    if (arrow) {
-        arrow.style.transform = 'rotate(180deg)';
-        arrow.style.transition = 'transform 0.3s ease';
-    }
-}
-
-function hideDropdown() {
-    const dropdown = document.getElementById('dropdownOptions');
-    const arrow = document.getElementById('arrow');
-    setTimeout(function() {
-        if (dropdown) {
-            dropdown.style.display = 'none';
-            isDropdownVisible = false;
-        }
-        if (arrow) {
-            arrow.style.transform = 'rotate(0deg)';
-        }
-    }, 150);
-}
-
-function handleButtonClick(event) {
-    if (isDropdownVisible) {
-        event.preventDefault();
-        return false;
-    }
-    // Allow normal navigation if dropdown is not visible
-}
+});
 </script>
 
 </body>
