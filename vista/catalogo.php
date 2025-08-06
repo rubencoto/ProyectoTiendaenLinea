@@ -508,6 +508,45 @@ while ($row = $stmt->fetch()) {
                 height: 14px;
             }
         }
+        
+        /* From Uiverse.io by Jedi-hongbin - Volver al Inicio Button */
+        .volver-inicio-btn {
+            display: flex;
+            height: 3em;
+            width: 100px;
+            align-items: center;
+            justify-content: center;
+            background-color: #eeeeee4b;
+            border-radius: 3px;
+            letter-spacing: 1px;
+            transition: all 0.2s linear;
+            cursor: pointer;
+            border: none;
+            background: #fff;
+            text-decoration: none;
+            color: #333;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .volver-inicio-btn > svg {
+            margin-right: 5px;
+            margin-left: 5px;
+            font-size: 20px;
+            transition: all 0.4s ease-in;
+        }
+
+        .volver-inicio-btn:hover > svg {
+            font-size: 1.2em;
+            transform: translateX(-5px);
+        }
+
+        .volver-inicio-btn:hover {
+            box-shadow: 9px 9px 33px #d1d1d1, -9px -9px 33px #ffffff;
+            transform: translateY(-2px);
+            text-decoration: none;
+            color: #333;
+        }
     </style>
 </head>
 <body>
@@ -522,7 +561,12 @@ while ($row = $stmt->fetch()) {
     <div class="container-fluid">
         <div class="row align-items-center">
             <div class="col-md-8">
-                <a href="<?= AppConfig::link('index.php') ?>" class="btn btn-secondary btn-sm">← Volver al Inicio</a>
+                <a href="<?= AppConfig::link('index.php') ?>" class="volver-inicio-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+                    </svg>
+                    Inicio
+                </a>
             </div>
             <div class="col-md-4 text-end">
                 <?php if ($isLoggedIn): ?>
