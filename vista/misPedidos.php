@@ -51,8 +51,22 @@ $stmt_ordenes->execute([$cliente_id]);
 
 $ordenes = [];
 while ($row = $stmt_ordenes->fetch()) {
-    error_log("MisPedidos: Found order ID: " . $row['id'] . " with numero_orden: " . $row['numero_orden']);
+    error_log("MisPedidos: Found order ID: " . $row['id'] . " with numero_orden: " . $row['numero_orden'] . " for cliente_id: $cliente_id");
     $ordenes[] = $row;
+}
+
+error_log("MisPedidos: Total orders found for cliente_id $cliente_id: " . count($ordenes));
+
+// Clean up orphaned details that don't have corresponding orders in the ordenes table
+$cleanup_stmt = $pdo_conn->prepare("
+    DELETE dp FROM detalle_pedidos dp 
+    LEFT JOIN ordenes o ON dp.orden_id = o.id 
+    WHERE o.id IS NULL
+");
+$cleanup_result = $cleanup_stmt->execute();
+$affected_rows = $cleanup_stmt->rowCount();
+if ($affected_rows > 0) {
+    error_log("MisPedidos: Cleaned up $affected_rows orphaned detail records");
 }
 
 // Para cada orden, obtener los productos
@@ -62,7 +76,8 @@ foreach ($ordenes as &$orden) {
                p.nombre as producto_nombre, p.imagen_principal
         FROM detalle_pedidos dp
         JOIN productos p ON dp.producto_id = p.id
-        WHERE dp.orden_id = ?
+        WHERE dp.orden_id = ? 
+        AND EXISTS (SELECT 1 FROM ordenes o WHERE o.id = dp.orden_id)
     ");
     $stmt_detalle->execute([$orden['id']]);
     

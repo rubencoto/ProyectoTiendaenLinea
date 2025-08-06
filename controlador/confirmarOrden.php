@@ -108,6 +108,7 @@ try {
         
         foreach ($productos_comprados as $producto) {
             $stmt_detalle->execute([$orden_id, $producto['producto_id'], $producto['cantidad'], $producto['precio'], $producto['subtotal']]);
+            error_log("ConfirmarOrden: Inserted detail for order_id: $orden_id, product_id: " . $producto['producto_id'] . ", cantidad: " . $producto['cantidad']);
         }
         
         // Validar y actualizar stock de productos
