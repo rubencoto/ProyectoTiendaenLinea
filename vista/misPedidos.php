@@ -11,8 +11,12 @@ if (!isset($_SESSION['cliente_id'])) {
 require_once '../modelo/conexion.php';
 $cliente_id = $_SESSION['cliente_id'];
 
+// Get PDO connection for consistency
+$db = DatabaseConnection::getInstance();
+$pdo_conn = $db->getConnection();
+
 // Obtener información del cliente
-$stmt = $conn->prepare("SELECT nombre, apellido FROM clientes WHERE id = ?");
+$stmt = $pdo_conn->prepare("SELECT nombre, apellido FROM clientes WHERE id = ?");
 $stmt->execute([$cliente_id]);
 $cliente_data = $stmt->fetch();
 
@@ -28,14 +32,14 @@ $pagina = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
 $offset = ($pagina - 1) * $limite;
 
 // Contar total de órdenes
-$stmt_count = $conn->prepare("SELECT COUNT(*) as total FROM ordenes WHERE cliente_id = ?");
+$stmt_count = $pdo_conn->prepare("SELECT COUNT(*) as total FROM ordenes WHERE cliente_id = ?");
 $stmt_count->execute([$cliente_id]);
 $count_result = $stmt_count->fetch();
 $total_ordenes = $count_result['total'];
 $total_paginas = ceil($total_ordenes / $limite);
 
 // Obtener órdenes del cliente
-$stmt_ordenes = $conn->prepare("
+$stmt_ordenes = $pdo_conn->prepare("
     SELECT o.id, o.numero_orden, o.subtotal, o.envio, o.total, 
            o.estado, o.fecha_orden
     FROM ordenes o 
@@ -47,12 +51,13 @@ $stmt_ordenes->execute([$cliente_id]);
 
 $ordenes = [];
 while ($row = $stmt_ordenes->fetch()) {
+    error_log("MisPedidos: Found order ID: " . $row['id'] . " with numero_orden: " . $row['numero_orden']);
     $ordenes[] = $row;
 }
 
 // Para cada orden, obtener los productos
 foreach ($ordenes as &$orden) {
-    $stmt_detalle = $conn->prepare("
+    $stmt_detalle = $pdo_conn->prepare("
         SELECT dp.cantidad, dp.precio_unitario, dp.subtotal,
                p.nombre as producto_nombre, p.imagen_principal
         FROM detalle_pedidos dp
@@ -62,12 +67,15 @@ foreach ($ordenes as &$orden) {
     $stmt_detalle->execute([$orden['id']]);
     
     $productos = [];
+    error_log("MisPedidos: Looking for details of order ID: " . $orden['id']);
     while ($row_detalle = $stmt_detalle->fetch()) {
+        error_log("MisPedidos: Found product: " . $row_detalle['producto_nombre'] . " cantidad: " . $row_detalle['cantidad']);
         if ($row_detalle['imagen_principal']) {
             $row_detalle['imagen_principal'] = base64_encode($row_detalle['imagen_principal']);
         }
         $productos[] = $row_detalle;
     }
+    error_log("MisPedidos: Order ID " . $orden['id'] . " has " . count($productos) . " products");
     $orden['productos'] = $productos;
 }
 
