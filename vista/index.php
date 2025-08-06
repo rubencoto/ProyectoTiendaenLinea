@@ -129,11 +129,10 @@ while ($row = $stmt->fetch()) {
             margin: 20px auto;
             flex-wrap: wrap;
             padding: 0 20px;
-            align-items: center;
         }
         #busqueda, #ordenar {
             flex: 1;
-            min-width: 250px;
+            min-width: 200px;
             padding: 10px;
             border-radius: 5px;
             border: 1px solid #ccc;
@@ -538,9 +537,7 @@ while ($row = $stmt->fetch()) {
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
-            margin-left: auto;
-            margin-right: 0;
-            flex-shrink: 0;
+            margin-left: 10px;
         }
 
         .star-1 {
@@ -766,7 +763,6 @@ while ($row = $stmt->fetch()) {
         <option value="precio_desc">Precio mayor a menor</option>
     </select>
     <button id="aplicarBtn">Buscar</button>
-    <div style="flex-grow: 1;"></div>
     <a href="<?= AppConfig::link('catalogo.php') ?>" class="star-button">
         Ver Catálogo Completo
         <div class="star-1">
