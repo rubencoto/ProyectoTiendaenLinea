@@ -321,6 +321,148 @@ while ($row = $stmt->fetch()) {
             text-decoration: none;
         }
         
+        /* New Menu Styles */
+        .menu {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #ffffff;
+            width: fit-content;
+            display: flex;
+            list-style: none;
+        }
+
+        .menu a {
+            text-decoration: none;
+            color: inherit;
+            font-family: inherit;
+            font-size: inherit;
+            line-height: inherit;
+        }
+
+        .menu .link {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 12px 36px;
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .menu .link::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0a3cff;
+            z-index: -1;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .menu .link svg {
+            width: 14px;
+            height: 14px;
+            fill: #ffffff;
+            transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .menu .item {
+            position: relative;
+        }
+
+        .menu .item .submenu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: absolute;
+            top: 100%;
+            border-radius: 0 0 16px 16px;
+            left: 0;
+            width: 100%;
+            overflow: hidden;
+            border: 1px solid #cccccc;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-12px);
+            transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+            z-index: 1000;
+            pointer-events: none;
+            list-style: none;
+            background: white;
+        }
+
+        .menu .item:hover .submenu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            pointer-events: auto;
+            border-top: transparent;
+            border-color: #0a3cff;
+        }
+
+        .menu .item:hover .link {
+            color: #ffffff;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .menu .item:hover .link::after {
+            transform: scaleX(1);
+            transform-origin: right;
+        }
+
+        .menu .item:hover .link svg {
+            fill: #ffffff;
+            transform: rotate(-180deg);
+        }
+
+        .submenu .submenu-item {
+            width: 100%;
+            transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .submenu .submenu-link {
+            display: block;
+            padding: 12px 24px;
+            width: 100%;
+            position: relative;
+            text-align: center;
+            transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+            color: #333;
+        }
+
+        .submenu .submenu-item:last-child .submenu-link {
+            border-bottom: none;
+        }
+
+        .submenu .submenu-link::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform: scaleX(0);
+            width: 100%;
+            height: 100%;
+            background-color: #0a3cff;
+            z-index: -1;
+            transform-origin: left;
+            transition: transform 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .submenu .submenu-link:hover:before {
+            transform: scaleX(1);
+            transform-origin: right;
+        }
+
+        .submenu .submenu-link:hover {
+            color: #ffffff;
+        }
+        
         /* Force update for Heroku deployment */
     </style>
 </head>
@@ -353,22 +495,38 @@ while ($row = $stmt->fetch()) {
                         <svg class="cartIcon" viewBox="0 0 576 512"><path d="M0 24C0 10.7 10.7 0 24 0H69.5c22 0 41.5 12.8 50.6 32h411c26.3 0 45.5 25 38.6 50.4l-41 152.3c-8.5 31.4-37 53.3-69.5 53.3H170.7l5.4 28.5c2.2 11.3 12.1 19.5 23.6 19.5H488c13.3 0 24 10.7 24 24s-10.7 24-24 24H199.7c-34.6 0-64.3-24.6-70.7-58.5L77.4 54.5c-.7-3.8-4-6.5-7.9-6.5H24C10.7 48 0 37.3 0 24zM128 464a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zm336-48a48 48 0 1 1 0 96 48 48 0 1 1 0-96z"></path></svg>
                         <span id="cart-count" class="badge bg-danger ms-1 <?= $cantidad_total > 0 ? '' : 'd-none' ?>"><?= $cantidad_total ?></span>
                     </a>
-                    <div class="user-dropdown" style="display: inline-block;">
-                        <a href="<?= AppConfig::link('inicioCliente.php') ?>" class="btn btn-info btn-sm" id="userButton">
-                            Bienvenido, <?php echo htmlspecialchars($nombre_completo); ?> <span id="arrow">▼</span>
-                        </a>
-                        <div class="dropdown-options" id="dropdownOptions">
-                            <a href="<?= AppConfig::link('catalogo.php') ?>" class="dropdown-option">Ver Catálogo</a>
-                            <a href="<?= AppConfig::link('carrito.php') ?>" class="dropdown-option">
-                                Mi Carrito
-                                <?php if ($cantidad_total > 0): ?>
-                                    <span style="background-color: #dc3545; color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.7em; margin-left: 5px;"><?= $cantidad_total ?></span>
-                                <?php endif; ?>
+                    <div class="menu" style="display: inline-block;">
+                        <div class="item">
+                            <a href="#" class="link">
+                                <span>Bienvenido, <?php echo htmlspecialchars($nombre_completo); ?></span>
+                                <svg viewBox="0 0 360 360" xml:space="preserve">
+                                    <g id="SVGRepo_iconCarrier">
+                                        <path id="XMLID_225_" d="M325.607,79.393c-5.857-5.857-15.355-5.858-21.213,0.001l-139.39,139.393L25.607,79.393 c-5.857-5.857-15.355-5.858-21.213,0.001c-5.858,5.858-5.858,15.355,0,21.213l150.004,150c2.813,2.813,6.628,4.393,10.606,4.393 s7.794-1.581,10.606-4.394l149.996-150C331.465,94.749,331.465,85.251,325.607,79.393z"></path>
+                                    </g>
+                                </svg>
                             </a>
-                            <a href="<?= AppConfig::link('misPedidos.php') ?>" class="dropdown-option">Mis Pedidos</a>
-                            <a href="<?= AppConfig::link('perfil.php') ?>" class="dropdown-option">Mi Perfil</a>
-                            <hr style="margin: 5px 0; border-color: #eee;">
-                            <a href="?logout=1" class="dropdown-option" style="color: #dc3545;">Cerrar Sesión</a>
+                            <div class="submenu">
+                                <div class="submenu-item">
+                                    <a href="<?= AppConfig::link('catalogo.php') ?>" class="submenu-link">Ver Catálogo</a>
+                                </div>
+                                <div class="submenu-item">
+                                    <a href="<?= AppConfig::link('carrito.php') ?>" class="submenu-link">
+                                        Mi Carrito
+                                        <?php if ($cantidad_total > 0): ?>
+                                            <span style="background-color: #dc3545; color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.7em; margin-left: 5px;"><?= $cantidad_total ?></span>
+                                        <?php endif; ?>
+                                    </a>
+                                </div>
+                                <div class="submenu-item">
+                                    <a href="<?= AppConfig::link('misPedidos.php') ?>" class="submenu-link">Mis Pedidos</a>
+                                </div>
+                                <div class="submenu-item">
+                                    <a href="<?= AppConfig::link('perfil.php') ?>" class="submenu-link">Mi Perfil</a>
+                                </div>
+                                <div class="submenu-item">
+                                    <a href="?logout=1" class="submenu-link" style="color: #dc3545;">Cerrar Sesión</a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 <?php else: ?>
@@ -541,35 +699,11 @@ function mostrarToast(msg, type = 'success') {
     setTimeout(() => toast.remove(), 3000);
 }
 
-// Simple dropdown functions
+// New menu functionality - hover handled by CSS
 document.addEventListener('DOMContentLoaded', function() {
-    const userDropdown = document.querySelector('.user-dropdown');
-    const dropdownOptions = document.getElementById('dropdownOptions');
-    const arrow = document.getElementById('arrow');
-    const userButton = document.getElementById('userButton');
-    
-    if (userDropdown && dropdownOptions && arrow && userButton) {
-        let dropdownTimer;
-        
-        // Show dropdown on hover
-        userDropdown.addEventListener('mouseenter', function() {
-            clearTimeout(dropdownTimer);
-            dropdownOptions.style.display = 'block';
-            arrow.style.transform = 'rotate(180deg)';
-            arrow.style.transition = 'transform 0.3s ease';
-        });
-        
-        // Hide dropdown when leaving the entire dropdown area
-        userDropdown.addEventListener('mouseleave', function() {
-            dropdownTimer = setTimeout(function() {
-                dropdownOptions.style.display = 'none';
-                arrow.style.transform = 'rotate(0deg)';
-            }, 100);
-        });
-        
-        // Allow normal navigation on click
-        // The dropdown functionality is handled by hover events only
-    }
+    // Menu functionality is now purely CSS-based
+    // The hover effects and animations are handled by CSS transitions
+    console.log('New menu loaded successfully');
 });
 </script>
 
