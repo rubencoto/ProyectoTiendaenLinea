@@ -153,6 +153,8 @@ while ($row = $stmt->fetch()) {
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             text-align: center;
             transition: transform 0.2s;
+            cursor: pointer;
+            position: relative;
         }
         .card:hover {
             transform: translateY(-2px);
@@ -202,15 +204,6 @@ while ($row = $stmt->fetch()) {
             cursor: pointer;
             transition: background-color 0.2s;
         }
-        .btn-detalle {
-            background-color: #f0c14b;
-            color: #111;
-        }
-        .btn-detalle:hover {
-            background-color: #e2b33d;
-            color: #111;
-            text-decoration: none;
-        }
         .btn-carrito {
             background-color: #28a745;
             color: white;
@@ -221,6 +214,14 @@ while ($row = $stmt->fetch()) {
         .btn-carrito:disabled {
             background-color: #6c757d;
             cursor: not-allowed;
+        }
+        .botones {
+            position: relative;
+            z-index: 2;
+        }
+        .btn-carrito {
+            position: relative;
+            z-index: 3;
         }
         .no-productos {
             text-align: center;
@@ -650,6 +651,13 @@ function renderizarProductos(lista) {
     lista.forEach(p => {
         const card = document.createElement("div");
         card.className = "card";
+        card.addEventListener('click', function(e) {
+            // Only navigate if the click wasn't on a button
+            if (!e.target.closest('.btn-carrito')) {
+                window.location.href = `${baseUrl}productoDetalleCliente.php?id=${p.id}`;
+            }
+        });
+        
         card.innerHTML = `
             <img src="data:image/jpeg;base64,${p.imagen_principal}" alt="${p.nombre}">
             <h3>${p.nombre}</h3>
@@ -657,8 +665,7 @@ function renderizarProductos(lista) {
             <div class="vendedor">Vendido por: ${p.vendedor_nombre}</div>
             <div class="descripcion">${p.descripcion || 'Sin descripción disponible'}</div>
             <div class="botones">
-                <a href="productoDetalleCliente.php?id=${p.id}" class="btn-detalle">Ver Detalle</a>
-                ${isLoggedIn ? `<button onclick="agregarAlCarrito(${p.id})" class="btn-carrito">Agregar al Carrito</button>` : `<button class="btn-carrito" disabled title="Debes iniciar sesión para agregar al carrito">Iniciar Sesión para Comprar</button>`}
+                ${isLoggedIn ? `<button onclick="event.stopPropagation(); agregarAlCarrito(${p.id})" class="btn-carrito">Agregar al Carrito</button>` : `<button onclick="event.stopPropagation();" class="btn-carrito" disabled title="Debes iniciar sesión para agregar al carrito">Iniciar Sesión para Comprar</button>`}
             </div>
         `;
         contenedor.appendChild(card);
