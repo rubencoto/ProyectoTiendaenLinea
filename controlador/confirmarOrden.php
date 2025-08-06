@@ -89,17 +89,13 @@ try {
     $pdo_conn->beginTransaction();
     
     try {
-        // Insertar orden en la tabla pedidos (not ordenes)
+        // Insertar orden en la tabla ordenes
         $stmt_orden = $pdo_conn->prepare("
-            INSERT INTO pedidos (cliente_id, total, estado, fecha_pedido, direccion_envio, telefono_contacto) 
-            VALUES (?, ?, 'pendiente', NOW(), ?, ?)
+            INSERT INTO ordenes (numero_orden, cliente_id, subtotal, envio, total, estado, fecha_orden) 
+            VALUES (?, ?, ?, ?, ?, 'pendiente', NOW())
         ");
         
-        // Get client contact info for the order
-        $direccion_envio = $cliente['direccion'] ?? 'Por definir';
-        $telefono_contacto = $cliente['telefono'] ?? 'Por definir';
-        
-        $stmt_orden->execute([$cliente_id, $total_final, $direccion_envio, $telefono_contacto]);
+        $stmt_orden->execute([$numero_orden, $cliente_id, $total, $envio, $total_final]);
         $orden_id = $pdo_conn->lastInsertId();
         
         error_log("ConfirmarOrden: Order created with ID: $orden_id");
