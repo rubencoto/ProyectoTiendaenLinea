@@ -537,8 +537,7 @@ while ($row = $stmt->fetch()) {
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
-            margin-left: 20px;
-            margin-top: 5px;
+            margin-left: 10px;
         }
 
         .star-1 {
@@ -745,125 +744,6 @@ while ($row = $stmt->fetch()) {
                             </div>
                         </div>
                     </div>
-                    <div style="display: block; width: 100%; text-align: right;">
-                        <a href="<?= AppConfig::link('catalogo.php') ?>" class="star-button">
-                            Ver Catálogo Completo
-                            <div class="star-1">
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  xml:space="preserve"
-                                  version="1.1"
-                                  style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
-                                  viewBox="0 0 784.11 815.53"
-                                  xmlns:xlink="http://www.w3.org/1999/xlink"
-                                >
-                                  <defs></defs>
-                                  <g id="Layer_x0020_1">
-                                    <metadata id="CorelCorpID_0Corel-Layer"></metadata>
-                                    <path
-                                      class="fil0"
-                                      d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z"
-                                    ></path>
-                                  </g>
-                                </svg>
-                              </div>
-                              <div class="star-2">
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  xml:space="preserve"
-                                  version="1.1"
-                                  style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
-                                  viewBox="0 0 784.11 815.53"
-                                  xmlns:xlink="http://www.w3.org/1999/xlink"
-                                >
-                                  <defs></defs>
-                                  <g id="Layer_x0020_1">
-                                    <metadata id="CorelCorpID_0Corel-Layer"></metadata>
-                                    <path
-                                      class="fil0"
-                                      d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z"
-                                    ></path>
-                                  </g>
-                                </svg>
-                              </div>
-                              <div class="star-3">
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  xml:space="preserve"
-                                  version="1.1"
-                                  style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
-                                  viewBox="0 0 784.11 815.53"
-                                  xmlns:xlink="http://www.w3.org/1999/xlink"
-                                >
-                                  <defs></defs>
-                                  <g id="Layer_x0020_1">
-                                    <metadata id="CorelCorpID_0Corel-Layer"></metadata>
-                                    <path
-                                      class="fil0"
-                                      d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z"
-                                    ></path>
-                                  </g>
-                                </svg>
-                              </div>
-                              <div class="star-4">
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  xml:space="preserve"
-                                  version="1.1"
-                                  style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
-                                  viewBox="0 0 784.11 815.53"
-                                  xmlns:xlink="http://www.w3.org/1999/xlink"
-                                >
-                                  <defs></defs>
-                                  <g id="Layer_x0020_1">
-                                    <metadata id="CorelCorpID_0Corel-Layer"></metadata>
-                                    <path
-                                      class="fil0"
-                                      d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z"
-                                    ></path>
-                                  </g>
-                                </svg>
-                              </div>
-                              <div class="star-5">
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  xml:space="preserve"
-                                  version="1.1"
-                                  style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
-                                  viewBox="0 0 784.11 815.53"
-                                  xmlns:xlink="http://www.w3.org/1999/xlink"
-                                >
-                                  <defs></defs>
-                                  <g id="Layer_x0020_1">
-                                    <metadata id="CorelCorpID_0Corel-Layer"></metadata>
-                                    <path
-                                      class="fil0"
-                                      d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z"
-                                    ></path>
-                                  </g>
-                                </svg>
-                              </div>
-                              <div class="star-6">
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  xml:space="preserve"
-                                  version="1.1"
-                                  style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
-                                  viewBox="0 0 784.11 815.53"
-                                  xmlns:xlink="http://www.w3.org/1999/xlink"
-                                >
-                                  <defs></defs>
-                                  <g id="Layer_x0020_1">
-                                    <metadata id="CorelCorpID_0Corel-Layer"></metadata>
-                                    <path
-                                      class="fil0"
-                                      d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z"
-                                    ></path>
-                                  </g>
-                                </svg>
-                              </div>
-                        </a>
-                    </div>
                 <?php else: ?>
                     <a href="<?= AppConfig::link('loginCliente.php') ?>" class="btn btn-primary btn-sm">Clientes</a>
                     <a href="<?= AppConfig::link('loginVendedor.php') ?>" class="btn btn-outline-light btn-sm">Vendedores</a>
@@ -883,6 +763,123 @@ while ($row = $stmt->fetch()) {
         <option value="precio_desc">Precio mayor a menor</option>
     </select>
     <button id="aplicarBtn">Buscar</button>
+    <a href="<?= AppConfig::link('catalogo.php') ?>" class="star-button">
+        Ver Catálogo Completo
+        <div class="star-1">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              xml:space="preserve"
+              version="1.1"
+              style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+              viewBox="0 0 784.11 815.53"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+            >
+              <defs></defs>
+              <g id="Layer_x0020_1">
+                <metadata id="CorelCorpID_0Corel-Layer"></metadata>
+                <path
+                  class="fil0"
+                  d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z"
+                ></path>
+              </g>
+            </svg>
+          </div>
+          <div class="star-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              xml:space="preserve"
+              version="1.1"
+              style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+              viewBox="0 0 784.11 815.53"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+            >
+              <defs></defs>
+              <g id="Layer_x0020_1">
+                <metadata id="CorelCorpID_0Corel-Layer"></metadata>
+                <path
+                  class="fil0"
+                  d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z"
+                ></path>
+              </g>
+            </svg>
+          </div>
+          <div class="star-3">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              xml:space="preserve"
+              version="1.1"
+              style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+              viewBox="0 0 784.11 815.53"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+            >
+              <defs></defs>
+              <g id="Layer_x0020_1">
+                <metadata id="CorelCorpID_0Corel-Layer"></metadata>
+                <path
+                  class="fil0"
+                  d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z"
+                ></path>
+              </g>
+            </svg>
+          </div>
+          <div class="star-4">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              xml:space="preserve"
+              version="1.1"
+              style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+              viewBox="0 0 784.11 815.53"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+            >
+              <defs></defs>
+              <g id="Layer_x0020_1">
+                <metadata id="CorelCorpID_0Corel-Layer"></metadata>
+                <path
+                  class="fil0"
+                  d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z"
+                ></path>
+              </g>
+            </svg>
+          </div>
+          <div class="star-5">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              xml:space="preserve"
+              version="1.1"
+              style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+              viewBox="0 0 784.11 815.53"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+            >
+              <defs></defs>
+              <g id="Layer_x0020_1">
+                <metadata id="CorelCorpID_0Corel-Layer"></metadata>
+                <path
+                  class="fil0"
+                  d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z"
+                ></path>
+              </g>
+            </svg>
+          </div>
+          <div class="star-6">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              xml:space="preserve"
+              version="1.1"
+              style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+              viewBox="0 0 784.11 815.53"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+            >
+              <defs></defs>
+              <g id="Layer_x0020_1">
+                <metadata id="CorelCorpID_0Corel-Layer"></metadata>
+                <path
+                  class="fil0"
+                  d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z"
+                ></path>
+              </g>
+            </svg>
+          </div>
+    </a>
 </div>
 
 <div id="productosContenedor"></div>
