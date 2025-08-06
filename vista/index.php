@@ -320,6 +320,8 @@ while ($row = $stmt->fetch()) {
             color: white;
             text-decoration: none;
         }
+        
+        /* Force update for Heroku deployment */
     </style>
 </head>
 <body>
