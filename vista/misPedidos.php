@@ -347,10 +347,6 @@ foreach ($ordenes as &$orden) {
                             <span><?php echo htmlspecialchars($orden['numero_orden']); ?></span>
                         </div>
                         <div class="orden-info">
-                            <strong>ID de Pedido</strong>
-                            <span>#<?php echo htmlspecialchars($orden['id']); ?></span>
-                        </div>
-                        <div class="orden-info">
                             <strong>Fecha del Pedido</strong>
                             <span><?php echo date('d/m/Y H:i', strtotime($orden['fecha_orden'])); ?></span>
                         </div>
