@@ -542,18 +542,6 @@ foreach ($ordenes as &$orden) {
                                         </form>
                                     <?php endif; ?>
                                 </div>
-                            <?php elseif ($orden['estado'] === 'cancelado'): ?>
-                                <div class="review-section" style="background: #f8d7da; border-color: #f5c6cb;">
-                                    <p style="margin: 0; color: #721c24; font-style: italic;">
-                                        No puedes reseñar productos de pedidos cancelados.
-                                    </p>
-                                </div>
-                            <?php else: ?>
-                                <div class="review-section" style="background: #fff3cd; border-color: #ffeaa7;">
-                                    <p style="margin: 0; color: #856404; font-style: italic;">
-                                        Podrás reseñar este producto cuando tu pedido sea entregado.
-                                    </p>
-                                </div>
                             <?php endif; ?>
                         <?php endforeach; ?>
                     </div>
