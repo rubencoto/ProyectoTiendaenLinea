@@ -592,8 +592,12 @@ foreach ($ordenes as &$orden) {
         // Star rating functionality
         function initializeStarRating(containerId) {
             const container = document.getElementById(containerId);
+            if (!container) return;
+            
             const stars = container.querySelectorAll('.star');
             const hiddenInput = container.querySelector('.rating-input');
+            
+            if (!hiddenInput) return;
             
             stars.forEach((star, index) => {
                 star.addEventListener('click', () => {
@@ -604,8 +608,10 @@ foreach ($ordenes as &$orden) {
                     stars.forEach((s, i) => {
                         if (i < rating) {
                             s.classList.add('active');
+                            s.textContent = '★';
                         } else {
                             s.classList.remove('active');
+                            s.textContent = '☆';
                         }
                     });
                 });
@@ -615,8 +621,10 @@ foreach ($ordenes as &$orden) {
                     stars.forEach((s, i) => {
                         if (i <= index) {
                             s.style.color = '#ffc107';
+                            s.textContent = '★';
                         } else {
                             s.style.color = '#ddd';
+                            s.textContent = '☆';
                         }
                     });
                 });
@@ -628,8 +636,12 @@ foreach ($ordenes as &$orden) {
                 stars.forEach((s, i) => {
                     if (i < currentRating) {
                         s.style.color = '#ffc107';
+                        s.classList.add('active');
+                        s.textContent = '★';
                     } else {
                         s.style.color = '#ddd';
+                        s.classList.remove('active');
+                        s.textContent = '☆';
                     }
                 });
             });
@@ -650,10 +662,25 @@ foreach ($ordenes as &$orden) {
         function submitReview(productoId, ordenId) {
             const formId = `review-form-${productoId}`;
             const form = document.getElementById(formId);
+            
+            if (!form) {
+                console.error('Form not found:', formId);
+                alert('Error: No se pudo encontrar el formulario.');
+                return;
+            }
+            
             const formData = new FormData(form);
+            
+            // Debug: Log form data
+            console.log('Form data:');
+            for (let [key, value] of formData.entries()) {
+                console.log(key + ': ' + value);
+            }
             
             // Validate rating
             const rating = formData.get('rating');
+            console.log('Rating value:', rating);
+            
             if (!rating || rating < 1 || rating > 5) {
                 alert('Por favor selecciona una calificación de 1 a 5 estrellas.');
                 return;
@@ -661,6 +688,8 @@ foreach ($ordenes as &$orden) {
             
             // Validate comment
             const comment = formData.get('comentario').trim();
+            console.log('Comment:', comment);
+            
             if (comment.length < 10) {
                 alert('El comentario debe tener al menos 10 caracteres.');
                 return;
@@ -679,10 +708,12 @@ foreach ($ordenes as &$orden) {
             })
             .then(response => response.json())
             .then(data => {
+                console.log('Server response:', data);
                 if (data.success) {
                     // Replace form with success message
                     const reviewSection = document.getElementById(`review-section-${productoId}`);
                     reviewSection.innerHTML = `
+                        <h5 style="margin: 0 0 10px 0; color: #333;">Tu reseña:</h5>
                         <div class="existing-review">
                             <div class="review-stars">${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</div>
                             <div class="review-text">${comment}</div>
