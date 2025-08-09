@@ -72,7 +72,7 @@ if ($affected_rows > 0) {
 // Para cada orden, obtener los productos
 foreach ($ordenes as &$orden) {
     $stmt_detalle = $pdo_conn->prepare("
-        SELECT dp.cantidad, dp.precio_unitario, dp.subtotal,
+        SELECT dp.cantidad, dp.precio_unitario, dp.subtotal, dp.producto_id,
                p.nombre as producto_nombre, p.imagen_principal
         FROM detalle_pedidos dp
         JOIN productos p ON dp.producto_id = p.id
@@ -88,6 +88,17 @@ foreach ($ordenes as &$orden) {
         if ($row_detalle['imagen_principal']) {
             $row_detalle['imagen_principal'] = base64_encode($row_detalle['imagen_principal']);
         }
+        
+        // Check if customer has already reviewed this product
+        $stmt_review = $pdo_conn->prepare("
+            SELECT id, estrellas, comentario, fecha 
+            FROM reseñas 
+            WHERE cliente_id = ? AND producto_id = ?
+        ");
+        $stmt_review->execute([$cliente_id, $row_detalle['producto_id']]);
+        $existing_review = $stmt_review->fetch();
+        
+        $row_detalle['existing_review'] = $existing_review;
         $productos[] = $row_detalle;
     }
     error_log("MisPedidos: Order ID " . $orden['id'] . " has " . count($productos) . " products");
@@ -311,6 +322,90 @@ foreach ($ordenes as &$orden) {
                 margin-top: 10px;
             }
         }
+
+        /* Review Styles */
+        .review-section {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .review-form {
+            margin-top: 10px;
+        }
+
+        .stars-rating {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+        }
+
+        .star {
+            font-size: 24px;
+            color: #ddd;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .star:hover,
+        .star.active {
+            color: #ffc107;
+        }
+
+        .review-textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .review-btn {
+            background: #007185;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .review-btn:hover {
+            background: #005d6b;
+        }
+
+        .review-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .existing-review {
+            padding: 10px;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        .review-stars {
+            color: #ffc107;
+            margin-bottom: 5px;
+        }
+
+        .review-text {
+            color: #333;
+            font-style: italic;
+        }
+
+        .review-date {
+            color: #666;
+            font-size: 12px;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -437,6 +532,120 @@ foreach ($ordenes as &$orden) {
 
     <!-- ✅ Script general JS -->
     <script src="../app.js"></script>
+    <script>
+        // Star rating functionality
+        function initializeStarRating(containerId) {
+            const container = document.getElementById(containerId);
+            const stars = container.querySelectorAll('.star');
+            const hiddenInput = container.querySelector('.rating-input');
+            
+            stars.forEach((star, index) => {
+                star.addEventListener('click', () => {
+                    const rating = index + 1;
+                    hiddenInput.value = rating;
+                    
+                    // Update visual state
+                    stars.forEach((s, i) => {
+                        if (i < rating) {
+                            s.classList.add('active');
+                        } else {
+                            s.classList.remove('active');
+                        }
+                    });
+                });
+                
+                // Hover effect
+                star.addEventListener('mouseenter', () => {
+                    stars.forEach((s, i) => {
+                        if (i <= index) {
+                            s.style.color = '#ffc107';
+                        } else {
+                            s.style.color = '#ddd';
+                        }
+                    });
+                });
+            });
+            
+            // Reset on mouse leave
+            container.addEventListener('mouseleave', () => {
+                const currentRating = parseInt(hiddenInput.value) || 0;
+                stars.forEach((s, i) => {
+                    if (i < currentRating) {
+                        s.style.color = '#ffc107';
+                    } else {
+                        s.style.color = '#ddd';
+                    }
+                });
+            });
+        }
+
+        // Initialize all star ratings when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const ratingContainers = document.querySelectorAll('.stars-rating');
+            ratingContainers.forEach(container => {
+                if (container.id) {
+                    initializeStarRating(container.id);
+                }
+            });
+        });
+
+        // Submit review function
+        function submitReview(productoId, ordenId) {
+            const formId = `review-form-${productoId}`;
+            const form = document.getElementById(formId);
+            const formData = new FormData(form);
+            
+            // Validate rating
+            const rating = formData.get('rating');
+            if (!rating || rating < 1 || rating > 5) {
+                alert('Por favor selecciona una calificación de 1 a 5 estrellas.');
+                return;
+            }
+            
+            // Validate comment
+            const comment = formData.get('comentario').trim();
+            if (comment.length < 10) {
+                alert('El comentario debe tener al menos 10 caracteres.');
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = form.querySelector('.review-btn');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Enviando...';
+            
+            // Submit via fetch
+            fetch('<?php echo AppConfig::controladorUrl('procesarReseña.php'); ?>', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Replace form with success message
+                    const reviewSection = document.getElementById(`review-section-${productoId}`);
+                    reviewSection.innerHTML = `
+                        <div class="existing-review">
+                            <div class="review-stars">${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</div>
+                            <div class="review-text">${comment}</div>
+                            <div class="review-date">Reseña enviada</div>
+                        </div>
+                    `;
+                } else {
+                    alert(data.message || 'Error al enviar la reseña. Inténtalo de nuevo.');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al enviar la reseña. Inténtalo de nuevo.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            });
+        }
+    </script>
     
 </body>
 </html>
