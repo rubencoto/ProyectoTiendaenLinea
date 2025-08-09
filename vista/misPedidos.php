@@ -724,7 +724,7 @@ foreach ($ordenes as &$orden) {
             submitBtn.textContent = 'Enviando...';
             
             // Submit via fetch
-            fetch('<?php echo AppConfig::controladorUrl('procesarReseña.php'); ?>', {
+            fetch('../controlador/procesarReseña.php', {
                 method: 'POST',
                 body: formData
             })
