@@ -592,26 +592,41 @@ foreach ($ordenes as &$orden) {
         // Star rating functionality
         function initializeStarRating(containerId) {
             const container = document.getElementById(containerId);
-            if (!container) return;
+            if (!container) {
+                console.error('Container not found:', containerId);
+                return;
+            }
             
             const stars = container.querySelectorAll('.star');
-            const hiddenInput = container.querySelector('.rating-input');
+            // Find the hidden input in the parent form
+            const form = container.closest('form');
+            const hiddenInput = form ? form.querySelector('.rating-input') : null;
             
-            if (!hiddenInput) return;
+            if (!hiddenInput) {
+                console.error('Hidden input not found for container:', containerId);
+                return;
+            }
+            
+            console.log('Initializing stars for:', containerId, 'Found', stars.length, 'stars');
             
             stars.forEach((star, index) => {
-                star.addEventListener('click', () => {
+                star.addEventListener('click', (e) => {
+                    e.preventDefault();
                     const rating = index + 1;
                     hiddenInput.value = rating;
+                    
+                    console.log('Star clicked:', rating, 'Hidden input value set to:', hiddenInput.value);
                     
                     // Update visual state
                     stars.forEach((s, i) => {
                         if (i < rating) {
                             s.classList.add('active');
                             s.textContent = '★';
+                            s.style.color = '#ffc107';
                         } else {
                             s.classList.remove('active');
                             s.textContent = '☆';
+                            s.style.color = '#ddd';
                         }
                     });
                 });
@@ -649,11 +664,18 @@ foreach ($ordenes as &$orden) {
 
         // Initialize all star ratings when page loads
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing star ratings...');
+            
             // Find all star rating containers
             const ratingContainers = document.querySelectorAll('.stars-rating');
+            console.log('Found', ratingContainers.length, 'rating containers');
+            
             ratingContainers.forEach(container => {
                 if (container.id) {
+                    console.log('Initializing container:', container.id);
                     initializeStarRating(container.id);
+                } else {
+                    console.warn('Container without ID found:', container);
                 }
             });
         });
