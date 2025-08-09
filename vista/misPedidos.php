@@ -9,6 +9,7 @@ if (!isset($_SESSION['cliente_id'])) {
 
 // 📋 Obtener información del cliente
 require_once '../modelo/conexion.php';
+require_once '../modelo/config.php';
 $cliente_id = $_SESSION['cliente_id'];
 
 // Get PDO connection for consistency
@@ -487,6 +488,73 @@ foreach ($ordenes as &$orden) {
                                     ₡<?php echo number_format($producto['subtotal'], 2); ?>
                                 </div>
                             </div>
+
+                            <!-- Review Section - Only show for completed orders -->
+                            <?php if ($orden['estado'] === 'entregado' || $orden['estado'] === 'completado'): ?>
+                                <div class="review-section" id="review-section-<?php echo $producto['producto_id']; ?>">
+                                    <?php if ($producto['existing_review']): ?>
+                                        <!-- Show existing review -->
+                                        <h5 style="margin: 0 0 10px 0; color: #333;">Tu reseña:</h5>
+                                        <div class="existing-review">
+                                            <div class="review-stars">
+                                                <?php 
+                                                $estrellas = $producto['existing_review']['estrellas'];
+                                                echo str_repeat('★', $estrellas) . str_repeat('☆', 5 - $estrellas);
+                                                ?>
+                                            </div>
+                                            <div class="review-text">
+                                                "<?php echo htmlspecialchars($producto['existing_review']['comentario']); ?>"
+                                            </div>
+                                            <div class="review-date">
+                                                Reseñado el <?php echo date('d/m/Y', strtotime($producto['existing_review']['fecha'])); ?>
+                                            </div>
+                                        </div>
+                                    <?php else: ?>
+                                        <!-- Show review form -->
+                                        <h5 style="margin: 0 0 10px 0; color: #333;">Reseñar este producto:</h5>
+                                        <form class="review-form" id="review-form-<?php echo $producto['producto_id']; ?>">
+                                            <input type="hidden" name="producto_id" value="<?php echo $producto['producto_id']; ?>">
+                                            <input type="hidden" name="orden_id" value="<?php echo $orden['id']; ?>">
+                                            <input type="hidden" name="rating" value="" class="rating-input">
+                                            
+                                            <div>
+                                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Calificación:</label>
+                                                <div class="stars-rating" id="stars-<?php echo $producto['producto_id']; ?>">
+                                                    <span class="star" data-rating="1">☆</span>
+                                                    <span class="star" data-rating="2">☆</span>
+                                                    <span class="star" data-rating="3">☆</span>
+                                                    <span class="star" data-rating="4">☆</span>
+                                                    <span class="star" data-rating="5">☆</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div>
+                                                <label style="display: block; margin: 10px 0 5px 0; font-weight: bold;">Comentario:</label>
+                                                <textarea name="comentario" class="review-textarea" 
+                                                          placeholder="Cuéntanos tu experiencia con este producto (mínimo 10 caracteres)..."
+                                                          required></textarea>
+                                            </div>
+                                            
+                                            <button type="button" class="review-btn" 
+                                                    onclick="submitReview(<?php echo $producto['producto_id']; ?>, <?php echo $orden['id']; ?>)">
+                                                Enviar Reseña
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
+                                </div>
+                            <?php elseif ($orden['estado'] === 'cancelado'): ?>
+                                <div class="review-section" style="background: #f8d7da; border-color: #f5c6cb;">
+                                    <p style="margin: 0; color: #721c24; font-style: italic;">
+                                        No puedes reseñar productos de pedidos cancelados.
+                                    </p>
+                                </div>
+                            <?php else: ?>
+                                <div class="review-section" style="background: #fff3cd; border-color: #ffeaa7;">
+                                    <p style="margin: 0; color: #856404; font-style: italic;">
+                                        Podrás reseñar este producto cuando tu pedido sea entregado.
+                                    </p>
+                                </div>
+                            <?php endif; ?>
                         <?php endforeach; ?>
                     </div>
 
@@ -581,6 +649,7 @@ foreach ($ordenes as &$orden) {
 
         // Initialize all star ratings when page loads
         document.addEventListener('DOMContentLoaded', function() {
+            // Find all star rating containers
             const ratingContainers = document.querySelectorAll('.stars-rating');
             ratingContainers.forEach(container => {
                 if (container.id) {
