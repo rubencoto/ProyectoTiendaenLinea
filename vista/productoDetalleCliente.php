@@ -17,14 +17,26 @@ if (!isset($_GET['id'])) {
 $id = intval($_GET['id']);
 
 // Obtener producto con información del vendedor
-$stmt = $conn->prepare("
-    SELECT p.*, v.nombre_empresa as vendedor_nombre, v.telefono as vendedor_telefono, v.correo as vendedor_correo 
-    FROM productos p 
-    JOIN vendedores v ON p.id_vendedor = v.id 
-    WHERE p.id = ?
-");
-$stmt->execute([$id]);
-$producto = $stmt->fetch();
+if ($conn->isConnected() && $conn->getConnectionType() === 'pdo') {
+    $stmt = $conn->getConnection()->prepare("
+        SELECT p.*, v.nombre_empresa as vendedor_nombre, v.telefono as vendedor_telefono, v.correo as vendedor_correo 
+        FROM productos p 
+        JOIN vendedores v ON p.id_vendedor = v.id 
+        WHERE p.id = ?
+    ");
+    $stmt->execute([$id]);
+    $producto = $stmt->fetch(PDO::FETCH_ASSOC);
+} else {
+    // Fallback method using unified connection
+    $stmt = $conn->prepare("
+        SELECT p.*, v.nombre_empresa as vendedor_nombre, v.telefono as vendedor_telefono, v.correo as vendedor_correo 
+        FROM productos p 
+        JOIN vendedores v ON p.id_vendedor = v.id 
+        WHERE p.id = ?
+    ");
+    $stmt->execute([$id]);
+    $producto = $stmt->fetch();
+}
 // PDO automatically handles cleanup - no need to close
 
 if (!$producto) {
@@ -33,15 +45,20 @@ if (!$producto) {
 }
 
 // Obtener reseñas del producto
-$stmt_reviews = $conn->prepare("
-    SELECT r.*, c.nombre as cliente_nombre 
-    FROM reseñas r 
-    JOIN clientes c ON r.cliente_id = c.id 
-    WHERE r.producto_id = ? 
-    ORDER BY r.fecha DESC
-");
-$stmt_reviews->execute([$id]);
-$reviews = $stmt_reviews->fetchAll();
+if ($conn->isConnected() && $conn->getConnectionType() === 'pdo') {
+    $stmt_reviews = $conn->getConnection()->prepare("
+        SELECT r.*, c.nombre as cliente_nombre 
+        FROM reseñas r 
+        JOIN clientes c ON r.cliente_id = c.id 
+        WHERE r.producto_id = ? 
+        ORDER BY r.fecha DESC
+    ");
+    $stmt_reviews->execute([$id]);
+    $reviews = $stmt_reviews->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    // Fallback for other connection types
+    $reviews = [];
+}
 
 // Calcular promedio de estrellas
 $total_reviews = count($reviews);
