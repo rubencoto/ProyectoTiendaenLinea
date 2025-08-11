@@ -116,11 +116,32 @@ document.addEventListener('DOMContentLoaded', function() {
         loginIcon.style.display = 'none';
         loginBtn.querySelector('span:last-child') ? loginBtn.querySelector('span:last-child').textContent = 'Ingresando...' : null;
         
-        fetch('../controlador/procesarLoginClienteController.php', {
+        fetch('procesarLoginCliente.php', {
             method: 'POST',
             body: formData
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log('Response status:', response.status);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            return response.text(); // Get as text first for debugging
+        })
+        .then(text => {
+            console.log('Raw response:', text);
+            
+            // Try to parse as JSON
+            try {
+                const data = JSON.parse(text);
+                return data;
+            } catch (parseError) {
+                console.error('JSON parse error:', parseError);
+                console.error('Response that failed to parse:', text);
+                throw new Error('Server returned invalid JSON: ' + text.substring(0, 100));
+            }
+        })
         .then(data => {
             if (data.success) {
                 showAlert(data.message, 'success');

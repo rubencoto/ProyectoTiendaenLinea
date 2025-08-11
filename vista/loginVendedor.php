@@ -63,11 +63,6 @@ if (isset($_SESSION['id'])) {
                         <i class="fas fa-sign-in-alt me-1" id="loginIcon"></i>
                         Ingresar
                     </button>
-                    
-                    <!-- Test button for debugging -->
-                    <button type="button" class="btn btn-warning w-100 mt-2" id="testBtn">
-                        Test Controller Connection
-                    </button>
                 </form>
                 
                 <div class="text-center mt-4">
@@ -199,37 +194,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Clear alerts when user starts typing
     document.getElementById('correoInput').addEventListener('input', clearAlerts);
     document.getElementById('contrasenaInput').addEventListener('input', clearAlerts);
-    
-    // Test button for debugging
-    document.getElementById('testBtn').addEventListener('click', function() {
-        console.log('Testing controller connection...');
-        
-        fetch('procesarLoginVendedor.php?test=1', {
-            method: 'GET'
-        })
-        .then(response => {
-            console.log('Test response status:', response.status);
-            if (response.status === 200) {
-                return response.text();
-            } else {
-                throw new Error(`Status: ${response.status}`);
-            }
-        })
-        .then(text => {
-            console.log('Test response text:', text);
-            try {
-                const data = JSON.parse(text);
-                showAlert('Test successful: ' + data.message, 'success');
-            } catch (e) {
-                console.error('Full response text:', text);
-                showAlert('Test failed - Invalid JSON. Check console for full response.', 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Test error:', error);
-            showAlert('Test failed: ' + error.message, 'error');
-        });
-    });
     
     function clearAlerts() {
         const alertContainer = document.getElementById('alertContainer');
