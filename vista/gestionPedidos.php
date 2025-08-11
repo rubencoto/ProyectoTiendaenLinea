@@ -465,21 +465,28 @@ foreach ($ordenes as &$orden) {
                             <span class="estado <?= str_replace(' ', '.', $orden['estado']) ?>">
                                 <?= ucfirst($orden['estado']) ?>
                             </span>
-                            <form method="POST" class="estado-form">
-                                <input type="hidden" name="accion" value="actualizar_estado">
-                                <input type="hidden" name="orden_id" value="<?= $orden['id'] ?>">
-                                <select name="nuevo_estado" required>
-                                    <option value="">Cambiar estado...</option>
-                                    <option value="pendiente" <?= $orden['estado'] === 'pendiente' ? 'selected' : '' ?>>Pendiente</option>
-                                    <option value="en transito" <?= $orden['estado'] === 'en transito' ? 'selected' : '' ?>>En Tránsito</option>
-                                    <option value="entregado" <?= $orden['estado'] === 'entregado' ? 'selected' : '' ?>>Entregado</option>
-                                    <option value="cancelado" <?= $orden['estado'] === 'cancelado' ? 'selected' : '' ?>>Cancelado</option>
-                                </select>
-                                <button type="submit" title="Se enviará notificación por correo al cliente">📧 Actualizar</button>
-                            </form>
-                            <small style="color: #666; font-size: 11px; margin-top: 5px; display: block;">
-                                📧 El cliente recibirá una notificación por correo
-                            </small>
+                            <?php if ($orden['estado'] === 'entregado'): ?>
+                                <div style="margin-top: 10px; padding: 10px; background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; color: #155724;">
+                                    <strong>✅ Orden completada</strong><br>
+                                    <small>Este pedido ya ha sido entregado y no se puede modificar</small>
+                                </div>
+                            <?php else: ?>
+                                <form method="POST" class="estado-form" id="form-<?= $orden['id'] ?>" onsubmit="return confirmarActualizacion(event, '<?= $orden['id'] ?>')">
+                                    <input type="hidden" name="accion" value="actualizar_estado">
+                                    <input type="hidden" name="orden_id" value="<?= $orden['id'] ?>">
+                                    <select name="nuevo_estado" required id="select-<?= $orden['id'] ?>">
+                                        <option value="">Cambiar estado...</option>
+                                        <option value="pendiente" <?= $orden['estado'] === 'pendiente' ? 'selected' : '' ?>>Pendiente</option>
+                                        <option value="en transito" <?= $orden['estado'] === 'en transito' ? 'selected' : '' ?>>En Tránsito</option>
+                                        <option value="entregado" <?= $orden['estado'] === 'entregado' ? 'selected' : '' ?>>Entregado</option>
+                                        <option value="cancelado" <?= $orden['estado'] === 'cancelado' ? 'selected' : '' ?>>Cancelado</option>
+                                    </select>
+                                    <button type="submit" title="Se enviará notificación por correo al cliente">📧 Actualizar</button>
+                                </form>
+                                <small style="color: #666; font-size: 11px; margin-top: 5px; display: block;">
+                                    📧 El cliente recibirá una notificación por correo
+                                </small>
+                            <?php endif; ?>
                         </div>
                         <div class="orden-info">
                             <strong>Total de la Orden</strong>
@@ -552,6 +559,30 @@ foreach ($ordenes as &$orden) {
         <?php endif; ?>
 
     </div>
+
+<script>
+function confirmarActualizacion(event, ordenId) {
+    const selectElement = document.getElementById('select-' + ordenId);
+    const nuevoEstado = selectElement.value;
+    
+    if (nuevoEstado === 'entregado') {
+        const confirmacion = confirm(
+            '⚠️ CONFIRMACIÓN REQUERIDA\n\n' +
+            '¿Está seguro que desea marcar esta orden como ENTREGADA?\n\n' +
+            '⚠️ IMPORTANTE: Una vez marcada como entregada, NO PODRÁ cambiar el estado nuevamente.\n\n' +
+            'Esta acción enviará una notificación por correo al cliente.\n\n' +
+            '¿Desea continuar?'
+        );
+        
+        if (!confirmacion) {
+            event.preventDefault();
+            return false;
+        }
+    }
+    
+    return true;
+}
+</script>
 
 </body>
 </html>
