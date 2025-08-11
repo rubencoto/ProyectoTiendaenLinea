@@ -204,27 +204,51 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('testBtn').addEventListener('click', function() {
         console.log('Testing controller connection...');
         
-        fetch('../controlador/procesarLoginVendedorController.php?test=1', {
-            method: 'GET'
-        })
-        .then(response => {
-            console.log('Test response status:', response.status);
-            return response.text();
-        })
-        .then(text => {
-            console.log('Test response text:', text);
-            try {
-                const data = JSON.parse(text);
-                showAlert('Test successful: ' + data.message, 'success');
-            } catch (e) {
-                console.error('Full response text:', text);
-                showAlert('Test failed - Invalid JSON. Check console for full response.', 'error');
+        // Try multiple path variations
+        const paths = [
+            '../controlador/procesarLoginVendedorController.php?test=1',
+            'controlador/procesarLoginVendedorController.php?test=1',
+            '/ProyectoTiendaenLinea/controlador/procesarLoginVendedorController.php?test=1',
+            './controlador/procesarLoginVendedorController.php?test=1'
+        ];
+        
+        testPath(0);
+        
+        function testPath(index) {
+            if (index >= paths.length) {
+                showAlert('All paths failed. Check server configuration.', 'error');
+                return;
             }
-        })
-        .catch(error => {
-            console.error('Test error:', error);
-            showAlert('Test failed: ' + error.message, 'error');
-        });
+            
+            console.log('Testing path:', paths[index]);
+            
+            fetch(paths[index], {
+                method: 'GET'
+            })
+            .then(response => {
+                console.log(`Path ${index} (${paths[index]}) - Status:`, response.status);
+                if (response.status === 200) {
+                    return response.text();
+                } else {
+                    throw new Error(`Status: ${response.status}`);
+                }
+            })
+            .then(text => {
+                console.log(`Path ${index} success - Response:`, text);
+                try {
+                    const data = JSON.parse(text);
+                    showAlert(`Success with path ${index}: ${data.message}`, 'success');
+                } catch (e) {
+                    console.error(`Path ${index} - Invalid JSON:`, text);
+                    showAlert(`Path ${index} returned non-JSON. Check console.`, 'error');
+                }
+            })
+            .catch(error => {
+                console.log(`Path ${index} failed:`, error.message);
+                // Try next path
+                testPath(index + 1);
+            });
+        }
     });
     
     function clearAlerts() {
