@@ -23,7 +23,12 @@ $resultado = $stmt->get_result();
 
 $productos = [];
 while ($row = $resultado->fetch_assoc()) {
-    $row['imagen_principal'] = base64_encode($row['imagen_principal']);
+    // Fix deprecated warning by checking for null before base64_encode
+    if ($row['imagen_principal'] !== null) {
+        $row['imagen_principal'] = base64_encode($row['imagen_principal']);
+    } else {
+        $row['imagen_principal'] = ''; // Set empty string for null images
+    }
     $productos[] = $row;
 }
 $stmt->close();
