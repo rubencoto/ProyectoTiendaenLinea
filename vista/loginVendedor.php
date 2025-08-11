@@ -63,6 +63,11 @@ if (isset($_SESSION['id'])) {
                         <i class="fas fa-sign-in-alt me-1" id="loginIcon"></i>
                         Ingresar
                     </button>
+                    
+                    <!-- Test button for debugging -->
+                    <button type="button" class="btn btn-warning w-100 mt-2" id="testBtn">
+                        Test Controller Connection
+                    </button>
                 </form>
                 
                 <div class="text-center mt-4">
@@ -113,7 +118,29 @@ document.addEventListener('DOMContentLoaded', function() {
             method: 'POST',
             body: formData
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            return response.text(); // Get as text first for debugging
+        })
+        .then(text => {
+            console.log('Raw response:', text);
+            
+            // Try to parse as JSON
+            try {
+                const data = JSON.parse(text);
+                return data;
+            } catch (parseError) {
+                console.error('JSON parse error:', parseError);
+                console.error('Response that failed to parse:', text);
+                throw new Error('Server returned invalid JSON: ' + text.substring(0, 100));
+            }
+        })
         .then(data => {
             if (data.success) {
                 showAlert(data.message, 'success');
@@ -172,6 +199,32 @@ document.addEventListener('DOMContentLoaded', function() {
     // Clear alerts when user starts typing
     document.getElementById('correoInput').addEventListener('input', clearAlerts);
     document.getElementById('contrasenaInput').addEventListener('input', clearAlerts);
+    
+    // Test button for debugging
+    document.getElementById('testBtn').addEventListener('click', function() {
+        console.log('Testing controller connection...');
+        
+        fetch('../controlador/procesarLoginVendedorController.php?test=1', {
+            method: 'GET'
+        })
+        .then(response => {
+            console.log('Test response status:', response.status);
+            return response.text();
+        })
+        .then(text => {
+            console.log('Test response text:', text);
+            try {
+                const data = JSON.parse(text);
+                showAlert('Test successful: ' + data.message, 'success');
+            } catch (e) {
+                showAlert('Test failed - Invalid JSON: ' + text.substring(0, 100), 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Test error:', error);
+            showAlert('Test failed: ' + error.message, 'error');
+        });
+    });
     
     function clearAlerts() {
         const alertContainer = document.getElementById('alertContainer');

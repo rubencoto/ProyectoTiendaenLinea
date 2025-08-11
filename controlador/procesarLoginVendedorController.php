@@ -10,6 +10,13 @@ require_once '../modelo/conexion.php';
 require_once '../modelo/config.php';
 
 try {
+    // Simple test endpoint
+    if (isset($_GET['test'])) {
+        ob_clean();
+        echo json_encode(['test' => 'success', 'message' => 'Controller is accessible']);
+        exit;
+    }
+    
     // Get database connection
     $db = DatabaseConnection::getInstance();
     
