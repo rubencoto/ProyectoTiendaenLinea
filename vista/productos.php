@@ -215,23 +215,29 @@ function confirmarEliminacionLista() {
     
     boton.disabled = true;
     boton.textContent = "Eliminando...";
-    fetch("../controlador/eliminarProductoController.php", {
+    fetch("eliminarProductoController.php", {
         method: "POST",
         headers: { 'Content-Type':'application/x-www-form-urlencoded' },
         body: new URLSearchParams({ id })
     })
     .then(r => r.json())
     .then(res => {
-        if (res.status === "ok") {
+        if (res.status === "success") {
             const card = boton.closest(".card");
             card.classList.add("desaparecer");
             setTimeout(() => card.remove(), 500);
             mostrarToast("Producto eliminado.");
         } else {
-            mostrarToast("Error al eliminar.");
+            mostrarToast("Error al eliminar: " + (res.message || "Error desconocido"));
             boton.disabled = false;
             boton.textContent = "Eliminar";
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarToast("Error de conexión al eliminar.");
+        boton.disabled = false;
+        boton.textContent = "Eliminar";
     });
 }
 

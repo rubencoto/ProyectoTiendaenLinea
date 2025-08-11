@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
         eliminarSpinner.style.display = 'inline-block';
         eliminarIcon.style.display = 'none';
         
-        fetch('../controlador/eliminarProductoController.php', {
+        fetch('eliminarProductoController.php', {
             method: 'POST',
             body: formData
         })
