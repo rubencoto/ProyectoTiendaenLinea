@@ -2,7 +2,7 @@
 session_start();
 
 // Verificar si el vendedor está autenticado
-if (!isset($_SESSION['vendedor_id'])) {
+if (!isset($_SESSION['id'])) {
     header('Location: loginVendedor.php');
     exit;
 }
@@ -10,7 +10,7 @@ if (!isset($_SESSION['vendedor_id'])) {
 require_once '../modelo/conexion.php';
 require_once '../modelo/config.php';
 
-$vendedor_id = $_SESSION['vendedor_id'];
+$vendedor_id = $_SESSION['id'];
 
 // Obtener información actual del vendedor
 try {
