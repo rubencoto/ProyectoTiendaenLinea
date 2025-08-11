@@ -1,5 +1,9 @@
 <?php
 session_start();
+
+// Ensure we output JSON even if there are PHP notices/warnings
+ob_start();
+
 header('Content-Type: application/json');
 
 require_once '../modelo/conexion.php';
@@ -8,12 +12,18 @@ require_once '../modelo/config.php';
 try {
     // Get database connection
     $db = DatabaseConnection::getInstance();
+    
+    if (!$db || !$db->isConnected()) {
+        throw new Exception("No se pudo establecer conexión con la base de datos");
+    }
+    
     $conn = $db->getConnection();
 
     $response = ['success' => false, 'message' => '', 'redirect' => ''];
 
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         $response['message'] = 'Método no permitido.';
+        ob_clean(); // Clear any output buffer
         echo json_encode($response);
         exit;
     }
@@ -23,6 +33,7 @@ try {
 
     if (empty($correo) || empty($contrasena)) {
         $response['message'] = 'Por favor, completa todos los campos.';
+        ob_clean();
         echo json_encode($response);
         exit;
     }
@@ -30,6 +41,7 @@ try {
     // Validate email format
     if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
         $response['message'] = 'Formato de correo electrónico inválido.';
+        ob_clean();
         echo json_encode($response);
         exit;
     }
@@ -64,10 +76,12 @@ try {
         $response['register_url'] = 'registroVendedor.php';
     }
 
+    ob_clean(); // Clear any output buffer before sending JSON
     echo json_encode($response);
 
 } catch (Exception $e) {
     error_log("Error in procesarLoginVendedorController.php: " . $e->getMessage());
+    ob_clean(); // Clear any output buffer
     echo json_encode([
         'success' => false,
         'message' => 'Error interno del servidor. Inténtalo de nuevo.',
