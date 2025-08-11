@@ -522,7 +522,7 @@ function agregarAlCarrito(productoId) {
 }
 
 function updateCartCount() {
-    fetch('getCartCount.php')
+    fetch('../controlador/getCartCount.php')
     .then(response => response.json())
     .then(data => {
         const cartCountElement = document.getElementById('cart-count');

@@ -7,10 +7,14 @@ ini_set('display_errors', 1);
 
 require_once '../modelo/conexion.php';
 require_once '../modelo/config.php';
+require_once '../modelo/CategoriasManager.php';
 
 // Get database connection
 $db = DatabaseConnection::getInstance();
 $conn = $db->getConnection();
+
+// Instanciar el manejador de categorías
+$categoriasManager = new CategoriasManager();
 
 $isLoggedIn = !empty($_SESSION['cliente_id']);
 
@@ -76,23 +80,90 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isLoggedIn) {
 }
 
 // Get featured products (only products explicitly marked as destacado = 1)
-$stmt = $conn->prepare(
-    "SELECT p.id, p.nombre, p.precio, p.imagen_principal, p.descripcion, v.nombre_empresa AS vendedor_nombre 
-    FROM productos p 
-    JOIN vendedores v ON p.id_vendedor = v.id 
-    WHERE p.destacado = 1 AND p.activo = 1
-    ORDER BY p.id DESC 
-    LIMIT 6"
-);
+// Obtener filtro de categoría si se especifica
+$categoria_filtro = isset($_GET['categoria']) ? intval($_GET['categoria']) : null;
 
-$stmt->execute();
-$productos = [];
-while ($row = $stmt->fetch()) {
-    if ($row['imagen_principal']) {
-        $row['imagen_principal'] = base64_encode($row['imagen_principal']);
+if ($categoria_filtro) {
+    // Filtrar productos por categoría
+    $productos_categoria = $categoriasManager->obtenerProductosPorCategoria($categoria_filtro);
+    $productos = [];
+    
+    foreach ($productos_categoria as $producto) {
+        // Solo incluir productos activos y destacados
+        if ($producto['activo'] && $producto['destacado']) {
+            $stmt_vendedor = $conn->prepare("SELECT nombre_empresa FROM vendedores WHERE id = ?");
+            $stmt_vendedor->execute([$producto['id_vendedor']]);
+            $vendedor = $stmt_vendedor->fetch();
+            
+            $producto['vendedor_nombre'] = $vendedor ? $vendedor['nombre_empresa'] : 'Vendedor Desconocido';
+            
+            if ($producto['imagen_principal']) {
+                $producto['imagen_principal'] = base64_encode($producto['imagen_principal']);
+            }
+            
+            $productos[] = $producto;
+        }
     }
-    $productos[] = $row;
+} else {
+    // Mostrar todos los productos destacados
+    $stmt = $conn->prepare(
+        "SELECT p.id, p.nombre, p.precio, p.imagen_principal, p.descripcion, v.nombre_empresa AS vendedor_nombre 
+        FROM productos p 
+        JOIN vendedores v ON p.id_vendedor = v.id 
+        WHERE p.destacado = 1 AND p.activo = 1
+        ORDER BY p.id DESC 
+        LIMIT 6"
+    );
+
+    $stmt->execute();
+    $productos = [];
+    while ($row = $stmt->fetch()) {
+        if ($row['imagen_principal']) {
+            $row['imagen_principal'] = base64_encode($row['imagen_principal']);
+        }
+        $productos[] = $row;
+    }
 }
+
+// Obtener todas las categorías activas para el filtro
+$categorias = $categoriasManager->obtenerCategoriasActivas();
+
+// Función para obtener imagen representativa de una categoría
+function obtenerImagenCategoria($conn, $categoria_id) {
+    // Primero intentar obtener un producto destacado de la categoría
+    $stmt = $conn->prepare("
+        SELECT p.imagen_principal 
+        FROM productos p 
+        INNER JOIN productos_categorias pc ON p.id = pc.id_producto 
+        WHERE pc.id_categoria = ? AND p.activo = 1 AND p.imagen_principal IS NOT NULL AND p.destacado = 1
+        ORDER BY p.id DESC
+        LIMIT 1
+    ");
+    $stmt->execute([$categoria_id]);
+    $producto = $stmt->fetch();
+    
+    // Si no hay productos destacados, obtener cualquier producto de la misma categoría
+    if (!$producto || !$producto['imagen_principal']) {
+        $stmt = $conn->prepare("
+            SELECT p.imagen_principal 
+            FROM productos p 
+            INNER JOIN productos_categorias pc ON p.id = pc.id_producto 
+            WHERE pc.id_categoria = ? AND p.activo = 1 AND p.imagen_principal IS NOT NULL 
+            ORDER BY p.id DESC
+            LIMIT 1
+        ");
+        $stmt->execute([$categoria_id]);
+        $producto = $stmt->fetch();
+    }
+    
+    if ($producto && $producto['imagen_principal']) {
+        return base64_encode($producto['imagen_principal']);
+    }
+    
+    // Si no hay productos con imagen en esta categoría, retornar null
+    return null;
+}
+
 // No fallback - only show explicitly featured products
 // PDO statements don't need explicit closing
 // Connection managed by singleton, no need to close explicitly
@@ -130,7 +201,7 @@ while ($row = $stmt->fetch()) {
             flex-wrap: wrap;
             padding: 0 20px;
         }
-        #busqueda, #ordenar {
+        #busqueda, #ordenar, #categoria {
             flex: 1;
             min-width: 200px;
             padding: 10px;
@@ -677,6 +748,96 @@ while ($row = $stmt->fetch()) {
             fill: #fffdef;
         }
         
+        /* Estilos para recuadros de categorías */
+        .categorias-section {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .categorias-titulo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+        
+        .categorias-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+        
+        .categoria-card {
+            position: relative;
+            height: 150px;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .categoria-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .categoria-imagen {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .categoria-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: white;
+        }
+        
+        .categoria-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .categoria-nombre {
+            font-weight: bold;
+            font-size: 16px;
+            margin: 0;
+        }
+        
+        /* Responsive design para categorías */
+        @media (max-width: 992px) {
+            .categorias-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .categorias-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .categoria-card {
+                height: 120px;
+            }
+            .categoria-nombre {
+                font-size: 14px;
+            }
+        }
+        
         /* Force update for Heroku deployment */
     </style>
 </head>
@@ -755,6 +916,14 @@ while ($row = $stmt->fetch()) {
 
 <div class="busqueda-container">
     <input type="text" id="busqueda" placeholder="Buscar productos...">
+    <select id="categoria">
+        <option value="">Todas las categorías</option>
+        <?php foreach ($categorias as $categoria): ?>
+            <option value="<?= $categoria['id_categoria'] ?>" <?= ($categoria_filtro == $categoria['id_categoria']) ? 'selected' : '' ?>>
+                <?= htmlspecialchars($categoria['nombre_categoria']) ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
     <select id="ordenar">
         <option value="reciente">Más recientes</option>
         <option value="asc">Nombre A-Z</option>
@@ -882,12 +1051,44 @@ while ($row = $stmt->fetch()) {
     </a>
 </div>
 
+<!-- Sección de Categorías -->
+<div class="categorias-section">
+    <h2 class="categorias-titulo">Compra por Categorías</h2>
+    <div class="categorias-grid">
+        <?php foreach ($categorias as $categoria): ?>
+            <div class="categoria-card" onclick="filtrarPorCategoria(<?= $categoria['id_categoria'] ?>)">
+                <?php 
+                $imagen_categoria = obtenerImagenCategoria($conn, $categoria['id_categoria']);
+                if ($imagen_categoria): 
+                ?>
+                    <img src="data:image/jpeg;base64,<?= $imagen_categoria ?>" alt="<?= htmlspecialchars($categoria['nombre_categoria']) ?>" class="categoria-imagen">
+                <?php else: ?>
+                    <div class="categoria-placeholder">
+                        <div style="color: white; text-align: center;">
+                            <div style="font-size: 24px; margin-bottom: 10px;">�</div>
+                            <div style="font-size: 12px;">Sin productos disponibles</div>
+                        </div>
+                    </div>
+                <?php endif; ?>
+                <div class="categoria-overlay">
+                    <h3 class="categoria-nombre"><?= htmlspecialchars($categoria['nombre_categoria']) ?></h3>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+</div>
+
 <div id="productosContenedor"></div>
 
 <script>
 const productos = <?= json_encode($productos, JSON_HEX_TAG) ?>;
 const isLoggedIn = <?= json_encode($isLoggedIn) ?>;
 const baseUrl = '<?= AppConfig::link('') ?>';
+
+// Función para filtrar por categoría desde los recuadros
+function filtrarPorCategoria(categoriaId) {
+    window.location.href = 'categoria.php?id=' + categoriaId;
+}
 
 function renderizarProductos(lista) {
     const contenedor = document.getElementById("productosContenedor");
@@ -924,6 +1125,23 @@ function renderizarProductos(lista) {
 function aplicarCambios() {
     const busqueda = document.getElementById("busqueda").value.toLowerCase();
     const orden = document.getElementById("ordenar").value;
+    const categoria = document.getElementById("categoria").value;
+    
+    // Si se selecciona una categoría, recargar la página con filtro
+    if (categoria !== '') {
+        const currentUrl = new URL(window.location);
+        currentUrl.searchParams.set('categoria', categoria);
+        window.location.href = currentUrl.toString();
+        return;
+    } else {
+        // Si no hay categoría seleccionada, eliminar el parámetro
+        const currentUrl = new URL(window.location);
+        currentUrl.searchParams.delete('categoria');
+        if (currentUrl.search !== window.location.search) {
+            window.location.href = currentUrl.toString();
+            return;
+        }
+    }
     
     let filtrados = productos.filter(p =>
         p.nombre.toLowerCase().includes(busqueda) ||
@@ -956,6 +1174,9 @@ document.getElementById("busqueda").addEventListener("keypress", function(e) {
         aplicarCambios();
     }
 });
+
+// Agregar event listener para el select de categoría
+document.getElementById("categoria").addEventListener("change", aplicarCambios);
 
 // Load products on page load
 renderizarProductos(productos);
@@ -990,7 +1211,7 @@ function agregarAlCarrito(productoId) {
 }
 
 function updateCartCount() {
-    fetch('getCartCount.php')
+    fetch('../controlador/getCartCount.php')
     .then(response => response.json())
     .then(data => {
         const cartCountElement = document.getElementById('cart-count');

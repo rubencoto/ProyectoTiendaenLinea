@@ -17,13 +17,22 @@ if (empty($controller)) {
 $controllers = [
     'procesarRegistroCliente' => '../controlador/procesarRegistroCliente.php',
     'procesarRegistroVendedor' => '../controlador/procesarRegistroVendedor.php',
-    'procesarLoginCliente' => '../controlador/procesarLoginCliente.php',
-    'procesarLoginVendedor' => '../controlador/procesarLoginVendedor.php',
+    'procesarLoginCliente' => '../controlador/procesarLoginClienteController.php',
+    'procesarLoginVendedor' => '../controlador/procesarLoginVendedorController.php',
     'procesarProducto' => '../controlador/procesarProducto.php',
     'actualizarProducto' => '../controlador/actualizarProducto.php',
     'confirmarOrden' => '../controlador/confirmarOrden.php',
     'verificarCuenta' => '../controlador/verificarCuenta.php',
-    'verificarCuentaCliente' => '../controlador/verificarCuentaCliente.php'
+    'verificarCuentaCliente' => '../controlador/verificarCuentaClienteController.php',
+    // Nuevos controladores agregados
+    'eliminarProducto' => '../controlador/eliminarProductoController.php',
+    'getCartCount' => '../controlador/getCartCount.php',
+    'procesarResena' => '../controlador/procesarResena.php',
+    'productoControlador' => '../controlador/productoControlador.php',
+    'restablecerContrasena' => '../controlador/restablecerContrasenaController.php',
+    'verificarCodigo' => '../controlador/verificarCodigoController.php',
+    'verificarCodigoReset' => '../controlador/verificarCodigoResetController.php',
+    'perfilVendedor' => '../controlador/perfilVendedorController.php'
 ];
 
 // Check if controller exists

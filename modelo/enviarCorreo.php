@@ -81,4 +81,62 @@ function enviarCorreo($correoDestino, $asunto, $mensaje) {
         return false;
     }
 }
+
+function enviarNotificacionCambioEstado($correoDestino, $nombreCliente, $numeroOrden, $nuevoEstado, $nombreEmpresa) {
+    $mail = new PHPMailer(true);
+
+    try {
+        $mail->isSMTP();
+        $mail->Host       = 'smtp.gmail.com';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = 'serviciocontactoventaonline@gmail.com';
+        $mail->Password   = 'hbon bfqz wroe bmzm';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port       = 587;
+
+        $mail->setFrom('serviciocontactoventaonline@gmail.com', 'Tienda en Línea');
+        $mail->addAddress($correoDestino, $nombreCliente);
+
+        $mail->isHTML(true);
+        $mail->Subject = "Actualización de tu pedido #$numeroOrden";
+        
+        $estadoTexto = '';
+        switch($nuevoEstado) {
+            case 'pendiente':
+                $estadoTexto = 'Pendiente de procesamiento';
+                break;
+            case 'procesando':
+                $estadoTexto = 'En procesamiento';
+                break;
+            case 'enviado':
+                $estadoTexto = 'Enviado';
+                break;
+            case 'entregado':
+                $estadoTexto = 'Entregado';
+                break;
+            case 'cancelado':
+                $estadoTexto = 'Cancelado';
+                break;
+            default:
+                $estadoTexto = $nuevoEstado;
+        }
+        
+        $mail->Body = "
+            <h3>Actualización de tu pedido</h3>
+            <p>Estimado/a $nombreCliente,</p>
+            <p>Te informamos que el estado de tu pedido <strong>#$numeroOrden</strong> ha sido actualizado.</p>
+            <p><strong>Nuevo estado:</strong> $estadoTexto</p>
+            <p><strong>Vendedor:</strong> $nombreEmpresa</p>
+            <p>Gracias por tu compra.</p>
+            <hr>
+            <p><small>Este es un correo automático, por favor no responder.</small></p>
+        ";
+
+        $mail->send();
+        return true;
+    } catch (Exception $e) {
+        error_log("Error al enviar notificación de cambio de estado: " . $mail->ErrorInfo);
+        return false;
+    }
+}
 ?>

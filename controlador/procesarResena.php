@@ -68,7 +68,7 @@ try {
     // Verify that the customer actually purchased this product in this order
     $verificarCompra = $conexion->prepare("
         SELECT COUNT(*) as compro 
-        FROM ordenes o 
+        FROM pedidos o 
         INNER JOIN detalle_pedidos dp ON o.id = dp.orden_id 
         WHERE o.cliente_id = ? AND dp.producto_id = ? AND o.id = ?
     ");

@@ -292,7 +292,7 @@ function confirmarEliminacionProducto() {
     const id = document.getElementById('productoIdEliminar').value;
     document.getElementById('modalEliminarProducto').style.display = 'none';
     
-    fetch("eliminarProducto.php", {
+    fetch("../controlador/eliminarProductoController.php", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: "id=" + encodeURIComponent(id)

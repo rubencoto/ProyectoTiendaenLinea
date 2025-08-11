@@ -126,10 +126,10 @@ class DatabaseConnection {
     private $lastError = '';
     
     // Database parameters
-    private $host = "kavfu5f7pido12mr.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
-    private $usuario = "kd8mm5vnhfoajcsh";
-    private $contrasena = "u8im10ovr94ccsfq";
-    private $base_datos = "lsj1q7iol6uhg5wu";
+    private $host = "gtizpe105piw2gfq.cbetxkdyhwsb.us-east-1.rds.amazonaws.com";
+    private $usuario = "mkmse4xl3pihhaxh";
+    private $contrasena = "j0jf79neridfkfo2";
+    private $base_datos = "ddpuklcmtttnqqkl";
     private $puerto = 3306;
     
     private function __construct() {

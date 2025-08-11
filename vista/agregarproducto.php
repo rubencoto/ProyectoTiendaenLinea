@@ -1,12 +1,20 @@
 <?php
 session_start();
 require_once '../modelo/config.php';
+require_once '../modelo/conexion.php';
+require_once '../modelo/CategoriasManager.php';
 
 // Verificar si hay sesión activa del vendedor
 if (!isset($_SESSION['id'])) {
     header('Location: ' . AppConfig::vistaUrl('loginVendedor.php'));
     exit;
 }
+
+// Instanciar el manejador de categorías
+$categoriasManager = new CategoriasManager();
+
+// Obtener todas las categorías activas
+$categorias = $categoriasManager->obtenerCategoriasActivas();
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -41,13 +49,25 @@ if (!isset($_SESSION['id'])) {
         input[type="text"],
         input[type="number"],
         textarea,
-        input[type="file"] {
+        input[type="file"],
+        select {
             width: 100%;
             padding: 10px;
             margin-bottom: 15px;
             border-radius: 4px;
             border: 1px solid #ccc;
             font-size: 14px;
+        }
+
+        select {
+            background-color: white;
+            cursor: pointer;
+        }
+
+        select:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0,123,255,0.3);
         }
 
         img.preview {
@@ -222,8 +242,15 @@ if (!isset($_SESSION['id'])) {
         <label>Precio (₡)</label>
         <input type="number" name="precio" step="0.01" required>
 
-        <label>Categoría</label>
-        <input type="text" name="categoria" required>
+        <label>Categoría *</label>
+        <select name="id_categoria" required>
+            <option value="">Selecciona una categoría</option>
+            <?php foreach ($categorias as $categoria): ?>
+                <option value="<?= htmlspecialchars($categoria['id_categoria']) ?>">
+                    <?= htmlspecialchars($categoria['nombre_categoria']) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
 
         <label>Imagen principal</label>
         <input type="file" name="imagen_principal" accept="image/*" onchange="preview(this, 'previewPrincipal')" required>

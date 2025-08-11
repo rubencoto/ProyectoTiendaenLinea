@@ -33,7 +33,7 @@ $pagina = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
 $offset = ($pagina - 1) * $limite;
 
 // Contar total de órdenes
-$stmt_count = $pdo_conn->prepare("SELECT COUNT(*) as total FROM ordenes WHERE cliente_id = ?");
+$stmt_count = $pdo_conn->prepare("SELECT COUNT(*) as total FROM pedidos WHERE cliente_id = ?");
 $stmt_count->execute([$cliente_id]);
 $count_result = $stmt_count->fetch();
 $total_ordenes = $count_result['total'];
@@ -43,7 +43,7 @@ $total_paginas = ceil($total_ordenes / $limite);
 $stmt_ordenes = $pdo_conn->prepare("
     SELECT o.id, o.numero_orden, o.subtotal, o.envio, o.total, 
            o.estado, o.fecha_orden
-    FROM ordenes o 
+    FROM pedidos o 
     WHERE o.cliente_id = ? 
     ORDER BY o.fecha_orden DESC 
     LIMIT $limite OFFSET $offset
@@ -58,10 +58,10 @@ while ($row = $stmt_ordenes->fetch()) {
 
 error_log("MisPedidos: Total orders found for cliente_id $cliente_id: " . count($ordenes));
 
-// Clean up orphaned details that don't have corresponding orders in the ordenes table
+// Clean up orphaned details that don't have corresponding orders in the pedidos table
 $cleanup_stmt = $pdo_conn->prepare("
     DELETE dp FROM detalle_pedidos dp 
-    LEFT JOIN ordenes o ON dp.orden_id = o.id 
+    LEFT JOIN pedidos o ON dp.orden_id = o.id 
     WHERE o.id IS NULL
 ");
 $cleanup_result = $cleanup_stmt->execute();
@@ -78,7 +78,7 @@ foreach ($ordenes as &$orden) {
         FROM detalle_pedidos dp
         JOIN productos p ON dp.producto_id = p.id
         WHERE dp.orden_id = ? 
-        AND EXISTS (SELECT 1 FROM ordenes o WHERE o.id = dp.orden_id)
+        AND EXISTS (SELECT 1 FROM pedidos o WHERE o.id = dp.orden_id)
     ");
     $stmt_detalle->execute([$orden['id']]);
     
@@ -724,7 +724,7 @@ foreach ($ordenes as &$orden) {
             submitBtn.textContent = 'Enviando...';
             
             // Submit via fetch
-            fetch('procesarResena.php', {
+            fetch('../controlador/procesarResena.php', {
                 method: 'POST',
                 body: formData
             })

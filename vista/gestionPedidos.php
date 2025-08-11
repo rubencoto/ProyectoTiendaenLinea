@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
             SELECT COUNT(*) as count, 
                    c.nombre as cliente_nombre, c.apellido as cliente_apellido, c.correo as cliente_correo,
                    o.numero_orden, v.nombre_empresa
-            FROM ordenes o
+            FROM pedidos o
             JOIN clientes c ON o.cliente_id = c.id
             JOIN vendedores v ON v.id = ?
             JOIN detalle_pedidos dp ON o.id = dp.orden_id 
@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
         $verification = $stmt_verify->fetch();
         
         if ($verification && $verification['count'] > 0) {
-            $stmt_update = $conn->prepare("UPDATE ordenes SET estado = ? WHERE id = ?");
+            $stmt_update = $conn->prepare("UPDATE pedidos SET estado = ? WHERE id = ?");
             if ($stmt_update->execute([$nuevo_estado, $orden_id])) {
                 // Send email notification to customer
                 $nombreCompleto = $verification['cliente_nombre'] . ' ' . $verification['cliente_apellido'];
@@ -90,7 +90,7 @@ $offset = ($pagina - 1) * $limite;
 // Count total orders for this vendor
 $stmt_count = $conn->prepare("
     SELECT COUNT(DISTINCT o.id) as total 
-    FROM ordenes o
+    FROM pedidos o
     JOIN detalle_pedidos dp ON o.id = dp.orden_id 
     JOIN productos p ON dp.producto_id = p.id 
     WHERE p.id_vendedor = ?
@@ -105,7 +105,7 @@ $stmt_ordenes = $conn->prepare("
     SELECT DISTINCT o.id, o.numero_orden, o.subtotal, o.envio, o.total, 
            o.estado, o.fecha_orden, c.nombre as cliente_nombre, c.apellido as cliente_apellido,
            c.correo as cliente_correo, c.telefono as cliente_telefono
-    FROM ordenes o
+    FROM pedidos o
     JOIN clientes c ON o.cliente_id = c.id
     JOIN detalle_pedidos dp ON o.id = dp.orden_id 
     JOIN productos p ON dp.producto_id = p.id 

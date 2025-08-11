@@ -6,6 +6,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 require_once '../modelo/conexion.php';
+require_once '../modelo/CategoriasManager.php';
 
 // Check if this is a POST request
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -26,11 +27,14 @@ try {
     $db = DatabaseConnection::getInstance();
     $conn = $db->getConnection();
     
+    // Instanciar el manejador de categorías
+    $categoriasManager = new CategoriasManager();
+    
     // Get form data
     $nombre = $_POST['nombre'] ?? '';
     $descripcion = $_POST['descripcion'] ?? '';
     $precio = floatval($_POST['precio'] ?? 0);
-    $categoria = $_POST['categoria'] ?? '';
+    $id_categoria = intval($_POST['id_categoria'] ?? 0);
     $tallas = $_POST['tallas'] ?? '';
     $color = $_POST['color'] ?? '';
     $stock = intval($_POST['stock'] ?? 0);
@@ -39,8 +43,15 @@ try {
     $peso = floatval($_POST['peso'] ?? 0);
     $tamano_empaque = $_POST['tamano_empaque'] ?? '';
     
+    // Validar que la categoría existe
+    $categoria_info = $categoriasManager->obtenerCategoriaPorId($id_categoria);
+    if (!$categoria_info) {
+        echo "Error: La categoría seleccionada no existe";
+        exit;
+    }
+    
     // Validate required fields
-    if (empty($nombre) || empty($descripcion) || $precio <= 0 || empty($categoria)) {
+    if (empty($nombre) || empty($descripcion) || $precio <= 0 || $id_categoria <= 0) {
         echo "Error: Campos obligatorios faltantes";
         exit;
     }
@@ -61,7 +72,7 @@ try {
     }
 
     
-    // PDO SQL insert
+    // PDO SQL insert - usar el nombre de la categoría para compatibilidad
     $sql = "INSERT INTO productos (
         nombre, descripcion, precio, categoria, 
         imagen_principal, imagen_secundaria1, imagen_secundaria2, 
@@ -77,25 +88,35 @@ try {
     
     // Execute with PDO parameters array
     $execute_result = $stmt->execute([
-        $nombre,            // 1
-        $descripcion,       // 2
-        $precio,            // 3
-        $categoria,         // 4
-        $imagen_principal,  // 5
-        $imagen_secundaria1,// 6
-        $imagen_secundaria2,// 7
-        $tallas,            // 8
-        $color,             // 9
-        $stock,             // 10
-        $garantia,          // 11
-        $dimensiones,       // 12
-        $peso,              // 13
-        $tamano_empaque,    // 14
-        $id_vendedor        // 15
+        $nombre,                              // 1
+        $descripcion,                         // 2
+        $precio,                              // 3
+        $categoria_info['nombre_categoria'],  // 4 - Usar el nombre de la categoría
+        $imagen_principal,                    // 5
+        $imagen_secundaria1,                  // 6
+        $imagen_secundaria2,                  // 7
+        $tallas,                              // 8
+        $color,                               // 9
+        $stock,                               // 10
+        $garantia,                            // 11
+        $dimensiones,                         // 12
+        $peso,                                // 13
+        $tamano_empaque,                      // 14
+        $id_vendedor                          // 15
     ]);
     
     if ($execute_result) {
-        echo "Producto agregado con éxito";
+        // Obtener el ID del producto recién insertado
+        $id_producto = $conn->lastInsertId();
+        
+        // Asignar la categoría en la tabla intermedia
+        $categoria_asignada = $categoriasManager->asignarCategoriaAProducto($id_producto, $id_categoria);
+        
+        if ($categoria_asignada) {
+            echo "Producto agregado con éxito y categoría asignada";
+        } else {
+            echo "Producto agregado, pero error al asignar categoría";
+        }
     } else {
         echo "Error al guardar producto";
     }
