@@ -50,7 +50,7 @@ if (!$producto) {
 <body>
 <div class="container mt-5">
     <h2>Editar Producto</h2>
-    <form action="<?= AppConfig::controladorUrl('actualizarProducto.php') ?>" method="POST" enctype="multipart/form-data">
+    <form action="actualizarProducto.php" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="id" value="<?= htmlspecialchars($producto['id']) ?>">
 
         <div class="mb-3">
