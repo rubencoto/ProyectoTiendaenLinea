@@ -724,7 +724,7 @@ foreach ($ordenes as &$orden) {
             submitBtn.textContent = 'Enviando...';
             
             // Submit via fetch
-            fetch('../controlador/procesarResena.php', {
+            fetch('procesarResena.php', {
                 method: 'POST',
                 body: formData
             })

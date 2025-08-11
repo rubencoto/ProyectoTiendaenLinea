@@ -1,4 +1,11 @@
 <?php
+// Turn off error reporting to prevent HTML error output
+error_reporting(0);
+ini_set('display_errors', 0);
+
+// Ensure we output JSON even if there are PHP notices/warnings
+ob_start();
+
 require_once '../modelo/conexion.php';
 
 // Set JSON response header
@@ -8,19 +15,16 @@ header('Content-Type: application/json');
 session_start();
 
 try {
-    // Add logging for debugging
-    error_log("procesarResena.php: Starting review processing");
-    
     // Check if user is logged in
     if (!isset($_SESSION['cliente_id'])) {
-        error_log("procesarResena.php: User not logged in");
+        ob_clean();
         echo json_encode(['success' => false, 'message' => 'Debes estar logueado para enviar una reseña.']);
         exit;
     }
 
     // Check if it's a POST request
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        error_log("procesarResena.php: Not a POST request");
+        ob_clean();
         echo json_encode(['success' => false, 'message' => 'Método no permitido.']);
         exit;
     }
@@ -32,52 +36,47 @@ try {
     $rating = filter_input(INPUT_POST, 'rating', FILTER_VALIDATE_INT);
     $comentario = trim(filter_input(INPUT_POST, 'comentario', FILTER_SANITIZE_STRING));
 
-    error_log("procesarResena.php: cliente_id=$cliente_id, producto_id=$producto_id, orden_id=$orden_id, rating=$rating, comentario=$comentario");
-
     // Validate input
     if (!$producto_id || !$orden_id || !$rating || empty($comentario)) {
-        error_log("procesarResena.php: Missing required fields");
+        ob_clean();
         echo json_encode(['success' => false, 'message' => 'Todos los campos son requeridos.']);
         exit;
     }
 
     if ($rating < 1 || $rating > 5) {
-        error_log("procesarResena.php: Invalid rating: $rating");
+        ob_clean();
         echo json_encode(['success' => false, 'message' => 'La calificación debe ser entre 1 y 5 estrellas.']);
         exit;
     }
 
     if (strlen($comentario) < 10) {
-        error_log("procesarResena.php: Comment too short: " . strlen($comentario));
+        ob_clean();
         echo json_encode(['success' => false, 'message' => 'El comentario debe tener al menos 10 caracteres.']);
         exit;
     }
 
     // Get database connection
     $db = DatabaseConnection::getInstance();
-    $conexion = $db->getConnection();
     
-    if (!$conexion) {
-        error_log("procesarResena.php: Failed to get database connection");
-        echo json_encode(['success' => false, 'message' => 'Error de conexión a la base de datos.']);
-        exit;
+    if (!$db || !$db->isConnected()) {
+        throw new Exception("No se pudo establecer conexión con la base de datos");
     }
     
-    error_log("procesarResena.php: Database connection established");
+    $conexion = $db->getConnection();
     
     // Verify that the customer actually purchased this product in this order
+    // Fixed: Use 'pedidos' table instead of 'ordenes'
     $verificarCompra = $conexion->prepare("
         SELECT COUNT(*) as compro 
-        FROM ordenes o 
+        FROM pedidos o 
         INNER JOIN detalle_pedidos dp ON o.id = dp.orden_id 
         WHERE o.cliente_id = ? AND dp.producto_id = ? AND o.id = ?
     ");
     $verificarCompra->execute([$cliente_id, $producto_id, $orden_id]);
     $compro = $verificarCompra->fetch();
 
-    error_log("procesarResena.php: Purchase verification result: " . ($compro['compro'] ?? 'null'));
-
     if ($compro['compro'] == 0) {
+        ob_clean();
         echo json_encode(['success' => false, 'message' => 'No puedes reseñar un producto que no has comprado.']);
         exit;
     }
@@ -91,9 +90,8 @@ try {
     $verificarReseña->execute([$cliente_id, $producto_id]);
     $yaReseño = $verificarReseña->fetch();
 
-    error_log("procesarResena.php: Existing review check: " . ($yaReseño['ya_reseño'] ?? 'null'));
-
     if ($yaReseño['ya_reseño'] > 0) {
+        ob_clean();
         echo json_encode(['success' => false, 'message' => 'Ya has reseñado este producto anteriormente.']);
         exit;
     }
@@ -104,20 +102,19 @@ try {
         VALUES (?, ?, ?, ?, NOW())
     ");
     
-    error_log("procesarResena.php: Attempting to insert review");
     $result = $insertarReseña->execute([$cliente_id, $producto_id, $rating, $comentario]);
-    error_log("procesarResena.php: Insert result: " . ($result ? 'success' : 'failed'));
     
     if ($result) {
+        ob_clean();
         echo json_encode(['success' => true, 'message' => 'Reseña enviada exitosamente.']);
     } else {
-        $errorInfo = $insertarReseña->errorInfo();
-        error_log("procesarResena.php: Insert error: " . print_r($errorInfo, true));
+        ob_clean();
         echo json_encode(['success' => false, 'message' => 'Error al guardar la reseña. Inténtalo de nuevo.']);
     }
 
 } catch (Exception $e) {
     error_log("Error en procesarResena.php: " . $e->getMessage());
+    ob_clean();
     echo json_encode(['success' => false, 'message' => 'Error interno del servidor.']);
 }
 ?>
