@@ -96,7 +96,7 @@ $nombre_empresa = $vendedor ? $vendedor['nombre_empresa'] : 'Vendedor';
             </div>
             <div class="card">
                 <h3>Mi Perfil</h3>
-                <a href="<?= AppConfig::vistaUrl('perfilVendedor.php') ?>">Editar Perfil</a>
+                <a href="perfilVendedor.php">Editar Perfil</a>
             </div>
             <div class="card">
                 <h3>Cerrar Sesión</h3>
