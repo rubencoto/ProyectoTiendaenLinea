@@ -15,8 +15,8 @@ $vendedor_id = $_SESSION['id'];
 // Obtener información actual del vendedor
 try {
     $stmt_vendedor = $conn->prepare("
-        SELECT nombre_empresa, correo, telefono, direccion1, direccion2, categoria, 
-               cedula_juridica, biografia, redes, logo, fecha_registro
+        SELECT nombre, apellido, nombre_empresa, correo, telefono, direccion1, direccion2, categoria, 
+               cedula_juridica, descripcion_tienda, fecha_registro, verificado, codigo_verificacion
         FROM vendedores 
         WHERE id = ?
     ");
@@ -194,13 +194,12 @@ try {
         <!-- Header del Perfil -->
         <div class="profile-header">
             <div class="logo-container">
-                <?php if (!empty($vendedor['logo'])): ?>
-                    <img src="data:image/jpeg;base64,<?= base64_encode($vendedor['logo']) ?>" alt="Logo de <?= htmlspecialchars($vendedor['nombre_empresa']) ?>">
+                <?php if (!empty(false)): ?>
+                    <img src="data:image/jpeg;base64,<?= base64_encode(false) ?>" alt="Logo de <?= htmlspecialchars($vendedor['nombre_empresa']) ?>">
                 <?php else: ?>
                     <div class="logo-placeholder">
                         <i class="fas fa-store"></i>
                     </div>
-                <?php endif; ?>
             </div>
             <h2 class="mb-1"><?= htmlspecialchars($vendedor['nombre_empresa']) ?></h2>
             <p class="mb-0 opacity-75">
@@ -253,17 +252,13 @@ try {
                     <div class="col-md-6">
                         <p><strong>Teléfono:</strong> <?= htmlspecialchars($vendedor['telefono']) ?></p>
                         <p><strong>Email:</strong> <?= htmlspecialchars($vendedor['correo']) ?></p>
-                        <?php if (!empty($vendedor['redes'])): ?>
-                        <p><strong>Redes Sociales:</strong> <?= htmlspecialchars($vendedor['redes']) ?></p>
-                        <?php endif; ?>
                     </div>
                 </div>
-                <?php if (!empty($vendedor['biografia'])): ?>
+                <?php if (!empty($vendedor['descripcion_tienda'])): ?>
                 <div class="mt-3">
                     <strong>Biografía:</strong>
-                    <p class="mt-2"><?= nl2br(htmlspecialchars($vendedor['biografia'])) ?></p>
+                    <p class="mt-2"><?= nl2br(htmlspecialchars($vendedor['descripcion_tienda'])) ?></p>
                 </div>
-                <?php endif; ?>
             </div>
 
             <!-- Formulario de Edición -->
@@ -338,24 +333,18 @@ try {
                 </div>
 
                 <div class="mb-3">
-                    <label for="biografia" class="form-label">
+                    <label for="descripcion_tienda" class="form-label">
                         <i class="fas fa-info-circle me-1"></i>Descripción/Biografía de la Empresa *
                     </label>
-                    <textarea class="form-control" id="biografia" name="biografia" rows="4" 
-                              placeholder="Cuéntanos sobre tu empresa, productos y servicios..." required><?= htmlspecialchars($vendedor['biografia']) ?></textarea>
-                </div>
-
-                <div class="mb-4">
-                    <label for="redes" class="form-label">
-                        <i class="fas fa-share-alt me-1"></i>Redes Sociales
-                    </label>
-                    <input type="text" class="form-control" id="redes" name="redes" 
-                           value="<?= htmlspecialchars($vendedor['redes']) ?>"
-                           placeholder="Enlaces a redes sociales, sitio web, etc.">
+                    <textarea class="form-control" id="descripcion_tienda" name="descripcion_tienda" rows="4" 
+                              placeholder="Cuéntanos sobre tu empresa, productos y servicios..." required><?= htmlspecialchars($vendedor['descripcion_tienda']) ?></textarea>
                 </div>
 
                 <div class="text-center">
                     <button type="submit" class="btn btn-primary btn-lg me-3" id="guardarBtn">
+                        <span class="spinner-border spinner-border-sm me-2" style="display: none;" id="guardarSpinner"></span>
+                        <i class="fas fa-save me-2" id="guardarIcon"></i>Guardar Cambios
+                    </button>
                         <span class="spinner-border spinner-border-sm me-2" style="display: none;" id="guardarSpinner"></span>
                         <i class="fas fa-save me-2" id="guardarIcon"></i>Guardar Cambios
                     </button>
@@ -374,7 +363,7 @@ try {
                 <p class="text-muted mb-3">Para cambiar el logo de su empresa, debe contactar al administrador del sistema.</p>
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle me-2"></i>
-                    El logo actual <?= !empty($vendedor['logo']) ? 'se estableció' : 'no se ha configurado' ?> durante el registro. 
+                    El logo actual <?= !empty(false) ? 'se estableció' : 'no se ha configurado' ?> durante el registro. 
                     Para actualizarlo, envíe un correo a <strong>soporte@tiendaenlinea.com</strong>
                 </div>
             </div>
@@ -418,7 +407,7 @@ document.addEventListener('DOMContentLoaded', function() {
         guardarSpinner.style.display = 'inline-block';
         guardarIcon.style.display = 'none';
         
-        fetch('../controlador/perfilVendedorController.php', {
+        fetch('perfilVendedorController.php', {
             method: 'POST',
             body: formData
         })
@@ -509,10 +498,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Update biography if exists
         const biografiaSection = document.querySelector('.info-card .mt-3');
-        if (biografiaSection && vendedor.biografia) {
+        if (biografiaSection && vendedor.descripcion_tienda) {
             const biografiaP = biografiaSection.querySelector('p');
             if (biografiaP) {
-                biografiaP.innerHTML = escapeHtml(vendedor.biografia).replace(/\n/g, '<br>');
+                biografiaP.innerHTML = escapeHtml(vendedor.descripcion_tienda).replace(/\n/g, '<br>');
             }
         }
     }
@@ -704,20 +693,18 @@ document.addEventListener('DOMContentLoaded', function() {
             <?= $mensaje ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-    <?php endif; ?>
 
     <!-- Tarjeta de Perfil -->
     <div class="profile-card">
         <!-- Header del Perfil -->
         <div class="profile-header">
             <div class="logo-container">
-                <?php if (!empty($vendedor['logo'])): ?>
-                    <img src="data:image/jpeg;base64,<?= base64_encode($vendedor['logo']) ?>" alt="Logo de <?= htmlspecialchars($vendedor['nombre_empresa']) ?>">
+                <?php if (!empty(false)): ?>
+                    <img src="data:image/jpeg;base64,<?= base64_encode(false) ?>" alt="Logo de <?= htmlspecialchars($vendedor['nombre_empresa']) ?>">
                 <?php else: ?>
                     <div class="logo-placeholder">
                         <i class="fas fa-store"></i>
                     </div>
-                <?php endif; ?>
             </div>
             <h2 class="mb-1"><?= htmlspecialchars($vendedor['nombre_empresa']) ?></h2>
             <p class="mb-0 opacity-75">
@@ -793,17 +780,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="col-md-6">
                         <p><strong>Teléfono:</strong> <?= htmlspecialchars($vendedor['telefono']) ?></p>
                         <p><strong>Email:</strong> <?= htmlspecialchars($vendedor['correo']) ?></p>
-                        <?php if (!empty($vendedor['redes'])): ?>
-                        <p><strong>Redes Sociales:</strong> <?= htmlspecialchars($vendedor['redes']) ?></p>
-                        <?php endif; ?>
                     </div>
                 </div>
-                <?php if (!empty($vendedor['biografia'])): ?>
+                <?php if (!empty($vendedor['descripcion_tienda'])): ?>
                 <div class="mt-3">
                     <strong>Biografía:</strong>
-                    <p class="mt-2"><?= nl2br(htmlspecialchars($vendedor['biografia'])) ?></p>
+                    <p class="mt-2"><?= nl2br(htmlspecialchars($vendedor['descripcion_tienda'])) ?></p>
                 </div>
-                <?php endif; ?>
             </div>
 
             <!-- Formulario de Edición -->
@@ -878,20 +861,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
 
                 <div class="mb-3">
-                    <label for="biografia" class="form-label">
+                    <label for="descripcion_tienda" class="form-label">
                         <i class="fas fa-info-circle me-1"></i>Descripción/Biografía de la Empresa *
                     </label>
-                    <textarea class="form-control" id="biografia" name="biografia" rows="4" 
-                              placeholder="Cuéntanos sobre tu empresa, productos y servicios..." required><?= htmlspecialchars($vendedor['biografia']) ?></textarea>
+                    <textarea class="form-control" id="descripcion_tienda" name="descripcion_tienda" rows="4" 
+                              placeholder="Cuéntanos sobre tu empresa, productos y servicios..." required><?= htmlspecialchars($vendedor['descripcion_tienda']) ?></textarea>
                 </div>
 
                 <div class="mb-4">
-                    <label for="redes" class="form-label">
-                        <i class="fas fa-share-alt me-1"></i>Redes Sociales
                     </label>
-                    <input type="text" class="form-control" id="redes" name="redes" 
-                           value="<?= htmlspecialchars($vendedor['redes']) ?>"
-                           placeholder="Enlaces a redes sociales, sitio web, etc.">
                 </div>
 
                 <div class="text-center">
@@ -913,7 +891,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <p class="text-muted mb-3">Para cambiar el logo de su empresa, debe contactar al administrador del sistema.</p>
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle me-2"></i>
-                    El logo actual <?= !empty($vendedor['logo']) ? 'se estableció' : 'no se ha configurado' ?> durante el registro. 
+                    El logo actual <?= !empty(false) ? 'se estableció' : 'no se ha configurado' ?> durante el registro. 
                     Para actualizarlo, envíe un correo a <strong>soporte@tiendaenlinea.com</strong>
                 </div>
             </div>
