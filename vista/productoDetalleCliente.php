@@ -426,6 +426,14 @@ if ($total_reviews > 0) {
         </div>
     </div>
     
+    <!-- Descripción completa -->
+    <?php if ($producto['descripcion']): ?>
+    <div class="descripcion-completa">
+        <h3>Descripción del Producto</h3>
+        <p><?= nl2br(htmlspecialchars($producto['descripcion'])) ?></p>
+    </div>
+    <?php endif; ?>
+    
     <!-- Sección de Reseñas -->
     <div class="reviews-section">
         <div class="reviews-header">
@@ -481,14 +489,6 @@ if ($total_reviews > 0) {
             </div>
         <?php endif; ?>
     </div>
-    
-    <!-- Descripción completa -->
-    <?php if ($producto['descripcion']): ?>
-    <div class="descripcion-completa">
-        <h3>Descripción del Producto</h3>
-        <p><?= nl2br(htmlspecialchars($producto['descripcion'])) ?></p>
-    </div>
-    <?php endif; ?>
 </div>
 
 <script>
