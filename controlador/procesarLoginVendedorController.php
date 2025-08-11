@@ -1,13 +1,14 @@
 <?php
+// Turn off error reporting to prevent HTML error output
+error_reporting(0);
+ini_set('display_errors', 0);
+
 session_start();
 
 // Ensure we output JSON even if there are PHP notices/warnings
 ob_start();
 
 header('Content-Type: application/json');
-
-require_once '../modelo/conexion.php';
-require_once '../modelo/config.php';
 
 try {
     // Simple test endpoint
@@ -16,6 +17,9 @@ try {
         echo json_encode(['test' => 'success', 'message' => 'Controller is accessible']);
         exit;
     }
+    
+    require_once '../modelo/conexion.php';
+    require_once '../modelo/config.php';
     
     // Get database connection
     $db = DatabaseConnection::getInstance();

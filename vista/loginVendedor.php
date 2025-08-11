@@ -217,7 +217,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = JSON.parse(text);
                 showAlert('Test successful: ' + data.message, 'success');
             } catch (e) {
-                showAlert('Test failed - Invalid JSON: ' + text.substring(0, 100), 'error');
+                console.error('Full response text:', text);
+                showAlert('Test failed - Invalid JSON. Check console for full response.', 'error');
             }
         })
         .catch(error => {
