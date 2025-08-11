@@ -1,0 +1,40 @@
+RewriteEngine On
+
+# Redirect root to index.php
+DirectoryIndex index.php
+
+# Allow access to vista directory
+<Directory "vista">
+    Order allow,deny
+    Allow from all
+    Require all granted
+</Directory>
+
+# Allow access to controlador directory for AJAX requests
+<Directory "controlador">
+    Order allow,deny
+    Allow from all
+    Require all granted
+</Directory>
+
+# Allow access to modelo directory
+<Directory "modelo">
+    Order allow,deny
+    Allow from all
+    Require all granted
+</Directory>
+
+# Prevent direct access to sensitive files
+<Files "composer.json">
+    Order deny,allow
+    Deny from all
+</Files>
+
+<Files "composer.lock">
+    Order deny,allow
+    Deny from all
+</Files>
+
+# Enable PHP error reporting for debugging (remove in production)
+php_flag display_errors on
+php_value error_reporting E_ALL

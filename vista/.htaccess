@@ -1,0 +1,29 @@
+DirectoryIndex index.php
+
+# Allow access to all files in vista directory
+Order allow,deny
+Allow from all
+Require all granted
+
+# Enable PHP processing
+AddType application/x-httpd-php .php
+
+# Set default file permissions
+<Files "*.php">
+    Order allow,deny
+    Allow from all
+    Require all granted
+</Files>
+
+# Allow access to JavaScript and CSS files
+<Files "*.js">
+    Order allow,deny
+    Allow from all
+    Require all granted
+</Files>
+
+<Files "*.css">
+    Order allow,deny
+    Allow from all
+    Require all granted
+</Files>
