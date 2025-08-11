@@ -93,10 +93,54 @@ if (!$categoria_info) {
 // Obtener productos de la categoría
 $productos = $categoriasManager->obtenerProductosPorCategoria($categoria_id, $busqueda, $orden);
 
-// Procesar imágenes para base64
-foreach ($productos as &$producto) {
-    if ($producto['imagen_principal']) {
-        $producto['imagen_principal'] = base64_encode($producto['imagen_principal']);
+// Debug: Log product data
+error_log("Productos obtenidos para categoría $categoria_id: " . count($productos));
+
+// Create a simplified version for JSON to avoid image issues
+$productos_para_json = [];
+foreach ($productos as $producto) {
+    $producto_limpio = [
+        'id' => intval($producto['id'] ?? 0),
+        'nombre' => $producto['nombre'] ?? '',
+        'descripcion' => $producto['descripcion'] ?? '',
+        'precio' => floatval($producto['precio'] ?? 0),
+        'stock' => intval($producto['stock'] ?? 0),
+        'vendedor_nombre' => $producto['vendedor_nombre'] ?? '',
+        'imagen_principal' => '' // We'll handle images separately
+    ];
+    
+    // Handle image separately and safely
+    if (!empty($producto['imagen_principal'])) {
+        try {
+            // Try to encode the image
+            $imagen_encoded = base64_encode($producto['imagen_principal']);
+            // Test if the encoded image is valid
+            if ($imagen_encoded && strlen($imagen_encoded) > 0) {
+                $producto_limpio['imagen_principal'] = $imagen_encoded;
+            }
+        } catch (Exception $e) {
+            error_log("Error encoding image for product " . $producto['id'] . ": " . $e->getMessage());
+            $producto_limpio['imagen_principal'] = '';
+        }
+    }
+    
+    $productos_para_json[] = $producto_limpio;
+}
+
+error_log("Productos procesados para JSON: " . count($productos_para_json));
+
+// Verificar que el JSON se puede codificar correctamente
+$productos_json = json_encode($productos_para_json, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+if (json_last_error() !== JSON_ERROR_NONE) {
+    error_log("JSON encoding error: " . json_last_error_msg());
+    // Try without images as fallback
+    foreach ($productos_para_json as &$p) {
+        $p['imagen_principal'] = '';
+    }
+    $productos_json = json_encode($productos_para_json, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        error_log("JSON encoding failed even without images: " . json_last_error_msg());
+        $productos_json = '[]'; // Final fallback
     }
 }
 
@@ -516,7 +560,19 @@ function obtenerImagenCategoria($conn, $categoria_id) {
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
-const productos = <?= json_encode($productos, JSON_HEX_TAG) ?>;
+// Validate JSON data before using it
+let productos;
+try {
+    productos = <?= $productos_json ?>;
+    if (!Array.isArray(productos)) {
+        console.error('Productos is not an array:', productos);
+        productos = [];
+    }
+} catch (e) {
+    console.error('Error parsing productos JSON:', e);
+    productos = [];
+}
+
 const isLoggedIn = <?= json_encode($isLoggedIn) ?>;
 const categoriaId = <?= $categoria_id ?>;
 
@@ -529,40 +585,50 @@ function navegarACategoria(nuevaCategoriaId) {
 
 function renderizarProductos(lista) {
     const contenedor = document.getElementById("productosContenedor");
+    
+    if (!contenedor) {
+        console.error('No se encontró el contenedor de productos');
+        return;
+    }
+    
     contenedor.innerHTML = "";
     
-    if (lista.length === 0) {
+    if (!lista || lista.length === 0) {
         contenedor.innerHTML = '<div class="no-productos">No se encontraron productos en esta categoría con los criterios de búsqueda especificados.</div>';
         return;
     }
     
-    lista.forEach(p => {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.addEventListener('click', function(e) {
-            // Only navigate if the click wasn't on a button
-            if (!e.target.closest('.btn-carrito')) {
-                window.location.href = `productoDetalleCliente.php?id=${p.id}`;
-            }
-        });
-        
-        card.innerHTML = `
-            <img src="data:image/jpeg;base64,${p.imagen_principal}" alt="${p.nombre}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmaWxsPSIjOTk5Ij5TaW4gaW1hZ2VuPC90ZXh0Pjwvc3ZnPg=='">
-            <h3>${p.nombre}</h3>
-            <div class="precio">₡${parseFloat(p.precio).toLocaleString()}</div>
-            <div class="vendedor">Vendido por: ${p.vendedor_nombre}</div>
-            <div class="descripcion">${p.descripcion || 'Sin descripción disponible'}</div>
-            <div class="botones">
-                ${isLoggedIn ? 
-                    (p.stock > 0 ? 
-                        `<button onclick="event.stopPropagation(); agregarAlCarrito(${p.id})" class="btn-carrito">Agregar al Carrito</button>` : 
-                        `<button class="btn-carrito" disabled>Agotado</button>`
-                    ) : 
-                    `<button onclick="event.stopPropagation(); window.location.href='loginCliente.php'" class="btn-carrito">Iniciar Sesión para Comprar</button>`
+    lista.forEach((p, index) => {
+        try {
+            const card = document.createElement("div");
+            card.className = "card";
+            card.addEventListener('click', function(e) {
+                // Only navigate if the click wasn't on a button
+                if (!e.target.closest('.btn-carrito')) {
+                    window.location.href = `productoDetalleCliente.php?id=${p.id}`;
                 }
-            </div>
-        `;
-        contenedor.appendChild(card);
+            });
+            
+            card.innerHTML = `
+                <img src="data:image/jpeg;base64,${p.imagen_principal}" alt="${p.nombre}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmaWxsPSIjOTk5Ij5TaW4gaW1hZ2VuPC90ZXh0Pjwvc3ZnPg=='">
+                <h3>${p.nombre}</h3>
+                <div class="precio">₡${parseFloat(p.precio).toLocaleString()}</div>
+                <div class="vendedor">Vendido por: ${p.vendedor_nombre}</div>
+                <div class="descripcion">${p.descripcion || 'Sin descripción disponible'}</div>
+                <div class="botones">
+                    ${isLoggedIn ? 
+                        (p.stock > 0 ? 
+                            `<button onclick="event.stopPropagation(); agregarAlCarrito(${p.id})" class="btn-carrito">Agregar al Carrito</button>` : 
+                            `<button class="btn-carrito" disabled>Agotado</button>`
+                        ) : 
+                        `<button onclick="event.stopPropagation(); window.location.href='loginCliente.php'" class="btn-carrito">Iniciar Sesión para Comprar</button>`
+                    }
+                </div>
+            `;
+            contenedor.appendChild(card);
+        } catch (error) {
+            console.error('Error renderizando producto', index + 1, ':', error, p);
+        }
     });
 }
 
@@ -586,7 +652,7 @@ document.getElementById("busqueda").addEventListener("keypress", function(e) {
 
 // Load products on page load
 document.addEventListener('DOMContentLoaded', function() {
-    renderizarProductos(productos);
+    renderizarProductos(productos || []);
 });
 
 function agregarAlCarrito(productoId) {
