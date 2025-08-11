@@ -17,19 +17,55 @@ if (!isset($_GET['id'])) {
 $id = intval($_GET['id']);
 
 // Obtener producto con información del vendedor
-$stmt = $conn->prepare("
-    SELECT p.*, v.nombre_empresa as vendedor_nombre, v.telefono as vendedor_telefono, v.correo as vendedor_correo 
-    FROM productos p 
-    JOIN vendedores v ON p.id_vendedor = v.id 
-    WHERE p.id = ?
-");
-$stmt->execute([$id]);
-$producto = $stmt->fetch();
+if ($conn->isConnected() && $conn->getConnectionType() === 'pdo') {
+    $stmt = $conn->getConnection()->prepare("
+        SELECT p.*, v.nombre_empresa as vendedor_nombre, v.telefono as vendedor_telefono, v.correo as vendedor_correo 
+        FROM productos p 
+        JOIN vendedores v ON p.id_vendedor = v.id 
+        WHERE p.id = ?
+    ");
+    $stmt->execute([$id]);
+    $producto = $stmt->fetch(PDO::FETCH_ASSOC);
+} else {
+    // Fallback method using unified connection
+    $stmt = $conn->prepare("
+        SELECT p.*, v.nombre_empresa as vendedor_nombre, v.telefono as vendedor_telefono, v.correo as vendedor_correo 
+        FROM productos p 
+        JOIN vendedores v ON p.id_vendedor = v.id 
+        WHERE p.id = ?
+    ");
+    $stmt->execute([$id]);
+    $producto = $stmt->fetch();
+}
 // PDO automatically handles cleanup - no need to close
 
 if (!$producto) {
     echo "Producto no encontrado";
     exit;
+}
+
+// Obtener reseñas del producto
+if ($conn->isConnected() && $conn->getConnectionType() === 'pdo') {
+    $stmt_reviews = $conn->getConnection()->prepare("
+        SELECT r.*, c.nombre as cliente_nombre 
+        FROM reseñas r 
+        JOIN clientes c ON r.cliente_id = c.id 
+        WHERE r.producto_id = ? 
+        ORDER BY r.fecha DESC
+    ");
+    $stmt_reviews->execute([$id]);
+    $reviews = $stmt_reviews->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    // Fallback for other connection types
+    $reviews = [];
+}
+
+// Calcular promedio de estrellas
+$total_reviews = count($reviews);
+$average_rating = 0;
+if ($total_reviews > 0) {
+    $sum_stars = array_sum(array_column($reviews, 'estrellas'));
+    $average_rating = round($sum_stars / $total_reviews, 1);
 }
 ?>
 
@@ -195,6 +231,81 @@ if (!$producto) {
             margin-top: 20px;
             line-height: 1.6;
         }
+        .reviews-section {
+            background-color: #fff;
+            padding: 30px;
+            border-top: 1px solid #e9ecef;
+        }
+        .reviews-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .average-rating {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .rating-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #333;
+        }
+        .stars-display {
+            color: #ffc107;
+            font-size: 1.5em;
+        }
+        .review-count {
+            color: #666;
+            font-size: 1.1em;
+        }
+        .review-item {
+            border-bottom: 1px solid #e9ecef;
+            padding: 20px 0;
+            margin-bottom: 20px;
+        }
+        .review-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .reviewer-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .reviewer-name {
+            font-weight: bold;
+            color: #333;
+        }
+        .review-stars {
+            color: #ffc107;
+            font-size: 1.2em;
+        }
+        .review-date {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .review-comment {
+            color: #555;
+            line-height: 1.6;
+            margin-top: 10px;
+        }
+        .no-reviews {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 40px 0;
+        }
     </style>
 </head>
 <body>
@@ -313,6 +424,62 @@ if (!$producto) {
                 <p><?= htmlspecialchars($producto['vendedor_correo']) ?></p>
             </div>
         </div>
+    </div>
+    
+    <!-- Sección de Reseñas -->
+    <div class="reviews-section">
+        <div class="reviews-header">
+            <h3>Reseñas de Clientes</h3>
+            <?php if ($total_reviews > 0): ?>
+                <div class="average-rating">
+                    <span class="rating-number"><?= $average_rating ?></span>
+                    <div>
+                        <div class="stars-display">
+                            <?php
+                            for ($i = 1; $i <= 5; $i++) {
+                                if ($i <= floor($average_rating)) {
+                                    echo '★';
+                                } elseif ($i <= $average_rating) {
+                                    echo '☆';
+                                } else {
+                                    echo '☆';
+                                }
+                            }
+                            ?>
+                        </div>
+                        <div class="review-count"><?= $total_reviews ?> reseña<?= $total_reviews != 1 ? 's' : '' ?></div>
+                    </div>
+                </div>
+            <?php endif; ?>
+        </div>
+        
+        <?php if ($total_reviews > 0): ?>
+            <?php foreach ($reviews as $review): ?>
+                <div class="review-item">
+                    <div class="review-header">
+                        <div class="reviewer-info">
+                            <span class="reviewer-name"><?= htmlspecialchars($review['cliente_nombre']) ?></span>
+                            <div class="review-stars">
+                                <?php
+                                for ($i = 1; $i <= 5; $i++) {
+                                    echo $i <= $review['estrellas'] ? '★' : '☆';
+                                }
+                                ?>
+                            </div>
+                        </div>
+                        <span class="review-date"><?= date('d/m/Y', strtotime($review['fecha'])) ?></span>
+                    </div>
+                    <?php if (!empty($review['comentario'])): ?>
+                        <div class="review-comment"><?= nl2br(htmlspecialchars($review['comentario'])) ?></div>
+                    <?php endif; ?>
+                </div>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <div class="no-reviews">
+                <p>Este producto aún no tiene reseñas.</p>
+                <p>¡Sé el primero en dejarnos tu opinión!</p>
+            </div>
+        <?php endif; ?>
     </div>
     
     <!-- Descripción completa -->
