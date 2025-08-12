@@ -102,7 +102,11 @@ if (!isset($vendedor)) {
 // Obtener estadísticas del vendedor
 $stmt_productos = $conn->prepare("SELECT COUNT(*) as total FROM productos WHERE id_vendedor = ?");
 $stmt_productos->execute([$vendedor_id]);
-$productos_count = $stmt_productos->fetchColumn();
+$result_productos = $stmt_productos->get_result();
+$productos_count = 0;
+if ($row = $result_productos->fetch_assoc()) {
+    $productos_count = $row['total'];
+}
 
 $stmt_pedidos = $conn->prepare("
     SELECT COUNT(DISTINCT dp.orden_id) as total 
@@ -111,7 +115,11 @@ $stmt_pedidos = $conn->prepare("
     WHERE p.id_vendedor = ?
 ");
 $stmt_pedidos->execute([$vendedor_id]);
-$pedidos_count = $stmt_pedidos->fetchColumn();
+$result_pedidos = $stmt_pedidos->get_result();
+$pedidos_count = 0;
+if ($row = $result_pedidos->fetch_assoc()) {
+    $pedidos_count = $row['total'];
+}
 ?>
 
 <!DOCTYPE html>

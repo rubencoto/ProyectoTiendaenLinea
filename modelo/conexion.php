@@ -69,6 +69,23 @@ class UnifiedStatement {
         }
     }
     
+    public function fetchColumn($column = 0) {
+        if ($this->connectionType === 'pdo') {
+            return $this->statement->fetchColumn($column);
+        } else {
+            // For MySQLi, we need to fetch the row and return the specific column
+            $result = $this->get_result();
+            if ($result) {
+                $row = $result->fetch_assoc();
+                if ($row) {
+                    $values = array_values($row);
+                    return isset($values[$column]) ? $values[$column] : null;
+                }
+            }
+            return null;
+        }
+    }
+    
     public function close() {
         if ($this->connectionType === 'mysqli') {
             return $this->statement->close();
