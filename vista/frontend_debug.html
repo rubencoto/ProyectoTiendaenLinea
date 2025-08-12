@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Frontend Debug for misPedidos.php</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-info { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 8px; }
+        .order-card { border: 2px solid #007185; margin: 10px 0; padding: 15px; background: white; }
+        .duplicate { border-color: red; background: #ffe6e6; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Frontend Debug Tool for misPedidos.php</h1>
+    
+    <div class="debug-info">
+        <h3>Instructions:</h3>
+        <ol>
+            <li>Open this page alongside misPedidos.php</li>
+            <li>Use the buttons below to check for issues</li>
+            <li>Compare results with what you see on misPedidos.php</li>
+        </ol>
+    </div>
+
+    <button onclick="checkDuplicateElements()" style="padding: 10px 20px; margin: 5px; background: #007185; color: white; border: none; border-radius: 4px; cursor: pointer;">
+        🔍 Check for Duplicate Elements
+    </button>
+    
+    <button onclick="checkPageStructure()" style="padding: 10px 20px; margin: 5px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
+        📋 Analyze Page Structure
+    </button>
+    
+    <button onclick="checkJavaScriptErrors()" style="padding: 10px 20px; margin: 5px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
+        ⚠️ Check JavaScript Errors
+    </button>
+
+    <div id="results" style="margin-top: 20px;"></div>
+
+    <script>
+        function checkDuplicateElements() {
+            const results = document.getElementById('results');
+            
+            // Instructions for manual checking
+            results.innerHTML = `
+                <div class="debug-info">
+                    <h3>🔍 Manual Check for Duplicate Elements</h3>
+                    <p><strong>Follow these steps on the misPedidos.php page:</strong></p>
+                    <ol>
+                        <li>Press <strong>F12</strong> to open Developer Tools</li>
+                        <li>Go to the <strong>Elements</strong> tab</li>
+                        <li>Press <strong>Ctrl+F</strong> to open search</li>
+                        <li>Search for: <strong>ORD-2025-945427</strong></li>
+                        <li>Count how many times it appears in the HTML</li>
+                        <li>Look for duplicate div elements with class "orden-card"</li>
+                    </ol>
+                    <p><strong>Expected Result:</strong> Should appear only once in the HTML</p>
+                    <p><strong>If it appears twice:</strong> There's a frontend duplication issue</p>
+                </div>
+            `;
+        }
+
+        function checkPageStructure() {
+            const results = document.getElementById('results');
+            
+            results.innerHTML = `
+                <div class="debug-info">
+                    <h3>📋 Page Structure Analysis</h3>
+                    <p><strong>Check these on misPedidos.php:</strong></p>
+                    <ol>
+                        <li><strong>Look for multiple containers:</strong> Check if there are multiple elements with the same content</li>
+                        <li><strong>Check for AJAX calls:</strong> Open Network tab in DevTools and look for repeated requests</li>
+                        <li><strong>Inspect the foreach loop:</strong> Look for the order cards and count them manually</li>
+                        <li><strong>Check CSS:</strong> Look for any CSS that might be duplicating content (like ::before or ::after)</li>
+                    </ol>
+                    <p><strong>Things to look for:</strong></p>
+                    <ul>
+                        <li>Multiple &lt;div class="orden-card"&gt; with same content</li>
+                        <li>JavaScript that clones or duplicates elements</li>
+                        <li>CSS pseudo-elements creating visual duplicates</li>
+                        <li>Multiple AJAX calls loading the same data</li>
+                    </ul>
+                </div>
+            `;
+        }
+
+        function checkJavaScriptErrors() {
+            const results = document.getElementById('results');
+            
+            results.innerHTML = `
+                <div class="debug-info">
+                    <h3>⚠️ JavaScript Error Check</h3>
+                    <p><strong>Check the Console tab in DevTools:</strong></p>
+                    <ol>
+                        <li>Press <strong>F12</strong> to open Developer Tools</li>
+                        <li>Go to the <strong>Console</strong> tab</li>
+                        <li>Refresh the misPedidos.php page</li>
+                        <li>Look for any JavaScript errors (red text)</li>
+                        <li>Look for any warnings (yellow text)</li>
+                    </ol>
+                    <p><strong>Common issues that cause duplication:</strong></p>
+                    <ul>
+                        <li>JavaScript trying to load content multiple times</li>
+                        <li>Event listeners being attached multiple times</li>
+                        <li>AJAX calls being triggered repeatedly</li>
+                        <li>DOM manipulation errors</li>
+                    </ul>
+                    <p><strong>Also check Network tab:</strong> Look for duplicate requests to the same PHP file</p>
+                </div>
+            `;
+        }
+
+        // Auto-check for current page issues
+        window.onload = function() {
+            const results = document.getElementById('results');
+            results.innerHTML = `
+                <div class="debug-info">
+                    <h3>🚀 Ready to Debug!</h3>
+                    <p>Current page info:</p>
+                    <ul>
+                        <li><strong>URL:</strong> ${window.location.href}</li>
+                        <li><strong>User Agent:</strong> ${navigator.userAgent}</li>
+                        <li><strong>Time:</strong> ${new Date().toLocaleString()}</li>
+                    </ul>
+                    <p>Use the buttons above to run specific checks on misPedidos.php</p>
+                </div>
+            `;
+        };
+    </script>
+</body>
+</html>
