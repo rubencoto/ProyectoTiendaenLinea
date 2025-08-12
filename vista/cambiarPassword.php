@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Obtener información básica del cliente
-$stmt = $conn->prepare("SELECT nombre, apellidos, correo FROM clientes WHERE id = ?");
+$stmt = $conn->prepare("SELECT nombre, apellido, correo FROM clientes WHERE id = ?");
 $stmt->execute([$cliente_id]);
 $cliente = $stmt->fetch();
 ?>
