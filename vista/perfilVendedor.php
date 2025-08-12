@@ -127,7 +127,7 @@ if ($row = $result_pedidos->fetch_assoc()) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Perfil - <?php echo htmlspecialchars($vendedor['nombre_empresa']); ?></title>
+    <title>Mi Perfil - <?php echo htmlspecialchars($vendedor['nombre_empresa'] ?? 'Vendedor'); ?></title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -405,10 +405,10 @@ if ($row = $result_pedidos->fetch_assoc()) {
                     🏪
                 </div>
                 <div class="perfil-nombre">
-                    <?php echo htmlspecialchars($vendedor['nombre_empresa']); ?>
+                    <?php echo htmlspecialchars($vendedor['nombre_empresa'] ?? 'Empresa'); ?>
                 </div>
                 <div class="perfil-email">
-                    <?php echo htmlspecialchars($vendedor['correo']); ?>
+                    <?php echo htmlspecialchars($vendedor['correo'] ?? ''); ?>
                 </div>
                 <div class="estado-verificacion <?php echo $vendedor['verificado'] ? 'verificado' : 'no-verificado'; ?>">
                     <?php echo $vendedor['verificado'] ? '✅ Vendedor Verificado' : '⚠️ Pendiente de Verificación'; ?>
@@ -465,20 +465,20 @@ if ($row = $result_pedidos->fetch_assoc()) {
                     <div class="form-group">
                         <label for="nombre_empresa">Nombre de la Empresa *</label>
                         <input type="text" id="nombre_empresa" name="nombre_empresa" 
-                               value="<?php echo htmlspecialchars($vendedor['nombre_empresa']); ?>" required>
+                               value="<?php echo htmlspecialchars($vendedor['nombre_empresa'] ?? ''); ?>" required>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label for="telefono">Teléfono *</label>
                             <input type="tel" id="telefono" name="telefono" 
-                                   value="<?php echo htmlspecialchars($vendedor['telefono']); ?>" 
+                                   value="<?php echo htmlspecialchars($vendedor['telefono'] ?? ''); ?>" 
                                    pattern="[0-9]{8}" title="Debe tener 8 dígitos" required>
                         </div>
                         <div class="form-group">
                             <label for="cedula_juridica">Cédula Jurídica *</label>
                             <input type="text" id="cedula_juridica" name="cedula_juridica" 
-                                   value="<?php echo htmlspecialchars($vendedor['cedula_juridica']); ?>" required>
+                                   value="<?php echo htmlspecialchars($vendedor['cedula_juridica'] ?? ''); ?>" required>
                         </div>
                     </div>
 
@@ -503,19 +503,19 @@ if ($row = $result_pedidos->fetch_assoc()) {
                         <div class="form-group">
                             <label for="direccion1">Dirección Principal *</label>
                             <input type="text" id="direccion1" name="direccion1" 
-                                   value="<?php echo htmlspecialchars($vendedor['direccion1']); ?>" required>
+                                   value="<?php echo htmlspecialchars($vendedor['direccion1'] ?? ''); ?>" required>
                         </div>
                         <div class="form-group">
                             <label for="direccion2">Dirección Secundaria</label>
                             <input type="text" id="direccion2" name="direccion2" 
-                                   value="<?php echo htmlspecialchars($vendedor['direccion2']); ?>">
+                                   value="<?php echo htmlspecialchars($vendedor['direccion2'] ?? ''); ?>">
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label for="descripcion_tienda">Descripción de la Tienda *</label>
                         <textarea id="descripcion_tienda" name="descripcion_tienda" rows="4" 
-                                  placeholder="Cuéntanos sobre tu empresa, productos y servicios..." required><?php echo htmlspecialchars($vendedor['descripcion_tienda']); ?></textarea>
+                                  placeholder="Cuéntanos sobre tu empresa, productos y servicios..." required><?php echo htmlspecialchars($vendedor['descripcion_tienda'] ?? ''); ?></textarea>
                     </div>
 
                     <div style="text-align: center; margin-top: 30px;">
