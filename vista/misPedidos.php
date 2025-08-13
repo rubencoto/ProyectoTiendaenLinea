@@ -71,7 +71,7 @@ if ($affected_rows > 0) {
 }
 
 // Para cada orden, obtener los productos
-foreach ($ordenes as &$orden) {
+foreach ($ordenes as $index => $orden) {
     $stmt_detalle = $pdo_conn->prepare("
         SELECT dp.cantidad, dp.precio_unitario, dp.subtotal, dp.producto_id,
                p.nombre as producto_nombre, p.imagen_principal
@@ -103,7 +103,7 @@ foreach ($ordenes as &$orden) {
         $productos[] = $row_detalle;
     }
     error_log("MisPedidos: Order ID " . $orden['id'] . " has " . count($productos) . " products");
-    $orden['productos'] = $productos;
+    $ordenes[$index]['productos'] = $productos;
 }
 
 ?>
