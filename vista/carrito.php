@@ -84,15 +84,15 @@ try {
 }
 
 // Calcular total y preparar datos para mostrar
-foreach ($productos_carrito as &$producto) {
-    $producto['subtotal'] = $producto['precio'] * $producto['cantidad'];
-    $total += $producto['subtotal'];
+foreach ($productos_carrito as $index => $producto) {
+    $productos_carrito[$index]['subtotal'] = $producto['precio'] * $producto['cantidad'];
+    $total += $productos_carrito[$index]['subtotal'];
     
     // Convertir imagen a base64 si existe
     if (!empty($producto['imagen1'])) {
-        $producto['imagen_principal'] = base64_encode($producto['imagen1']);
+        $productos_carrito[$index]['imagen_principal'] = base64_encode($producto['imagen1']);
     } else {
-        $producto['imagen_principal'] = '';
+        $productos_carrito[$index]['imagen_principal'] = '';
     }
 }
 unset($producto); // Romper la referencia

@@ -121,7 +121,7 @@ while ($row = $stmt_ordenes->fetch()) {
 }
 
 // Get order details for each order (only vendor's products)
-foreach ($ordenes as &$orden) {
+foreach ($ordenes as $index => $orden) {
     $stmt_detalle = $conn->prepare("
         SELECT dp.cantidad, dp.precio_unitario, dp.subtotal,
                p.nombre as producto_nombre, p.imagen_principal
@@ -138,7 +138,7 @@ foreach ($ordenes as &$orden) {
         }
         $productos[] = $row_detalle;
     }
-    $orden['productos'] = $productos;
+    $ordenes[$index]['productos'] = $productos;
 }
 
 ?>
