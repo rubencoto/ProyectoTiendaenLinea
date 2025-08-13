@@ -425,8 +425,7 @@ try {
             <p>Tu compra ha sido procesada exitosamente.</p>
 
             <div class="order-number">
-                <strong>Numero de Orden:</strong> ' . $numero_orden . '<br>
-                <strong>ID de Orden:</strong> #' . $orden_id . '
+                <strong>Numero de Orden:</strong> ' . $numero_orden . '
             </div>';
 
     if ($direccion_envio_info) {
